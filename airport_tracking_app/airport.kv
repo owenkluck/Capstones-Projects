@@ -1,0 +1,384 @@
+ScreenManager:
+    Screen:
+        name: 'main_menu'
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout:
+                size_hint_max_y: 80
+                TestLabel:
+                    text: 'Main Menu'
+                    font_size: '25sp'
+            BoxLayout:
+                orientation: 'horizontal'
+                BoxLayout:
+                    size_hint_max_x: 40
+                BoxLayout:
+                    orientation: 'vertical'
+                    BoxLayout:
+                        size_hint_max_y: 10
+                    Button:
+                        text: 'Create Airport'
+                        font_size: '20sp'
+                        on_press: root.current = 'create_airport'
+                    BoxLayout:
+                        size_hint_max_y: 10
+                    Button:
+                        text: 'Create City'
+                        font_size: '20sp'
+                        on_press: root.current = 'create_city'
+                    BoxLayout:
+                        size_hint_max_y: 10
+                    Button:
+                        text: 'Check Forecast'
+                        font_size: '20sp'
+                        on_press: root.current = 'check_forecast'
+                    BoxLayout:
+                        size_hint_max_y: 20
+                    BoxLayout:
+                        size_hint_max_y: 60
+                        orientation: 'horizontal'
+                        BoxLayout:
+                            size_hint_min_x: 600
+                        Button:
+                            text: 'Quit'
+                            on_press: app.stop()
+                    BoxLayout:
+                        size_hint_max_y: 20
+                BoxLayout:
+                    size_hint_max_x: 40
+    Screen:
+        name: 'create_airport'
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_max_y: 80
+                TestLabel:
+                    text: 'Create Airport'
+                    font_size: '25sp'
+                Button:
+                    size_hint_max_x: 100
+                    text: 'Return'
+                    on_press:
+                        root.current = 'main_menu'
+                        root.ids.airport_name.text = ''
+                        root.ids.airport_code.text = ''
+                        root.ids.airport_location.text = ''
+            BoxLayout:
+                orientation: 'vertical'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    BoxLayout:
+                        size_hint_max_x: 20
+                    BoxLayout:
+                        orientation: 'vertical'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Name'
+                            TextInput:
+                                id: airport_name
+                                multiline: False
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'ICAO Code'
+                                foreground_color: 'red'
+                            TextInput:
+                                id: airport_code
+                                multiline: False
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Location'
+                            TextInput:
+                                id: airport_location
+                                multiline: False
+                        BoxLayout:
+                            size_hint_max_y: 40
+                    BoxLayout:
+                        size_hint_max_x: 20
+                    BoxLayout:
+                        orientation: 'vertical'
+                        size_hint_max_x: 80
+                        Button:
+                            text: 'Discard\nChanges'
+                            on_press:
+                                root.ids.airport_name.text = ''
+                                root.ids.airport_code.text = ''
+                                root.ids.airport_location.text = ''
+                BoxLayout:
+                    orientation: 'horizontal'
+                    BoxLayout:
+                        size_hint_max_x: 20
+                    BoxLayout:
+                        orientation: 'vertical'
+                        Button:
+                            text: 'Submit'
+                            on_press:
+                                app.submit_data_airport(root.ids.airport_name.text, root.ids.airport_code.text, root.ids.airport_location.text)
+                                root.current = 'success_airport'
+                                root.ids.airport_name.text = ''
+                                root.ids.airport_code.text = ''
+                                root.ids.airport_location.text = ''
+                        BoxLayout:
+                    Label:
+                        text: ''
+                        id: Error_3
+                    BoxLayout:
+                        size_hint_max_x: 20
+    Screen:
+        name: 'create_city'
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_max_y: 80
+                TestLabel:
+                    text: 'Create City'
+                    font_size: '25sp'
+                Button:
+                    size_hint_max_x: 100
+                    text: 'Return'
+                    on_press:
+                        root.current = 'main_menu'
+                        root.ids.city_name.text = ''
+                        root.ids.city_geo.text = ''
+                        root.ids.city_location.text = ''
+            BoxLayout:
+                orientation: 'vertical'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    BoxLayout:
+                        size_hint_max_x: 20
+                    BoxLayout:
+                        orientation: 'vertical'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Name'
+                            TextInput:
+                                id: city_name
+                                multiline: False
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Geographic Entity'
+                            TextInput:
+                                id: city_geo
+                                multiline: False
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Location'
+                            TextInput:
+                                id: city_location
+                                multiline: False
+                    BoxLayout:
+                        size_hint_max_x: 20
+                    BoxLayout:
+                        size_hint_max_x: 80
+                        Button:
+                            size_hint_max_y: 80
+                            text: 'Discard\nChanges'
+                            on_press:
+                                root.ids.city_name.text = ''
+                                root.ids.city_geo.text = ''
+                                root.ids.city_location.text = ''
+                BoxLayout:
+                    size_hint_max_y: 40
+                BoxLayout:
+                    orientation: 'horizontal'
+                    BoxLayout:
+                        size_hint_max_x: 20
+                    BoxLayout:
+                        orientation: 'vertical'
+                        Button:
+                            text: 'Submit'
+                            on_press:
+                                app.submit_data_city(root.ids.city_name.text, root.ids.city_geo.text, root.ids.city_location.text)
+                                root.current = 'success_city'
+                                root.ids.city_name.text = ''
+                                root.ids.city_geo.text = ''
+                                root.ids.city_location.text = ''
+                        BoxLayout:
+                    Label:
+                        text: ''
+                        id: Error_2
+                    BoxLayout:
+                        size_hint_max_x: 20
+    Screen:
+        name: 'success_airport'
+        on_enter: app.add_buttons()
+        BoxLayout:
+            orientation: 'vertical'
+            TestLabel:
+                text: 'Success!'
+                font_size: 20
+                size_hint_max_y: 60
+            BoxLayout:
+                orientation: 'vertical'
+                BoxLayout:
+                    size_hint_max_y: 30
+                    orientation: 'horizontal'
+                    BoxLayout:
+                    Button:
+                        text: 'X'
+                        size_hint_max_x: 40
+                        on_press: root.current = 'main_menu'
+                Label:
+                    text: 'Your airport has successfully been added to our database. \nClick the \'X\' at any time to return to the main menu'
+                    font_size: '20sp'
+            BoxLayout:
+                orientation: 'vertical'
+                Label:
+                    text: 'Please select Cities for your Airport to service'
+                    size_hint_max_y: 80
+                ScrollView:
+                    do_scroll_x: False
+                    do_scroll_y: True
+                    BoxLayout:
+                        orientation: 'vertical'
+                        id: scroll_box_1
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_max_y: 60
+                BoxLayout:
+                Button:
+                    text: 'Create New City'
+                    on_press: root.current = 'create_city'
+                BoxLayout:
+    Screen:
+        name: 'check_forecast'
+        on_enter: app.add_airports_spinner()
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_max_y: 80
+                TestLabel:
+                    text: 'Check Forecast'
+                    font_size: '25sp'
+                Button:
+                    size_hint_max_x: 100
+                    text: 'Return'
+                    on_press:
+                        root.current = 'main_menu'
+                        root.ids.forecast_date.text = ''
+            BoxLayout:
+                orientation: 'vertical'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_max_y: 45
+                    Label:
+                        text: 'Day/Month/Year'
+                    TextInput:
+                        id: forecast_date
+                        multiline: False
+                BoxLayout:
+                    size_hint_max_y: 60
+            BoxLayout:
+                Spinner:
+                    id: forecast_spinner
+                    text: 'Select Airport'
+                    values:()
+            BoxLayout:
+                size_hint_max_y: 40
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_max_y: 100
+                Button:
+                    text: 'Submit'
+                    on_press: root.current = 'create_forecast'
+                BoxLayout:
+                    size_hint_max_x: 40
+                Label:
+                    id: Error_1
+                    text: 'Insert Error Message'
+    Screen:
+        name: 'create_forecast'
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout:
+                size_hint_max_y: 80
+                TestLabel:
+                    text: 'Forecast on (Insert Date Variable)'
+                    font_size: '25sp'
+                Button:
+                    text: 'Return'
+                    on_press:
+                        root.current = 'check_forecast'
+                        root.ids.forecast_date.text = ''
+                    size_hint_max_x: 100
+            Label:
+                text: 'Forecast Here'
+    Screen:
+        name: 'success_city'
+        on_enter: app.add_buttons()
+        BoxLayout:
+            orientation: 'vertical'
+            TestLabel:
+                text: 'Success!'
+                font_size: 25
+                size_hint_max_y: 60
+            BoxLayout:
+                orientation: 'vertical'
+                BoxLayout:
+                    size_hint_max_y: 30
+                    orientation: 'horizontal'
+                    BoxLayout:
+                    Button:
+                        text: 'X'
+                        size_hint_max_x: 40
+                        on_press: root.current = 'main_menu'
+                Label:
+                    text: 'Your city has successfully been added to our database. \nClick the \'X\' at any time to return to the main menu'
+                    font_size: '20sp'
+            BoxLayout:
+                orientation: 'vertical'
+                Label:
+                    text: 'Please select Airports for your City to be serviced by'
+                    size_hint_max_y: 80
+                ScrollView:
+                    do_scroll_x: False
+                    do_scroll_y: True
+                    BoxLayout:
+                        orientation: 'vertical'
+                        id: scroll_box_2
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_max_y: 60
+                BoxLayout:
+                Button:
+                    text: 'Create New Airport'
+                    on_press: root.current = 'create_airport'
+                BoxLayout:
+
+<TestLabel@Label>:
+    font_size: 20
+    background_color: 1, 1, 1, 1
+    background_normal: ""
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Line:
+            width: 2
+            rectangle: self.x, self.y, self.width, self.height
