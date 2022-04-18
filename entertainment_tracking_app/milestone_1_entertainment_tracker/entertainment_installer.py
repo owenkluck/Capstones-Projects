@@ -70,7 +70,7 @@ def add_starter_data(session):
 
 def main():
     try:
-        url = EntertainmentDatabase.construct_mysql_url('localhost', 3306, 'entertainment', 'root', 'cse1208')
+        url = EntertainmentDatabase.construct_mysql_url('localhost', 33060, 'entertainment', 'root', 'cse1208')
         entertainment_database = EntertainmentDatabase(url)
         entertainment_database.ensure_tables_exist()
         print('Tables created.')
