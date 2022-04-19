@@ -228,6 +228,7 @@ ScreenManager:
     Screen:
         name: 'success_airport'
         on_enter: app.add_buttons()
+        on_leave: app.delete_buttons()
         BoxLayout:
             orientation: 'vertical'
             TestLabel:
@@ -315,6 +316,7 @@ ScreenManager:
                     text: 'Insert Error Message'
     Screen:
         name: 'create_forecast'
+        on_enter: app.add_forecast(root.ids.forecast_spinner.text, root.ids.forecast_date.text)
         BoxLayout:
             orientation: 'vertical'
             BoxLayout:
@@ -327,12 +329,16 @@ ScreenManager:
                     on_press:
                         root.current = 'check_forecast'
                         root.ids.forecast_date.text = ''
+                        root.ids.forecast.text = ''
                     size_hint_max_x: 100
             Label:
-                text: 'Forecast Here'
+                id: forecast
+                font_size: '28sp'
+                text: ''
     Screen:
         name: 'success_city'
         on_enter: app.add_buttons()
+        on_leave: app.delete_buttons()
         BoxLayout:
             orientation: 'vertical'
             TestLabel:
