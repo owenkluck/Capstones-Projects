@@ -7,7 +7,7 @@ from entertainment_installer import *
 class EntertainmentTrackerApp(App):
     def __init__(self, **kwargs):
         super(EntertainmentTrackerApp, self).__init__(**kwargs)
-        url = EntertainmentDatabase.construct_mysql_url('localhost', 3306, 'entertainment', 'root', 'cse1208')
+        url = EntertainmentDatabase.construct_mysql_url('localhost', 33060, 'entertainment', 'root', 'cse1208')
         self.entertainment_database = EntertainmentDatabase(url)
         self.session = self.entertainment_database.create_session()
 
