@@ -7,7 +7,7 @@ from entertainment_installer import *
 class EntertainmentTrackerApp(App):
     def __init__(self, **kwargs):
         super(EntertainmentTrackerApp, self).__init__(**kwargs)
-        url = EntertainmentDatabase.construct_mysql_url('localhost', 33060, 'entertainment', 'root', 'cse1208')
+        url = EntertainmentDatabase.construct_mysql_url('localhost', 3306, 'entertainment', 'root', 'cse1208')
         self.entertainment_database = EntertainmentDatabase(url)
         self.session = self.entertainment_database.create_session()
 
@@ -54,7 +54,7 @@ class EntertainmentTrackerApp(App):
     def duplicate_name_venue(self, original_name, candidate_name, city_selection):
         c_id = self.session.query(City).filter(City.city_name == city_selection).one().city_id
         same_name = self.session.query(Venue).filter(Venue.venue_name == candidate_name, Venue.city_id == c_id).count()
-        if same_name > 0:
+        if same_name > 0 and original_name != candidate_name:
             return True
         return False
 
@@ -160,7 +160,6 @@ class EntertainmentTrackerApp(App):
             current_venue = self.session.get(Venue, i)
             if current_venue.city_id == c_id:
                 self.root.ids.venue_edit_selection.values.append(current_venue.venue_name)
-        self.root.ids.venue_edit_selection.text = self.root.ids.venue_edit_selection.values[0]
 
     def adjust_opacity(self, t_cb, h_cb, w_cb, wwc_cb):
         if not t_cb:
