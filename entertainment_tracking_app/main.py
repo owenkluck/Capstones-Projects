@@ -51,22 +51,24 @@ class EntertainmentTrackerApp(App):
             return True
         return False
 
-    def duplicate_name_venue(self, candidate_name, candidate_city):
-        city_query = self.session.query(City).filter(City.city_name == candidate_city).one()
-        venue_query = self.session.query(Venue).filter(Venue.venue_name == candidate_name and Venue.city_id == city_query.city_id)
-        if venue_query.count() > 0:
+    def duplicate_name_venue(self, original_name, candidate_name, city_selection):
+        c_id = self.session.query(City).filter(City.city_name == city_selection).one().city_id
+        same_name = self.session.query(Venue).filter(Venue.venue_name == candidate_name, Venue.city_id == c_id).count()
+        if same_name > 0 and original_name != candidate_name:
             return True
         return False
 
-    def add_venue(self, name, v_type, city):
-        if self.duplicate_name_venue(name, city):
-            self.root.ids.venue_creation_message.text = f'A venue under the name {name} already exists.'
+    def add_venue(self, name, v_type, city, min_t, max_t, min_h, max_h, max_ws, owc):
+        the_id = self.session.query(City).filter(City.city_name == city).one().city_id
+        if self.duplicate_name_venue(name, name, city):
+            self.root.ids.venue_creation_message.text = f'A venue under the name {name} already exists in the chosen city.'
         else:
-            the_id = self.session.query(City).filter(City.city_name == city).one().city_id
             venue = Venue(venue_name=name, venue_type=v_type, city_id=the_id)
             self.session.add(venue)
             self.session.commit()
             self.root.ids.venue_edit_selection.values.append(name)
+            self.session.commit()
+            self.add_condition(name, min_t, max_t, min_h, max_h, max_ws, owc)
             self.session.commit()
 
     def add_condition(self, name, min_t, max_t, min_h, max_h, max_ws, owc):
@@ -104,10 +106,8 @@ class EntertainmentTrackerApp(App):
             self.root.transition.direction = 'left'
             self.root.current = 'venue_creation_success'
 
-    def update_venue_data(self, name, new_name, new_min_t, new_max_t, new_min_h, new_max_h, new_max_w, new_owc):
-        query = self.session.query(Venue).filter(Venue.venue_name == name).one()
-        candidate_city = query.city_id
-        if self.duplicate_name_venue(new_name, candidate_city):
+    def update_venue_data(self, name, new_name, city, new_min_t, new_max_t, new_min_h, new_max_h, new_max_w, new_owc):
+        if self.duplicate_name_venue(name, new_name, city):
             self.root.ids.venue_edit_message.text = f'A venue under the name {new_name} already exists.'
         else:
             # Check for empty strings
@@ -151,6 +151,15 @@ class EntertainmentTrackerApp(App):
             self.session.commit()
             self.root.transition.direction = 'left'
             self.root.current = 'venue_edit_success'
+
+    def update_venue_list(self, city):
+        self.root.ids.venue_edit_selection.values.clear()
+        c_id = self.session.query(City).filter(City.city_name == city).one().city_id
+        venue_count = self.session.query(Venue).count()
+        for i in range(1, venue_count + 1):
+            current_venue = self.session.get(Venue, i)
+            if current_venue.city_id == c_id:
+                self.root.ids.venue_edit_selection.values.append(current_venue.venue_name)
 
     def adjust_opacity(self, t_cb, h_cb, w_cb, wwc_cb):
         if not t_cb:

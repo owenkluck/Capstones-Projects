@@ -8,8 +8,8 @@ from entertainment import City, Venue, Condition, EntertainmentDatabase, VenueCo
 def add_starter_data(session):
     san_fran = City(city_name='San Francisco', latitude=37.8, longitude=-122.4, ege='California')
     denver = City(city_name='Denver', latitude=39.7, longitude=-105.0, ege='Colorado')
-    session.add(denver)
     session.add(san_fran)
+    session.add(denver)
     session.commit()
 
     chase = Venue(venue_name='Chase Center', venue_type='Indoor Sports Arena', city_id=1)
