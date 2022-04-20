@@ -143,7 +143,7 @@ ScreenManager:
                     pos_hint: {'x':.25, 'y':0}
                     on_press:
                         root.transition.direction = 'left'
-                        root.current = 'edit_venue'
+                        root.current = 'choose_city_for_venue_edit'
             BoxLayout:
                 orientation: 'vertical'
                 BoxLayout:
@@ -313,8 +313,7 @@ ScreenManager:
                 Button:
                     text: 'CREATE VENUE'
                     on_press:
-                        app.add_venue(venue_name.text, venue_type.text, associated_city.text)
-                        app.add_condition(venue_name.text, min_temp.text, max_temp.text, min_humidity.text, max_humidity.text, max_wind_speed.text, owc.text)
+                        app.add_venue(venue_name.text, venue_type.text, associated_city.text, min_temp.text, max_temp.text, min_humidity.text, max_humidity.text, max_wind_speed.text, owc.text)
     Screen:
         name: 'venue_creation_success'
         BoxLayout:
@@ -328,6 +327,31 @@ ScreenManager:
                 on_press:
                     root.transition.direction = 'right'
                     root.current = 'home'
+    Screen:
+        name: 'choose_city_for_venue_edit'
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                text: 'Choose City To Edit Venues Of'
+            Spinner:
+                id: venue_edit_city
+                text: 'Pick a city'
+                values: associated_city.values
+            Widget:
+            BoxLayout:
+                orientation: 'horizontal'
+                Button:
+                    text: 'BACK'
+                    on_press:
+                        root.transition.direction = 'right'
+                        root.current = 'venues'
+                Widget:
+                Button:
+                    text: 'Choose Venue'
+                    on_press:
+                        root.transition.direction = 'left'
+                        root.current = 'edit_venue'
+                        app.update_venue_list(venue_edit_city.text)
     Screen:
         name: 'edit_venue'
         BoxLayout:
@@ -350,7 +374,7 @@ ScreenManager:
                     text: 'BACK'
                     on_press:
                         root.transition.direction = 'right'
-                        root.current = 'venues'
+                        root.current = 'choose_city_for_venue_edit'
                 Button:
                     text: 'NEXT'
                     on_press:
@@ -419,7 +443,7 @@ ScreenManager:
                 Button:
                     text: 'SAVE'
                     on_press:
-                        app.update_venue_data(venue_edit_selection.text, new_venue_name.text, new_min_t.text, new_max_t.text, new_min_h.text, new_max_h.text, new_max_w.text, new_owc.text)
+                        app.update_venue_data(venue_edit_selection.text, new_venue_name.text, venue_edit_city.text, new_min_t.text, new_max_t.text, new_min_h.text, new_max_h.text, new_max_w.text, new_owc.text)
     Screen:
         name: 'venue_edit_success'
         BoxLayout:
