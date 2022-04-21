@@ -8,7 +8,6 @@ ScreenManager:
                 font_size: sp(32)
             BoxLayout:
                 orientation: 'vertical'
-                Widget:
                 Button:
                     text: 'Create City'
                     size_hint: (0.5, None)
@@ -16,7 +15,6 @@ ScreenManager:
                     on_press:
                         root.transition.direction = 'left'
                         root.current = 'create_city'
-                Widget:
                 Button:
                     text: 'Add/Edit Venue'
                     size_hint: (0.5, None)
@@ -24,6 +22,13 @@ ScreenManager:
                     on_press:
                         root.transition.direction = 'left'
                         root.current = 'venues'
+            Widget:
+                size_hint: (1, 0.5)
+            Button:
+                text: 'Exit App'
+                size_hint: (1, 0.5)
+                on_press:
+                    app.stop()
     Screen:
         name: 'create_city'
         on_pre_enter:
