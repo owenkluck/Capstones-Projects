@@ -8,22 +8,32 @@ ScreenManager:
                 font_size: sp(32)
             BoxLayout:
                 orientation: 'vertical'
-                Widget:
                 Button:
                     text: 'Create City'
                     size_hint: (0.5, None)
-                    pos_hint: {'x':.25, 'y':.25}
+                    pos_hint: {'center_x': 0.5}
                     on_press:
                         root.transition.direction = 'left'
                         root.current = 'create_city'
-                Widget:
                 Button:
                     text: 'Add/Edit Venue'
                     size_hint: (0.5, None)
-                    pos_hint: {'x':.25, 'y':.25}
+                    pos_hint: {'center_x': 0.5}
                     on_press:
                         root.transition.direction = 'left'
                         root.current = 'venues'
+                Button:
+                    text: 'Add/Edit Review'
+                    size_hint: (0.5, None)
+                    pos_hint: {'center_x': 0.5}
+                    on_press:
+                        root.transition.direction = 'left'
+                        root.current = 'reviews'
+            Button:
+                text: 'Exit App'
+                size_hint: (1, 0.5)
+                on_press:
+                    app.stop()
     Screen:
         name: 'create_city'
         on_pre_enter:
@@ -130,29 +140,25 @@ ScreenManager:
                 orientation: 'vertical'
                 Button:
                     text: 'Add New Venue'
-                    size_hint: (0.5, 0.5)
-                    pos_hint: {'x':.25, 'y':0}
+                    size_hint: (0.5, None)
+                    pos_hint: {'center_x': 0.5}
                     on_press:
                         root.transition.direction = 'left'
                         root.current = 'new_venue'
-            BoxLayout:
-                orientation: 'vertical'
                 Button:
                     text: 'Edit Existing Venue'
-                    size_hint: (0.5, 0.5)
-                    pos_hint: {'x':.25, 'y':0}
+                    size_hint: (0.5, None)
+                    pos_hint: {'center_x': 0.5}
                     on_press:
                         root.transition.direction = 'left'
                         root.current = 'choose_city_for_venue_edit'
-            BoxLayout:
-                orientation: 'vertical'
-                BoxLayout:
-                    orientation: 'horizontal'
-                    Button:
-                        text: 'BACK'
-                        on_press:
-                            root.transition.direction = 'right'
-                            root.current = 'home'
+                Button:
+                    text: 'BACK'
+                    size_hint: (0.5, None)
+                    pos_hint: {'center_x': 0.5}
+                    on_press:
+                        root.transition.direction = 'right'
+                        root.current = 'home'
     Screen:
         name: 'new_venue'
         on_pre_enter:
@@ -255,6 +261,7 @@ ScreenManager:
             max_humidity.text = ''
             max_wind_speed.text = ''
             owc.text = ''
+            venue_creation_message.text = ''
         BoxLayout:
             orientation: 'vertical'
             Label:
@@ -390,6 +397,7 @@ ScreenManager:
             new_max_h.text = ''
             new_max_w.text = ''
             new_owc.text = ''
+            venue_edit_message.text = ''
         BoxLayout:
             orientation: 'vertical'
             Label:
@@ -454,6 +462,28 @@ ScreenManager:
             Widget:
             Button:
                 text: 'OK'
+                on_press:
+                    root.transition.direction = 'right'
+                    root.current = 'home'
+    Screen:
+        name: 'reviews'
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                text: 'Add/Edit Review'
+                font_size: sp(32)
+            Button:
+                text: 'Add Review'
+                size_hint: (0.5, None)
+                pos_hint: {'center_x': 0.5}
+            Button:
+                text: 'Edit Review'
+                size_hint: (0.5, None)
+                pos_hint: {'center_x': 0.5}
+            Button:
+                text: 'BACK'
+                size_hint: (0.5, None)
+                pos_hint: {'center_x': 0.5}
                 on_press:
                     root.transition.direction = 'right'
                     root.current = 'home'

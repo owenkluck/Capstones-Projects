@@ -4,6 +4,14 @@ from kivy.core.window import Window  # For inspection.
 from entertainment_installer import *
 
 
+def bad_condition_entry(data_list):
+    bad_entry = False
+    for element in data_list:
+        if not element.strip('-').replace('.', '', 1).isnumeric() and element != '':
+            bad_entry = True
+    return bad_entry
+
+
 class EntertainmentTrackerApp(App):
     def __init__(self, **kwargs):
         super(EntertainmentTrackerApp, self).__init__(**kwargs)
@@ -25,13 +33,13 @@ class EntertainmentTrackerApp(App):
     def add_city(self, name, lat, long, entity):
         # Search for cities with the exact same name
         query = self.session.query(City).filter(City.city_name == name)
-        # Check for empty fields
         empty_field = False
         if str(name) == '' or str(lat) == '' or str(long) == '' or str(entity) == '':
             empty_field = True
         if empty_field:
             self.root.ids.city_creation_message.text = 'Please fill in all of the data fields.'
-        elif not str(lat).strip('-.').replace('.', '', 1).isdecimal() or not str(long).strip('-.').replace('.', '', 1).isdecimal():
+        elif not str(lat).strip('-.').replace('.', '', 1).isdecimal() or not str(long).strip('-.').replace('.', '',
+                                                                                                           1).isdecimal():
             self.root.ids.city_creation_message.text = f'Lat and Long must be a decimal or whole number.'
         elif query.count() > 0:
             self.root.ids.city_creation_message.text = f'A city with the name {name} already exists.'
@@ -73,28 +81,16 @@ class EntertainmentTrackerApp(App):
 
     def add_condition(self, name, min_t, max_t, min_h, max_h, max_ws, owc):
         data = [min_t, min_h, max_t, max_h, max_ws, owc]
-        bad_entry = False
-        for element in data:
-            if not element.strip('-').replace('.', '', 1).isnumeric() and element != '':
-                bad_entry = True
-        if bad_entry:
+        if bad_condition_entry(data):
             self.root.ids.venue_creation_message.text = 'All weather condition entries must be an integer.'
         else:
             query = self.session.query(Venue).filter(Venue.venue_name == name).one()
             v_id = query.venue_id
             # If the user passed in an empty string, render it as None
-            if min_t == '':
-                min_t = None
-            if max_t == '':
-                max_t = None
-            if min_h == '':
-                min_h = None
-            if max_h == '':
-                max_h = None
-            if max_ws == '':
-                max_ws = None
-            if owc == '':
-                owc = None
+            for element in data:
+                if element == '':
+                    data[data.index(element)] = None
+            min_t, max_t, min_h, max_h, max_ws, owc = data
             condition = Condition(min_temperature=min_t, max_temperature=max_t,
                                   min_humidity=min_h, max_humidity=max_h, max_wind_speed=max_ws, open_weather_code=owc)
             self.session.add(condition)
@@ -107,22 +103,19 @@ class EntertainmentTrackerApp(App):
             self.root.current = 'venue_creation_success'
 
     def update_venue_data(self, name, new_name, city, new_min_t, new_max_t, new_min_h, new_max_h, new_max_w, new_owc):
-        if self.duplicate_name_venue(name, new_name, city):
+        data = [new_min_t, new_max_t, new_min_h, new_max_h, new_max_w, new_owc]
+        if new_name == '':
+            self.root.ids.venue_edit_message.text = "Venue name can't be an empty string."
+        elif bad_condition_entry(data):
+            self.root.ids.venue_edit_message.text = 'Venue conditions must be integers.'
+        elif self.duplicate_name_venue(name, new_name, city):
             self.root.ids.venue_edit_message.text = f'A venue under the name {new_name} already exists.'
         else:
             # Check for empty strings
-            if new_min_t == '':
-                new_min_t = None
-            if new_max_t == '':
-                new_max_t = None
-            if new_min_h == '':
-                new_min_h = None
-            if new_max_h == '':
-                new_max_h = None
-            if new_max_w == '':
-                new_max_w = None
-            if new_owc == '':
-                new_owc = None
+            for element in data:
+                if element == '':
+                    data[data.index(element)] = None
+            new_min_t, new_max_t, new_min_h, new_max_h, new_max_w, new_owc = data
             # Grab data from tables
             venue_data = self.session.query(Venue).filter(Venue.venue_name == name).one()
             v_id = venue_data.venue_id
