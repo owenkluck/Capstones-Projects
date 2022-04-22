@@ -55,16 +55,12 @@ class EntertainmentTrackerApp(App):
 
     def duplicate_name_city(self, candidate_name):
         query = self.session.query(City).filter(City.city_name == candidate_name)
-        if query.count() > 0:
-            return True
-        return False
+        return query.count() > 0
 
     def duplicate_name_venue(self, original_name, candidate_name, city_selection):
         c_id = self.session.query(City).filter(City.city_name == city_selection).one().city_id
         same_name = self.session.query(Venue).filter(Venue.venue_name == candidate_name, Venue.city_id == c_id).count()
-        if same_name > 0 and original_name != candidate_name:
-            return True
-        return False
+        return same_name > 0 and original_name != candidate_name
 
     def add_venue(self, name, v_type, city, min_t, max_t, min_h, max_h, max_ws, owc):
         the_id = self.session.query(City).filter(City.city_name == city).one().city_id
