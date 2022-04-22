@@ -107,22 +107,17 @@ class EntertainmentTrackerApp(App):
             self.root.current = 'venue_creation_success'
 
     def update_venue_data(self, name, new_name, city, new_min_t, new_max_t, new_min_h, new_max_h, new_max_w, new_owc):
-        if self.duplicate_name_venue(name, new_name, city):
+        if new_name == '':
+            self.root.ids.venue_edit_message.text = "Venue name can't be an empty string."
+        elif self.duplicate_name_venue(name, new_name, city):
             self.root.ids.venue_edit_message.text = f'A venue under the name {new_name} already exists.'
         else:
             # Check for empty strings
-            if new_min_t == '':
-                new_min_t = None
-            if new_max_t == '':
-                new_max_t = None
-            if new_min_h == '':
-                new_min_h = None
-            if new_max_h == '':
-                new_max_h = None
-            if new_max_w == '':
-                new_max_w = None
-            if new_owc == '':
-                new_owc = None
+            data = [new_min_t, new_max_t, new_min_h, new_max_h, new_max_w, new_owc]
+            for element in data:
+                if element == '':
+                    data[data.index(element)] = None
+            new_min_t, new_max_t, new_min_h, new_max_h, new_max_w, new_owc = data
             # Grab data from tables
             venue_data = self.session.query(Venue).filter(Venue.venue_name == name).one()
             v_id = venue_data.venue_id
