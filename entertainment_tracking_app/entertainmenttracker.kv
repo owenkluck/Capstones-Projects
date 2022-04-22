@@ -11,26 +11,24 @@ ScreenManager:
                 Button:
                     text: 'Create City'
                     size_hint: (0.5, None)
-                    pos_hint: {'x':.25, 'y':.25}
+                    pos_hint: {'center_x': 0.5}
                     on_press:
                         root.transition.direction = 'left'
                         root.current = 'create_city'
                 Button:
                     text: 'Add/Edit Venue'
                     size_hint: (0.5, None)
-                    pos_hint: {'x':.25, 'y':.25}
+                    pos_hint: {'center_x': 0.5}
                     on_press:
                         root.transition.direction = 'left'
                         root.current = 'venues'
                 Button:
                     text: 'Add/Edit Review'
                     size_hint: (0.5, None)
-                    pos_hint: {'x':.25, 'y':.25}
+                    pos_hint: {'center_x': 0.5}
                     on_press:
                         root.transition.direction = 'left'
                         root.current = 'reviews'
-            Widget:
-                size_hint: (1, 0.5)
             Button:
                 text: 'Exit App'
                 size_hint: (1, 0.5)
@@ -482,6 +480,11 @@ ScreenManager:
                 text: 'Add Review'
             Button:
                 text: 'Edit Review'
+            Button:
+                text: 'BACK'
+                on_press:
+                    root.transition.direction = 'right'
+                    root.current = 'home'
 
 <Screen>:
     canvas.before:
