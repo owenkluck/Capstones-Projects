@@ -34,6 +34,8 @@ class Condition(Persisted):
     min_humidity = Column(Integer)
     max_humidity = Column(Integer)
     max_wind_speed = Column(Integer)
+    rain = Column(Integer)
+    visibility = Column(Integer)
     open_weather_code = Column(Integer)
     date = Column(Date)
     venue = relationship('Venue', uselist=True, back_populates='condition', secondary='venue_conditions')
@@ -49,6 +51,7 @@ class VenueCondition(Persisted):
 class Airport(Persisted):
     __tablename__ = 'airports'
     airport_id = Column(Integer, primary_key=True)
+    condition_id = Column(Integer, ForeignKey('conditions.condition_id'))
     name = Column(String(256), nullable=False)
     code = Column(String(256))
     longitude = Column(Float)
