@@ -140,29 +140,25 @@ ScreenManager:
                 orientation: 'vertical'
                 Button:
                     text: 'Add New Venue'
-                    size_hint: (0.5, 0.5)
-                    pos_hint: {'x':.25, 'y':0}
+                    size_hint: (0.5, None)
+                    pos_hint: {'center_x': 0.5}
                     on_press:
                         root.transition.direction = 'left'
                         root.current = 'new_venue'
-            BoxLayout:
-                orientation: 'vertical'
                 Button:
                     text: 'Edit Existing Venue'
-                    size_hint: (0.5, 0.5)
-                    pos_hint: {'x':.25, 'y':0}
+                    size_hint: (0.5, None)
+                    pos_hint: {'center_x': 0.5}
                     on_press:
                         root.transition.direction = 'left'
                         root.current = 'choose_city_for_venue_edit'
-            BoxLayout:
-                orientation: 'vertical'
-                BoxLayout:
-                    orientation: 'horizontal'
-                    Button:
-                        text: 'BACK'
-                        on_press:
-                            root.transition.direction = 'right'
-                            root.current = 'home'
+                Button:
+                    text: 'BACK'
+                    size_hint: (0.5, None)
+                    pos_hint: {'center_x': 0.5}
+                    on_press:
+                        root.transition.direction = 'right'
+                        root.current = 'home'
     Screen:
         name: 'new_venue'
         on_pre_enter:
@@ -478,10 +474,16 @@ ScreenManager:
                 font_size: sp(32)
             Button:
                 text: 'Add Review'
+                size_hint: (0.5, None)
+                pos_hint: {'center_x': 0.5}
             Button:
                 text: 'Edit Review'
+                size_hint: (0.5, None)
+                pos_hint: {'center_x': 0.5}
             Button:
                 text: 'BACK'
+                size_hint: (0.5, None)
+                pos_hint: {'center_x': 0.5}
                 on_press:
                     root.transition.direction = 'right'
                     root.current = 'home'
