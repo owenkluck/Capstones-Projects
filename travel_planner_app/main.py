@@ -5,6 +5,8 @@ from travel_planner_app.database import Database
 from travel_planner_app.rest import RESTConnection
 from api_key import API_KEY
 from database import Airport, City, Venue
+from kivy.logger import Logger
+from json import dumps
 import csv
 
 
@@ -17,6 +19,7 @@ class TravelPlannerApp(App):
         self.session = self.database.create_session()
         self.connection = RESTConnection('api.openweathermap.org', port_api, '/data/2.5')
         self.api_key = api_key
+        self.validate_city_records = None
 
     def build(self):
         inspector.create_inspector(Window, self)
@@ -34,7 +37,7 @@ class TravelPlannerApp(App):
         unvalidated_venues = self.session.query(Venue).all()
         return unvalidated_venues
 
-    def validate_place(self, airport_code, latitude, longitude):
+    def validate_airport(self, airport_code, latitude, longitude):
         # May need to update to make comparison forgiving
         with open('airports.csv') as csvfile:
             reader = csv.DictReader(csvfile)
@@ -43,6 +46,27 @@ class TravelPlannerApp(App):
                     if item['Latitude'] == latitude and item['Longitude'] == longitude:
                         return True
             return False
+
+    def validate_city(self, city_name, latitude, longitude):
+        geo_connection = RESTConnection('api.openweathermap.org', 443, '/geo/1.0')
+        geo_connection.send_request(
+            'direct',
+            {
+                'q': 'London,US',
+                'appid': API_KEY
+            },
+            None,
+            self.on_records_loaded,
+            self.on_records_not_loaded,
+            self.on_records_not_loaded
+        )
+
+    def on_records_loaded(self, _, response):
+        print(dumps(response, indent=4, sort_keys=True))
+        self.validate_city_records = response
+
+    def on_records_not_loaded(self, _, error):
+        Logger.error(f'{self.__class__.__name__}: {error}')
 
     def get_average_rating(self):
         pass
