@@ -6,7 +6,7 @@ ScreenManager:
             BoxLayout:
                 size_hint_max_y: 80
                 TestLabel:
-                    text: 'Main Menu'
+                    text: 'Airport Menu'
                     font_size: '25sp'
             BoxLayout:
                 orientation: 'horizontal'
@@ -56,14 +56,6 @@ ScreenManager:
                 TestLabel:
                     text: 'Create Airport'
                     font_size: '25sp'
-                Button:
-                    size_hint_max_x: 100
-                    text: 'Return'
-                    on_press:
-                        root.current = 'main_menu'
-                        root.ids.airport_name.text = ''
-                        root.ids.airport_code.text = ''
-                        root.ids.airport_location.text = ''
             BoxLayout:
                 orientation: 'vertical'
                 BoxLayout:
@@ -117,25 +109,32 @@ ScreenManager:
                                 root.ids.airport_code.text = ''
                                 root.ids.airport_location.text = ''
                 BoxLayout:
-                    orientation: 'horizontal'
-                    BoxLayout:
-                        size_hint_max_x: 20
-                    BoxLayout:
-                        orientation: 'vertical'
-                        Button:
-                            text: 'Submit'
-                            on_press:
-                                app.submit_data_airport(root.ids.airport_name.text, root.ids.airport_code.text, root.ids.airport_location.text)
-                                root.current = 'success_airport'
-                                root.ids.airport_name.text = ''
-                                root.ids.airport_code.text = ''
-                                root.ids.airport_location.text = ''
-                        BoxLayout:
                     Label:
                         text: ''
                         id: Error_3
                     BoxLayout:
                         size_hint_max_x: 20
+                BoxLayout:
+                    orientation: 'horizontal'
+                    Button:
+                        text: 'BACK'
+                        size_hint: (0.30, 0.30)
+                        pos_hint: {'x':.25, 'y':0}
+                        on_press:
+                            root.current = 'main_menu'
+                            root.ids.city_name.text = ''
+                            root.ids.city_geo.text = ''
+                            root.ids.city_location.text = ''
+                    Button:
+                        text: 'CREATE AIRPORT'
+                        size_hint: (0.30, 0.30)
+                        pos_hint: {'x':.25, 'y':0}
+                        on_press:
+                            app.submit_data_airport(root.ids.airport_name.text, root.ids.airport_code.text, root.ids.airport_location.text)
+                            root.current = 'success_airport'
+                            root.ids.airport_name.text = ''
+                            root.ids.airport_code.text = ''
+                            root.ids.airport_location.text = ''
     Screen:
         name: 'create_city'
         BoxLayout:
@@ -146,14 +145,6 @@ ScreenManager:
                 TestLabel:
                     text: 'Create City'
                     font_size: '25sp'
-                Button:
-                    size_hint_max_x: 100
-                    text: 'Return'
-                    on_press:
-                        root.current = 'main_menu'
-                        root.ids.city_name.text = ''
-                        root.ids.city_geo.text = ''
-                        root.ids.city_location.text = ''
             BoxLayout:
                 orientation: 'vertical'
                 BoxLayout:
@@ -204,27 +195,34 @@ ScreenManager:
                                 root.ids.city_geo.text = ''
                                 root.ids.city_location.text = ''
                 BoxLayout:
-                    size_hint_max_y: 40
-                BoxLayout:
                     orientation: 'horizontal'
-                    BoxLayout:
-                        size_hint_max_x: 20
-                    BoxLayout:
-                        orientation: 'vertical'
-                        Button:
-                            text: 'Submit'
-                            on_press:
-                                app.submit_data_city(root.ids.city_name.text, root.ids.city_geo.text, root.ids.city_location.text)
-                                root.current = 'success_city'
-                                root.ids.city_name.text = ''
-                                root.ids.city_geo.text = ''
-                                root.ids.city_location.text = ''
-                        BoxLayout:
                     Label:
                         text: ''
                         id: Error_2
                     BoxLayout:
-                        size_hint_max_x: 20
+                        size_hint_max_x: 15
+                        pos_hint: {'x':.75, 'y':.75}
+                BoxLayout:
+                    orientation: 'horizontal'
+                    Button:
+                        text: 'BACK'
+                        size_hint: (0.30, 0.30)
+                        pos_hint: {'x':.25, 'y':0}
+                        on_press:
+                            root.current = 'main_menu'
+                            root.ids.city_name.text = ''
+                            root.ids.city_geo.text = ''
+                            root.ids.city_location.text = ''
+                    Button:
+                        text: 'CREATE CITY'
+                        size_hint: (0.30, 0.30)
+                        pos_hint: {'x':.25, 'y':0}
+                        on_press:
+                            app.submit_data_city(root.ids.city_name.text, root.ids.city_geo.text, root.ids.city_location.text)
+                            root.current = 'success_city'
+                            root.ids.city_name.text = ''
+                            root.ids.city_geo.text = ''
+                            root.ids.city_location.text = ''
     Screen:
         name: 'success_airport'
         on_enter: app.add_buttons()
@@ -278,12 +276,6 @@ ScreenManager:
                 TestLabel:
                     text: 'Check Forecast'
                     font_size: '25sp'
-                Button:
-                    size_hint_max_x: 100
-                    text: 'Return'
-                    on_press:
-                        root.current = 'main_menu'
-                        root.ids.forecast_date.text = ''
             BoxLayout:
                 orientation: 'vertical'
                 BoxLayout:
@@ -302,18 +294,23 @@ ScreenManager:
                     text: 'Select Airport'
                     values:()
             BoxLayout:
-                size_hint_max_y: 40
+                size_hint_max_x: 30
+            Label:
+                id: Error_1
+                text: 'Insert Error Message'
             BoxLayout:
                 orientation: 'horizontal'
-                size_hint_max_y: 100
                 Button:
-                    text: 'Submit'
-                    on_press: root.current = 'create_forecast'
-                BoxLayout:
-                    size_hint_max_x: 40
-                Label:
-                    id: Error_1
-                    text: 'Insert Error Message'
+                    text: 'BACK'
+                    size_hint: (0.5, 0.5)
+                    on_press:
+                        root.current = 'main_menu'
+                        root.ids.forecast_date.text = ''
+                Button:
+                    text: 'CHECK FORECAST'
+                    size_hint: (0.5, 0.5)
+                    on_press:
+                        root.current = 'create_forecast'
     Screen:
         name: 'create_forecast'
         on_enter: app.add_forecast(root.ids.forecast_spinner.text, root.ids.forecast_date.text)
@@ -324,17 +321,19 @@ ScreenManager:
                 TestLabel:
                     text: 'Forecast on (Insert Date Variable)'
                     font_size: '25sp'
-                Button:
-                    text: 'Return'
-                    on_press:
-                        root.current = 'check_forecast'
-                        root.ids.forecast_date.text = ''
-                        root.ids.forecast.text = ''
-                    size_hint_max_x: 100
             Label:
                 id: forecast
                 font_size: '28sp'
                 text: ''
+            BoxLayout:
+                orientation: 'horizontal'
+                Button:
+                    text: 'BACK'
+                    size_hint: (0.25, 0.25)
+                    on_press:
+                        root.current = 'check_forecast'
+                        root.ids.forecast_date.text = ''
+                        root.ids.forecast.text = ''
     Screen:
         name: 'success_city'
         on_enter: app.add_buttons()
@@ -377,6 +376,35 @@ ScreenManager:
                     text: 'Create New Airport'
                     on_press: root.current = 'create_airport'
                 BoxLayout:
+
+<Screen>:
+    canvas.before:
+        Color:
+            rgba: (1.0, 1.0, 1.0, 1.0)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<Label>:
+    color: (0.0, 0.0, 0.75, 1.0)
+    halign: 'center'
+
+<Button>:
+    color: (1, 1, 1, 1)
+    halign: 'center'
+
+<TextInput>:
+    multiline: False
+    write_tab: False
+
+<CheckBox>:
+    canvas:
+        Color:
+            rgba: (0.0, 0.0, 0.75, 1.0)
+        Rectangle:
+            source: f'atlas://data/images/defaulttheme/checkbox{"_radio" if self.group else ""}{"_disabled" if self.disabled else ""}{"_on" if self.active else "_off"}'
+            size: sp(32), sp(32)
+            pos: int(self.center_x - sp(16)), int(self.center_y - sp(16))
 
 <TestLabel@Label>:
     font_size: 20
