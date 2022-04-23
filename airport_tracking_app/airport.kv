@@ -48,6 +48,7 @@ ScreenManager:
                     size_hint_max_x: 40
     Screen:
         name: 'create_airport'
+        on_leave: root.ids.create_airport_error.text = ''
         BoxLayout:
             orientation: 'vertical'
             BoxLayout:
@@ -126,18 +127,19 @@ ScreenManager:
                             text: 'Submit'
                             on_press:
                                 app.submit_data_airport(root.ids.airport_name.text, root.ids.airport_code.text, root.ids.airport_location.text)
-                                root.current = 'success_airport'
+                                root.ids.success_airport_name.text = root.ids.airport_name.text
                                 root.ids.airport_name.text = ''
                                 root.ids.airport_code.text = ''
                                 root.ids.airport_location.text = ''
                         BoxLayout:
                     Label:
                         text: ''
-                        id: Error_3
+                        id: create_airport_error
                     BoxLayout:
                         size_hint_max_x: 20
     Screen:
         name: 'create_city'
+        on_leave: root.ids.create_city_error.text = ''
         BoxLayout:
             orientation: 'vertical'
             BoxLayout:
@@ -215,20 +217,22 @@ ScreenManager:
                             text: 'Submit'
                             on_press:
                                 app.submit_data_city(root.ids.city_name.text, root.ids.city_geo.text, root.ids.city_location.text)
-                                root.current = 'success_city'
+                                root.ids.success_city_name.text = root.ids.city_name.text
                                 root.ids.city_name.text = ''
                                 root.ids.city_geo.text = ''
                                 root.ids.city_location.text = ''
                         BoxLayout:
                     Label:
                         text: ''
-                        id: Error_2
+                        id: create_city_error
                     BoxLayout:
                         size_hint_max_x: 20
     Screen:
         name: 'success_airport'
         on_enter: app.add_buttons()
-        on_leave: app.delete_buttons()
+        on_leave:
+            app.delete_buttons()
+            root.ids.select_city_error.text = ''
         BoxLayout:
             orientation: 'vertical'
             TestLabel:
@@ -249,10 +253,19 @@ ScreenManager:
                     text: 'Your airport has successfully been added to our database. \nClick the \'X\' at any time to return to the main menu'
                     font_size: '20sp'
             BoxLayout:
-                orientation: 'vertical'
                 Label:
-                    text: 'Please select Cities for your Airport to service'
+                    id: select_city_error
+                    text: ''
+            BoxLayout:
+                orientation: 'vertical'
+                BoxLayout:
+                    orientation: 'horizontal'
                     size_hint_max_y: 80
+                    Label:
+                        text: 'Please select Cities to be serviced by'
+                    Label:
+                        id: success_airport_name
+                        text:''
                 ScrollView:
                     do_scroll_x: False
                     do_scroll_y: True
@@ -270,6 +283,7 @@ ScreenManager:
     Screen:
         name: 'check_forecast'
         on_enter: app.add_airports_spinner()
+        on_leave: root.ids.check_forecast_error.text = ''
         BoxLayout:
             orientation: 'vertical'
             BoxLayout:
@@ -312,7 +326,7 @@ ScreenManager:
                 BoxLayout:
                     size_hint_max_x: 40
                 Label:
-                    id: Error_1
+                    id: check_forecast_error
                     text: 'Insert Error Message'
     Screen:
         name: 'create_forecast'
@@ -338,7 +352,9 @@ ScreenManager:
     Screen:
         name: 'success_city'
         on_enter: app.add_buttons()
-        on_leave: app.delete_buttons()
+        on_leave:
+            app.delete_buttons()
+            root.ids.select_airport_error.text = ''
         BoxLayout:
             orientation: 'vertical'
             TestLabel:
@@ -359,10 +375,18 @@ ScreenManager:
                     text: 'Your city has successfully been added to our database. \nClick the \'X\' at any time to return to the main menu'
                     font_size: '20sp'
             BoxLayout:
-                orientation: 'vertical'
                 Label:
-                    text: 'Please select Airports for your City to be serviced by'
+                    id: select_airport_error
+                    text: ''
+            BoxLayout:
+                orientation: 'vertical'
+                BoxLayout
                     size_hint_max_y: 80
+                    Label:
+                        text: 'Please select Airports to service'
+                    Label:
+                        id: success_city_name
+                        text: ''
                 ScrollView:
                     do_scroll_x: False
                     do_scroll_y: True
@@ -388,3 +412,9 @@ ScreenManager:
         Line:
             width: 2
             rectangle: self.x, self.y, self.width, self.height
+
+<AirportButtons>
+    on_press: app.add_airport(self.text)
+
+<CityButtons>
+    on_press: app.add_city(self.text)
