@@ -5,6 +5,7 @@ from travel_planner_app.database import Database
 from travel_planner_app.rest import RESTConnection
 from api_key import API_KEY
 from database import Airport, City, Venue
+import csv
 
 
 class TravelPlannerApp(App):
@@ -32,9 +33,16 @@ class TravelPlannerApp(App):
     def get_venues_to_validate(self):
         unvalidated_venues = self.session.query(Venue).all()
         return unvalidated_venues
-    
-    def validate_place(self):
-        pass
+
+    def validate_place(self, airport_code, latitude, longitude):
+        # May need to update to make comparison forgiving
+        with open('airports.csv') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for item in reader:
+                if item['ICAO'] == airport_code:
+                    if item['Latitude'] == latitude and item['Longitude'] == longitude:
+                        return True
+            return False
 
     def get_average_rating(self):
         pass
