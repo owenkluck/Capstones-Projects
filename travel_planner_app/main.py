@@ -3,6 +3,8 @@ import math
 from kivy.app import App
 from kivy.modules import inspector
 from kivy.core.window import Window
+
+from airport_tracking_app.airport import Forecast
 from travel_planner_app.database import Database
 from travel_planner_app.rest import RESTConnection
 from api_key import API_KEY
@@ -90,16 +92,19 @@ class TravelPlannerApp(App):
                 best_option = airport
         return best_option
 
-    def get_airports_in_range(self, current_airport):
+    def get_airports_in_range(self, current_airport, forecast):
         airports = self.session.query(Airport).all()
         in_range_airports = []
         for airport in airports:
-            if self.find_distance(current_airport.latitude, current_airport.longitude, airport.latitude, airport.longitude) <= 3500 and self.is_weather_ok_airport():
+            if self.find_distance(current_airport.latitude, current_airport.longitude, airport.latitude, airport.longitude) <= 3500 and self.is_weather_ok_airport(forecast):
                 in_range_airports.append(airport)
         return in_range_airports
 
-    def is_weather_ok_airport(self):
-        pass
+    def is_weather_ok_airport(self, forecast):
+        # Figure out severe weather
+        if forecast.temperature < 45 and forecast.visibility > 5:
+            return True
+        return False
 
     def find_distance(self, current_latitude, current_longitude, next_latitude, next_longitude):
         # need to figure out how to calculate whether you are still going East or West.
@@ -108,33 +113,50 @@ class TravelPlannerApp(App):
                              math.cos(next_longitude - current_longitude)) * 6371
         return distance
 
-    def determine_best_city(self, airport):
+    def determine_best_city(self, airport, date):
         best_city = None
         city_score = 0
         for city in airport.cities:
-            pass
+            if self.get_city_score(city, date) > city_score:
+                city_score = self.get_city_score(city, date)
+                best_city = city
         return best_city
 
-    def get_city_score(self, city):
+    def get_city_score(self, city, date):
         score = 0
         venues_open = 0
-        if self.is_weather_good_city():
+        forecast = self.session.query(Forecast).filter(Forecast.city_id == city.city_id and Forecast.date == date).one()
+        if self.is_weather_good_city(forecast):
             score += 3
-        for venue in city.venues:
-            if self.does_weather_meet_venues_conditions(venue, city.forecast):
-                venues_open += 1
+        score += len(self.get_open_venues_list(city, forecast))
         score += venues_open
         return score
 
-    def is_weather_good_city(self):
-        pass
+    def is_weather_good_city(self, forecast):
+        if 32 <= forecast.temperature <= 90 and 0 <= forecast.temperature <= 40 and forecast.wind_speed <= 20:
+            return True
+        return False
 
-    def does_weather_meet_venues_conditions(self, venue, weather):
-        return True
+    def does_weather_meet_venues_conditions(self, venue, forecast):
+        if venue.min_temperature <= forecast.temperature <= venue.max_temperature and \
+                venue.min_humidity <= forecast.temperature <= venue.max_humidity and \
+                forecast.wind_speed <= venue.max_wind_speed:
+            return True
+        return False
 
-    def create_closest_itinerary_day(self, destination):
-        airport = self.find_closest_airport_to_destination(self.get_airports_in_range(self.current_location), destination)
-        pass
+    def get_open_venues_list(self, city, forecast):
+        venues_to_visit = []
+        for venue in city.venues:
+            if self.does_weather_meet_venues_conditions(venue, forecast):
+                venues_to_visit.append(venue)
+        return venues_to_visit
+
+    def create_closest_itinerary_day(self, destination, date, current_airport):
+        airport_forecast = self.session.query(Forecast).filter(Forecast.date == date and Forecast.airport_id == current_airport.airport_id).one()
+        airport = self.find_closest_airport_to_destination(self.get_airports_in_range(self.current_location, airport_forecast), destination)
+        city = self.determine_best_city(airport, date)
+        city_forecast = self.session.query(Forecast).filter(Forecast.date == date and Forecast.city_id == city.city_id).one()
+        venues_to_visit = self.get_open_venues_list(city, city_forecast)
 
     def create_entertainment_itinerary(self):
         pass
