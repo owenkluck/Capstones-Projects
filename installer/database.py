@@ -24,6 +24,14 @@ class Venue(Persisted):
     venue_type = Column(String(256), nullable=False)
     condition = relationship('Condition', back_populates='venue', secondary='venue_conditions')
     city = relationship('City', back_populates='venues')
+    reviews = relationship('Review', back_populates='venue')
+
+
+class Review(Persisted):
+    __tablename__ = 'reviews'
+    review_id = Column(Integer, primary_key=True, autoincrement=True)
+    score = Column(Integer)
+    venue = relationship('Venue', back_populates='reviews')
 
 
 class Condition(Persisted):
