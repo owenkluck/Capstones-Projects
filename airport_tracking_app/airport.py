@@ -21,6 +21,7 @@ class City(Persisted):
     name = Column(String(256), nullable=False)
     geographic_entity = Column(String(256), nullable=False)
     location = Column(String(256))
+    forecasts = relationship('Forecast', uselist=True, back_populates='city')
     airports = relationship('Airport', uselist=True, secondary='airport_cities', back_populates='cities')
 
 
@@ -34,6 +35,7 @@ class Forecast(Persisted):
     __tablename__ = 'forecasts'
     forecast_id = Column(Integer, primary_key=True)
     airport_id = Column(Integer, ForeignKey('airports.airport_id'))
+    city_id = Column(Integer, ForeignKey('city.city_id'))
     date = Column(Date)
     temperature = Column(Float)
     humidity = Column(Float)
@@ -41,6 +43,7 @@ class Forecast(Persisted):
     rain = Column(Float)
     visibility = Column(Float)
     airport = relationship('Airport', back_populates='forecasts')
+    city = relationship('City', back_populates='forecasts')
 
 
 class AirportDatabase(object):
