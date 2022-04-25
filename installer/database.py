@@ -25,6 +25,7 @@ class Venue(Persisted):
     venue_name = Column(String(256), nullable=False)
     venue_type = Column(String(256), nullable=False)
     average_welp_score = Column(Float)
+    welp_score_needs_update = Column(Boolean, default=False)
     condition = relationship('Condition', back_populates='venue', secondary='venue_conditions')
     city = relationship('City', back_populates='venues')
     reviews = relationship('Review', back_populates='venue')
