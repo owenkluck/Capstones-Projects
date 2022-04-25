@@ -3,6 +3,222 @@ ScreenManager:
         name: 'home'
         BoxLayout:
             orientation: 'vertical'
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_max_y: 80
+                Label:
+                    text: 'Conrhusker Entertainment Tracker'
+                    font_size: '25sp'
+            BoxLayout:
+                orientation: 'vertical'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    BoxLayout:
+                        size_hint_max_x: 20
+                    BoxLayout:
+                        orientation: 'vertical'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Remote Database Information'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Authority'
+                            TextInput:
+                                text: 'cse.unl.edu'
+                                id: +
+                                multiline: False
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Port Number'
+                            TextInput:
+                                id: +
+                                text: '3306'
+                                multiline: False
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Database Name'
+                            TextInput:
+                                id: +
+                                text: 'kandrews'
+                                multiline: False
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Username'
+                            TextInput:
+                                id: +
+                                text: 'kandrews'
+                                multiline: False
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Password'
+                                foreground_color: 'red'
+                            TextInput:
+                                id: +
+                                multiline: False
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: ''
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'OpenWeather API Information'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Authority'
+                            TextInput:
+                                id: +
+                                text: 'api.openweathermap.org'
+                                multiline: False
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Port Number'
+                                foreground_color: 'red'
+                            TextInput:
+                                id: +
+                                text: '443'
+                                multiline: False
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'API Key'
+                            TextInput:
+                                id: +
+                                multiline: False
+                        BoxLayout:
+                            size_hint_max_y: 40
+                    BoxLayout:
+                        size_hint_max_x: 20
+                    BoxLayout:
+                        orientation: 'vertical'
+                        size_hint_max_x: 80
+                        Button:
+                            text: 'Discard\nChanges'
+                            font_size: '15sp'
+                            on_press:
+                BoxLayout:
+                    orientation: 'horizontal'
+                    Button:
+                        text: 'SUBMIT'
+                        size_hint: (0.30, 0.30)
+                        pos_hint: {'x':.25, 'y':0}
+                        on_press:
+                            root.transition.direction = 'left'
+                            root.current = 'mainmenu1'
+    Screen:
+        name: 'mainmenu1'
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout:
+                size_hint_max_y: 80
+                Label:
+                    text: 'Main Menu'
+                    font_size: '25sp'
+            BoxLayout:
+                orientation: 'horizontal'
+                BoxLayout:
+                    size_hint_max_x: 40
+                BoxLayout:
+                    orientation: 'vertical'
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        Label:
+                            text: 'Cities need to be validated.'
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        Label:
+                            text: 'Airports need to be validated.'
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        Label:
+                            text: 'Operators need their RateMyPilot scores updated.'
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        Label:
+                            text: 'Venues need their welp scores updated.'
+                    BoxLayout:
+                        size_hint_max_y: 10
+                    Button:
+                        text: 'Validate Locations'
+                        font_size: '20sp'
+                        on_press:
+                    BoxLayout:
+                        size_hint_max_y: 10
+                    Button:
+                        text: 'Update Ratings'
+                        font_size: '20sp'
+                        on_press:
+                    BoxLayout:
+                        size_hint_max_y: 10
+                    Button:
+                        text: 'Prepare Itinerary'
+                        font_size: '20sp'
+                        on_press:
+                    BoxLayout:
+                        size_hint_max_y: 10
+                    Button:
+                        text: 'Click this to advance calendar by one day.'
+                        font_size: '20sp'
+                        on_press:
+                    BoxLayout:
+                        size_hint_max_y: 20
+                    BoxLayout:
+                        size_hint_max_y: 60
+                        orientation: 'horizontal'
+                        BoxLayout:
+                            size_hint_min_x: 600
+                        Button:
+                            text: 'Quit'
+                            on_press: app.stop()
+                    BoxLayout:
+                        size_hint_max_y: 20
+                BoxLayout:
+                    size_hint_max_x: 40
+    Screen:
+        name: 'mainmenu'
+        BoxLayout:
+            orientation: 'vertical'
             Label:
                 text: 'Cornhusker Entertainment Tracker'
                 font_size: sp(32)
@@ -80,7 +296,7 @@ ScreenManager:
                         disabled: True
                         on_press:
                             root.transition.direction = 'right'
-                            root.current = 'home'
+                            root.current = 'mainmenu'
                 BoxLayout:
                     orientation: 'horizontal'
                     Button:
@@ -88,7 +304,7 @@ ScreenManager:
                         pos_hint: {'x':.1, 'y':.1}
                         on_press:
                             root.transition.direction = 'right'
-                            root.current = 'home'
+                            root.current = 'mainmenu'
                     Button:
                         text: 'CREATE CITY'
                         pos_hint: {'x':.1, 'y':.1}
@@ -118,7 +334,7 @@ ScreenManager:
                     font_size: sp(25)
                     on_press:
                         root.transition.direction = 'right'
-                        root.current = 'home'
+                        root.current = 'mainmenu'
     Screen:
         name: 'venues'
         BoxLayout:
@@ -152,7 +368,7 @@ ScreenManager:
                         text: 'BACK'
                         on_press:
                             root.transition.direction = 'right'
-                            root.current = 'home'
+                            root.current = 'mainmenu'
     Screen:
         name: 'new_venue'
         on_pre_enter:
@@ -326,7 +542,7 @@ ScreenManager:
                 text: 'OK'
                 on_press:
                     root.transition.direction = 'right'
-                    root.current = 'home'
+                    root.current = 'mainmenu'
     Screen:
         name: 'choose_city_for_venue_edit'
         BoxLayout:
@@ -456,7 +672,7 @@ ScreenManager:
                 text: 'OK'
                 on_press:
                     root.transition.direction = 'right'
-                    root.current = 'home'
+                    root.current = 'mainmenu'
 
 <Screen>:
     canvas.before:
