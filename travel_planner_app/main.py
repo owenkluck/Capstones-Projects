@@ -26,6 +26,7 @@ class TravelPlannerApp(App):
         self.outdoor_sporting_events = 0
         self.outdoor_plays = 0
         self.outdoor_restaurants = 0
+        self.current_date = date
 
     def build(self):
         inspector.create_inspector(Window, self)
@@ -245,7 +246,7 @@ def construct_in_memory_url():
 def main():
     app = TravelPlannerApp()
     app.validate_city()
-    # a, b = app.get_places_to_validate()
+    a, b = app.get_places_to_validate()
     # print(a)
     # print(b)
     # c = app.get_venues_to_validate()
