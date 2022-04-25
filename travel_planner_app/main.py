@@ -1,21 +1,19 @@
 import math
-
 from kivy.app import App
 from kivy.modules import inspector
 from kivy.core.window import Window
-
-from airport_tracking_app.airport import Forecast
+from datetime import timedelta, date
 from travel_planner_app.database import Database
 from travel_planner_app.rest import RESTConnection
 from api_key import API_KEY
-from database import Airport, City, Venue
+from database import Airport, City, Venue, Condition
 from kivy.logger import Logger
 from json import dumps
 import csv
 
 
 class TravelPlannerApp(App):
-    def __init__(self, authority='localhost', port=33060, database='database', username='root', password='cse1208',
+    def __init__(self, authority='localhost', port=33060, database='airports', username='root', password='cse1208',
                  port_api=443, api_key=API_KEY, **kwargs):
         super(TravelPlannerApp, self).__init__(**kwargs)
         url = construct_mysql_url(authority, port, database, username, password)
@@ -25,6 +23,10 @@ class TravelPlannerApp(App):
         self.api_key = api_key
         self.validate_city_records = None
         self.current_location = None
+        self.outdoor_sporting_events = 0
+        self.outdoor_plays = 0
+        self.outdoor_restaurants = 0
+        self.current_date = date
 
     def build(self):
         inspector.create_inspector(Window, self)
@@ -48,11 +50,12 @@ class TravelPlannerApp(App):
             reader = csv.DictReader(csvfile)
             for item in reader:
                 if item['ICAO'] == airport_code:
-                    if item['Latitude'] == latitude and item['Longitude'] == longitude:
+                    # Change to int to make forgiving comparison
+                    if item['Latitude'] == str(latitude) and item['Longitude'] == str(longitude):
                         return True
             return False
 
-    def validate_city(self, city_name, latitude, longitude):
+    def validate_city(self):
         geo_connection = RESTConnection('api.openweathermap.org', 443, '/geo/1.0')
         geo_connection.send_request(
             'direct',
@@ -83,27 +86,47 @@ class TravelPlannerApp(App):
     def update_ratings(self):
         pass
 
+    def find_best_entertainment_airport_and_city(self, in_range_airports, destination, current_date):
+        best_score = 0
+        best_city = None
+        best_airport = None
+        for airport in in_range_airports:
+            city = self.determine_best_city(airport, current_date)
+            score = self.get_city_score(city, current_date)
+            if score > best_score:
+                best_score = score
+                best_city = city
+                best_airport = airport
+        return best_airport, best_city
+
     def find_closest_airport_to_destination(self, in_range_airports, destination):
         best_option = None
         max_distance = 0
         for airport in in_range_airports:
-            if self.find_distance(airport.latitude, airport.longitude, destination.latitude, destination.longitude) > max_distance:
-                max_distance = self.find_distance(airport.latitude, airport.longitude, destination.latitude, destination.longitude)
+            if self.find_distance(airport.latitude, airport.longitude, destination.latitude,
+                                  destination.longitude) > max_distance:
+                max_distance = self.find_distance(airport.latitude, airport.longitude, destination.latitude,
+                                                  destination.longitude)
                 best_option = airport
         return best_option
 
-    def get_airports_in_range(self, current_airport, forecast):
+    def get_airports_in_range(self, current_airport, current_date):
         airports = self.session.query(Airport).all()
         in_range_airports = []
         for airport in airports:
-            if self.find_distance(current_airport.latitude, current_airport.longitude, airport.latitude, airport.longitude) <= 3500 and self.is_weather_ok_airport(forecast):
+            # make it, so it returns a list of positive going airports if there are any.
+            if self.find_distance(current_airport.latitude, current_airport.longitude, airport.latitude,
+                                  airport.longitude) <= 3500 and self.is_weather_ok_airport(airport, current_date):
                 in_range_airports.append(airport)
         return in_range_airports
 
-    def is_weather_ok_airport(self, forecast):
+    def is_weather_ok_airport(self, airport, current_date):
         # Figure out severe weather
-        if forecast.temperature < 45 and forecast.visibility > 5:
-            return True
+        next_day = current_date + timedelta(days=1)
+        for forecast in airport.conditions:
+            if next_day == forecast.date:
+                if forecast.max_temperature < 45 and forecast.visibility > 5:
+                    return True
         return False
 
     def find_distance(self, current_latitude, current_longitude, next_latitude, next_longitude):
@@ -113,19 +136,20 @@ class TravelPlannerApp(App):
                              math.cos(next_longitude - current_longitude)) * 6371
         return distance
 
-    def determine_best_city(self, airport, date):
+    def determine_best_city(self, airport, current_date):
         best_city = None
         city_score = 0
         for city in airport.cities:
-            if self.get_city_score(city, date) > city_score:
-                city_score = self.get_city_score(city, date)
+            if self.get_city_score(city, current_date) > city_score:
+                city_score = self.get_city_score(city, current_date)
                 best_city = city
         return best_city
 
-    def get_city_score(self, city, date):
+    def get_city_score(self, city, current_date):
         score = 0
         venues_open = 0
-        forecast = self.session.query(Forecast).filter(Forecast.city_id == city.city_id and Forecast.date == date).one()
+        forecast = self.session.query(Condition).filter(
+            Condition.city_id == city.city_id and Condition.date == current_date).one()
         if self.is_weather_good_city(forecast):
             score += 3
         score += len(self.get_open_venues_list(city, forecast))
@@ -151,21 +175,64 @@ class TravelPlannerApp(App):
                 venues_to_visit.append(venue)
         return venues_to_visit
 
-    def create_closest_itinerary_day(self, destination, date, current_airport):
-        airport_forecast = self.session.query(Forecast).filter(Forecast.date == date and Forecast.airport_id == current_airport.airport_id).one()
-        airport = self.find_closest_airport_to_destination(self.get_airports_in_range(self.current_location, airport_forecast), destination)
-        city = self.determine_best_city(airport, date)
-        city_forecast = self.session.query(Forecast).filter(Forecast.date == date and Forecast.city_id == city.city_id).one()
+    def determine_venues(self, venues_to_visit):
+        # 'Indoor Restaurant', 'Outdoor Restaurant', 'Indoor Theater', 'Outdoor Theater', 'Indoor Sports Arena', 'Outdoor Sports Arena'
+        venues = []
+        event = None
+        restaurant = None
+        if self.outdoor_plays < self.outdoor_sporting_events:
+            # Change to while statement
+            for venue in venues_to_visit:
+                if venue.venue_type == 'Outdoor Theater':
+                    event = venue
+            venues.append(event)
+            venues.append(restaurant)
+            return venues
+        else:
+            pass
+        return venues
+
+    def create_closest_itinerary_day(self, destination, current_date, current_airport):
+        airport = self.find_closest_airport_to_destination(self.get_airports_in_range(current_airport, current_date),
+                                                           destination)
+        city = self.determine_best_city(airport, current_date)
+        city_forecast = self.session.query(Condition).filter(
+            Condition.date == current_date and Condition.city_id == city.city_id).one()
         venues_to_visit = self.get_open_venues_list(city, city_forecast)
 
-    def create_entertainment_itinerary(self):
-        pass
+    def create_entertainment_itinerary(self, destination, current_date, current_airport):
+        airport, city = self.find_best_entertainment_airport_and_city(
+            self.get_airports_in_range(current_airport, current_date), destination, current_date)
+        city_forecast = self.session.query(Condition).filter(
+            Condition.date == current_date and Condition.city_id == city.city_id).one()
+        venues_to_visit = self.get_open_venues_list(city, city_forecast)
+        venues = self.determine_venues(venues_to_visit)
 
     def get_previous_itinerary(self):
         pass
 
     def get_current_location(self):
         pass
+
+    def prepare_itineraries(self):
+        pass
+
+    def update_existing_itineraries(self):
+        pass
+
+    def request_onecall_for_place(self, latitude, longitude):
+        self.connection.send_request(
+            'onecall',
+            {
+                'lat': latitude,
+                'lon': longitude,
+                'appid': API_KEY
+            },
+            None,
+            self.on_records_loaded,
+            self.on_records_not_loaded,
+            self.on_records_not_loaded
+        )
 
 
 def construct_mysql_url(authority, port, database, username, password):
@@ -178,6 +245,22 @@ def construct_in_memory_url():
 
 def main():
     app = TravelPlannerApp()
+    app.validate_city()
+    a, b = app.get_places_to_validate()
+    # print(a)
+    # print(b)
+    # c = app.get_venues_to_validate()
+    # print(c)
+    # print(app.validate_airport('AYGA', -6.081689835, 145.3919983))
+    # d = app.session.query(Airport).all()
+    # e = app.session.query(City).all()[0]
+    # f = app.find_closest_airport_to_destination(d, e)
+    # print(f.name)
+    # current_date = date(2002, 9, 20)
+    # print(app.get_airports_in_range(f, current_date)[0].name)
+    # current_date += timedelta(days=1)
+    # city = app.session.query(City).filter(City.city_name == 'Omaha').one()
+    app.request_onecall_for_place(90, 90)
     app.run()
 
 
