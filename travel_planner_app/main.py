@@ -1,5 +1,4 @@
 import math
-import time
 from kivy.app import App
 from kivy.modules import inspector
 from kivy.core.window import Window
@@ -83,8 +82,18 @@ class TravelPlannerApp(App):
     def update_ratings(self):
         pass
 
-    def find_best_entertainment_airport_and_city(self):
-        pass
+    def find_best_entertainment_airport_and_city(self, in_range_airports, destination, current_date):
+        best_score = 0
+        best_city = None
+        best_airport = None
+        for airport in in_range_airports:
+            city = self.determine_best_city(airport, current_date)
+            score = self.get_city_score(city, current_date)
+            if score > best_score:
+                best_score = score
+                best_city = city
+                best_airport = airport
+        return best_airport, best_city
 
     def find_closest_airport_to_destination(self, in_range_airports, destination):
         best_option = None
@@ -99,6 +108,7 @@ class TravelPlannerApp(App):
         airports = self.session.query(Airport).all()
         in_range_airports = []
         for airport in airports:
+            # make it, so it returns a list of positive going airports if there are any.
             if self.find_distance(current_airport.latitude, current_airport.longitude, airport.latitude, airport.longitude) <= 3500 and self.is_weather_ok_airport(airport, current_date):
                 in_range_airports.append(airport)
         return in_range_airports
@@ -158,13 +168,15 @@ class TravelPlannerApp(App):
         return venues_to_visit
 
     def create_closest_itinerary_day(self, destination, current_date, current_airport):
-        airport = self.find_closest_airport_to_destination(self.get_airports_in_range(self.current_location, current_date), destination)
+        airport = self.find_closest_airport_to_destination(self.get_airports_in_range(current_airport, current_date), destination)
         city = self.determine_best_city(airport, current_date)
         city_forecast = self.session.query(Condition).filter(Condition.date == current_date and Condition.city_id == city.city_id).one()
         venues_to_visit = self.get_open_venues_list(city, city_forecast)
 
-    def create_entertainment_itinerary(self):
-        pass
+    def create_entertainment_itinerary(self, destination, current_date, current_airport):
+        airport, city = self.find_best_entertainment_airport_and_city(self.get_airports_in_range(current_airport, current_date), destination, current_date)
+        city_forecast = self.session.query(Condition).filter(Condition.date == current_date and Condition.city_id == city.city_id).one()
+        venues_to_visit = self.get_open_venues_list(city, city_forecast)
 
     def get_previous_itinerary(self):
         pass
