@@ -476,7 +476,7 @@ ScreenManager:
                 text: 'What city is the venue you are rating in/nearby?'
                 font_size: sp(25)
             Spinner:
-                id: add_review_city_selection
+                id: welp_city
                 text: 'Select a City'
                 values: associated_city.values
             BoxLayout:
@@ -492,7 +492,7 @@ ScreenManager:
                     on_press:
                         root.transition.direction = 'left'
                         root.current = 'choose_venue_new_review'
-                        app.update_venue_list(add_review_city_selection.text)
+                        app.update_venue_list(welp_city.text)
     Screen:
         name: 'choose_venue_new_review'
         BoxLayout:
@@ -504,7 +504,7 @@ ScreenManager:
                 text: 'What venue will you be reviewing?'
                 font_size: sp(25)
             Spinner:
-                id: welp_new
+                id: welp_venue
                 text: 'Choose a Venue'
                 values: venue_edit_selection.values
             BoxLayout:
@@ -525,15 +525,15 @@ ScreenManager:
         BoxLayout:
             orientation: 'vertical'
             Label:
-                text: f"Reviewing {welp_new.text} on Welp"
+                text: f"Reviewing {welp_venue.text} on Welp"
                 font_size: sp(32)
             Label:
-                text: f'How many stars would you give {welp_new.text}?'
+                text: f'How many stars would you give {welp_venue.text}?'
                 font_size: sp(25)
             TextInput:
-                id: new_welp_score
+                id: welp_score
             Label:
-                id: invalid_new_welp_score
+                id: invalid_welp_score
                 text: ''
                 font_size: sp(20)
             BoxLayout:
@@ -547,13 +547,13 @@ ScreenManager:
                 Button:
                     text: 'NEXT'
                     on_press:
-                        app.add_welp_score(new_welp_score.text)
+                        app.add_welp_score(welp_score.text, welp_city.text, welp_venue.text)
     Screen:
         name: 'review_added_success'
         BoxLayout:
             orientation: 'vertical'
             Label:
-                text: f'Thank you for reviewing {welp_new.text} on Welp!'
+                text: f'Thank you for reviewing {welp_venue.text} on Welp!'
                 font_size: sp(25)
             Button:
                 text: 'OK'
