@@ -75,6 +75,7 @@ def add_starter_data(session):
 def main():
     try:
         url = Database.construct_mysql_url('cse.unl.edu', 3306, 'kandrews', 'kandrews', 'qUc:6M')
+        #url = Database.construct_mysql_url('localhost', 33060, 'test', 'root', 'cse1208')
         database = Database(url)
         database.ensure_tables_exist()
         session = database.create_session()

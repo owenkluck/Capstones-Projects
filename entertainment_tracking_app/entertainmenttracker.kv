@@ -23,12 +23,12 @@ ScreenManager:
                         root.transition.direction = 'left'
                         root.current = 'venues'
                 Button:
-                    text: 'Add/Edit Review'
+                    text: 'Add Review'
                     size_hint: (0.5, None)
                     pos_hint: {'center_x': 0.5}
                     on_press:
                         root.transition.direction = 'left'
-                        root.current = 'reviews'
+                        root.current = 'add_review_page'
             Button:
                 text: 'Exit App'
                 size_hint: (1, 0.5)
@@ -466,24 +466,97 @@ ScreenManager:
                     root.transition.direction = 'right'
                     root.current = 'home'
     Screen:
-        name: 'reviews'
+        name: 'add_review_page'
         BoxLayout:
             orientation: 'vertical'
             Label:
-                text: 'Add/Edit Review'
+                text: 'Add A New Review'
                 font_size: sp(32)
+            Label:
+                text: 'What city is the venue you are rating in/nearby?'
+                font_size: sp(25)
+            Spinner:
+                id: welp_city
+                text: 'Select a City'
+                values: associated_city.values
+            BoxLayout:
+                orientation: 'horizontal'
+                Button:
+                    text: 'BACK'
+                    on_press:
+                        root.transition.direction = 'right'
+                        root.current = 'home'
+                Widget:
+                Button:
+                    text: 'NEXT'
+                    on_press:
+                        root.transition.direction = 'left'
+                        root.current = 'choose_venue_new_review'
+                        app.update_venue_list(welp_city.text)
+    Screen:
+        name: 'choose_venue_new_review'
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                text: 'Add A New Review'
+                font_size: sp(32)
+            Label:
+                text: 'What venue will you be reviewing?'
+                font_size: sp(25)
+            Spinner:
+                id: welp_venue
+                text: 'Choose a Venue'
+                values: venue_edit_selection.values
+            BoxLayout:
+                orientation: 'horizontal'
+                Button:
+                    text: 'BACK'
+                    on_press:
+                        root.transition.direction = 'right'
+                        root.current = 'add_review_page'
+                Widget:
+                Button:
+                    text: 'NEXT'
+                    on_press:
+                        root.transition.direction = 'left'
+                        root.current = 'new_venue_score'
+    Screen:
+        name: 'new_venue_score'
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                text: f"Reviewing {welp_venue.text} on Welp"
+                font_size: sp(32)
+            Label:
+                text: f'How many stars would you give {welp_venue.text}?'
+                font_size: sp(25)
+            TextInput:
+                id: welp_score
+            Label:
+                id: invalid_welp_score
+                text: ''
+                font_size: sp(20)
+            BoxLayout:
+                orientation: 'horizontal'
+                Button:
+                    text: 'BACK'
+                    on_press:
+                        root.transition.direction = 'right'
+                        root.current = 'choose_venue_new_review'
+                Widget:
+                Button:
+                    text: 'NEXT'
+                    on_press:
+                        app.add_welp_score(welp_score.text, welp_city.text, welp_venue.text)
+    Screen:
+        name: 'review_added_success'
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                text: f'Thank you for reviewing {welp_venue.text} on Welp!'
+                font_size: sp(25)
             Button:
-                text: 'Add Review'
-                size_hint: (0.5, None)
-                pos_hint: {'center_x': 0.5}
-            Button:
-                text: 'Edit Review'
-                size_hint: (0.5, None)
-                pos_hint: {'center_x': 0.5}
-            Button:
-                text: 'BACK'
-                size_hint: (0.5, None)
-                pos_hint: {'center_x': 0.5}
+                text: 'OK'
                 on_press:
                     root.transition.direction = 'right'
                     root.current = 'home'

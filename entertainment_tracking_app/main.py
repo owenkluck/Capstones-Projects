@@ -12,11 +12,15 @@ def bad_condition_entry(data_list):
     return bad_entry
 
 
+def valid_welp_score(score):
+    return str(score).isdigit() and 1 <= eval(score) <= 5
+
+
 class EntertainmentTrackerApp(App):
     def __init__(self, **kwargs):
         super(EntertainmentTrackerApp, self).__init__(**kwargs)
-        url = EntertainmentDatabase.construct_mysql_url('localhost', 3306, 'entertainment', 'root', 'cse1208')
-        self.entertainment_database = EntertainmentDatabase(url)
+        url = Database.construct_mysql_url('localhost', 3306, 'entertainment', 'root', 'cse1208')
+        self.entertainment_database = Database(url)
         self.session = self.entertainment_database.create_session()
 
     def build(self):
@@ -34,8 +38,10 @@ class EntertainmentTrackerApp(App):
         # Search for cities with the exact same name
         query = self.session.query(City).filter(City.city_name == name)
         empty_field = False
-        if str(name) == '' or str(lat) == '' or str(long) == '' or str(entity) == '':
-            empty_field = True
+        data = [name, lat, long, entity]
+        for element in data:
+            if str(element) == '':
+                empty_field = True
         if empty_field:
             self.root.ids.city_creation_message.text = 'Please fill in all of the data fields.'
         elif not str(lat).strip('-.').replace('.', '', 1).isdecimal() or not str(long).strip('-.').replace('.', '',
@@ -44,7 +50,7 @@ class EntertainmentTrackerApp(App):
         elif query.count() > 0:
             self.root.ids.city_creation_message.text = f'A city with the name {name} already exists.'
         else:
-            city = City(city_name=name, latitude=lat, longitude=long, ege=entity)
+            city = City(city_name=name, latitude=lat, longitude=long, encompassing_geographic_entity=entity)
             self.session.add(city)
             self.root.ids.city_creation_message.text = ''
             self.session.commit()
@@ -167,6 +173,25 @@ class EntertainmentTrackerApp(App):
             self.root.ids.open_weather_conditions.opacity = 0
         else:
             self.root.ids.open_weather_conditions.opacity = 1
+
+    def add_welp_score(self, review_score, city, venue_being_reviewed):
+        if valid_welp_score(review_score):
+            c_id = self.session.query(City).filter(City.city_name == city).one().city_id
+            venue = self.session.query(Venue).filter(Venue.venue_name == venue_being_reviewed,
+                                                     Venue.city_id == c_id).one()
+            v_id = venue.venue_id
+            review = Review(venue_id=v_id, score=review_score)
+            self.session.add(review)
+            self.session.commit()
+            if venue.average_welp_score is None:
+                venue.average_welp_score = review_score
+            else:
+                venue.average_welp_score = (venue.average_welp_score + float(review_score)) / 2
+            self.session.commit()
+            self.root.transition.direction = 'left'
+            self.root.current = 'review_added_success'
+        else:
+            self.root.ids.invalid_welp_score.text = 'Welp scores must be an integer 1-5.'
 
 
 if __name__ == '__main__':
