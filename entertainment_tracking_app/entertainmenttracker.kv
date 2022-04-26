@@ -23,12 +23,12 @@ ScreenManager:
                         root.transition.direction = 'left'
                         root.current = 'venues'
                 Button:
-                    text: 'Add/Edit Review'
+                    text: 'Add Review'
                     size_hint: (0.5, None)
                     pos_hint: {'center_x': 0.5}
                     on_press:
                         root.transition.direction = 'left'
-                        root.current = 'reviews'
+                        root.current = 'add_review_page'
             Button:
                 text: 'Exit App'
                 size_hint: (1, 0.5)
@@ -466,34 +466,6 @@ ScreenManager:
                     root.transition.direction = 'right'
                     root.current = 'home'
     Screen:
-        name: 'reviews'
-        BoxLayout:
-            orientation: 'vertical'
-            Label:
-                text: 'Add/Edit Review'
-                font_size: sp(32)
-            Button:
-                text: 'Add Review'
-                size_hint: (0.5, None)
-                pos_hint: {'center_x': 0.5}
-                on_press:
-                    root.transition.direction = 'left'
-                    root.current = 'add_review_page'
-            Button:
-                text: 'Edit Review'
-                size_hint: (0.5, None)
-                pos_hint: {'center_x': 0.5}
-                on_press:
-                    root.transition.direction = 'left'
-                    root.current = 'edit_review_page'
-            Button:
-                text: 'BACK'
-                size_hint: (0.5, None)
-                pos_hint: {'center_x': 0.5}
-                on_press:
-                    root.transition.direction = 'right'
-                    root.current = 'home'
-    Screen:
         name: 'add_review_page'
         BoxLayout:
             orientation: 'vertical'
@@ -513,7 +485,7 @@ ScreenManager:
                     text: 'BACK'
                     on_press:
                         root.transition.direction = 'right'
-                        root.current = 'reviews'
+                        root.current = 'home'
                 Widget:
                 Button:
                     text: 'NEXT'
@@ -528,6 +500,9 @@ ScreenManager:
             Label:
                 text: 'Add A New Review'
                 font_size: sp(32)
+            Label:
+                text: 'What venue will you be reviewing?'
+                font_size: sp(25)
             Spinner:
                 id: welp_new
                 text: 'Choose a Venue'
