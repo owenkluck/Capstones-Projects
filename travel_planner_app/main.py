@@ -234,6 +234,18 @@ class TravelPlannerApp(App):
             self.on_records_not_loaded
         )
 
+    def add_airports_spinner(self):
+        values = [airport.name for airport in self.session.query(Airport).all()]
+        self.root.ids.airport_spinner.values = values
+
+    def add_airports_city_spinner(self):
+        values = [airport.name for airport in self.session.query(Airport).all()] and [city.name for city in self.session.query(City).all()]
+        self.root.ids.airports_city_spinner.values = values
+
+    def delete_buttons(self):
+        self.root.ids.scroll_box_1.clear_widgets()
+        self.root.ids.scroll_box_2.clear_widgets()
+
 
 def construct_mysql_url(authority, port, database, username, password):
     return f'mysql+mysqlconnector://{username}:{password}@{authority}:{port}/{database}'
