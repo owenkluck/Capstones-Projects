@@ -3,7 +3,7 @@ from sys import stderr
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from database import Database, City, VenueCondition, Airport, AirportCity, Venue, Condition
+from database import Database, City, Airport, Venue, Condition
 
 
 def add_starter_data(session):
@@ -56,12 +56,12 @@ def add_starter_data(session):
 
     lincoln = City(city_name='Lincoln', encompassing_geographic_entity='Nebraska', latitude=92.01, longitude=95.2)
     omaha = City(city_name='Omaha', encompassing_geographic_entity='Nebraska', latitude=91, longitude=93.4)
-    omaha_airport = Airport(name='Omaha Airport', code='SEAL', latitude=90, longitude=90, cities=[lincoln, omaha])
-    denver_airport = Airport(name='Denver Airport', code='ABCD', latitude=120, longitude=57.4, cities=[omaha])
-    first_denver_airport_forecast = Condition(date=date(2002, 9, 21), max_temperature=90, max_humidity=20, max_wind_speed=13, rain=0, visibility=100, airport=[denver_airport])
-    second_denver_airport_forecast = Condition(date=date(2003, 10, 21), max_temperature=40, max_humidity=40, max_wind_speed=40, rain=10, visibility=85, airport=[denver_airport])
-    first_omaha_airport_forecast = Condition(date=date(2022, 4, 7), max_temperature=65, max_humidity=0, max_wind_speed=60, rain=0, visibility=100, airport=[omaha_airport])
-    second_omaha_airport_forecast = Condition(date=date(2022, 5, 4), max_temperature=72, max_humidity=10, max_wind_speed=8, rain=5, visibility=92, airport=[omaha_airport])
+    first_denver_airport_forecast = Condition(date=date(2002, 9, 21), max_temperature=90, max_humidity=20, max_wind_speed=13, rain=0, visibility=100)
+    second_denver_airport_forecast = Condition(date=date(2003, 10, 21), max_temperature=40, max_humidity=40, max_wind_speed=40, rain=10, visibility=85)
+    first_omaha_airport_forecast = Condition(date=date(2022, 4, 7), max_temperature=65, max_humidity=0, max_wind_speed=60, rain=0, visibility=100)
+    second_omaha_airport_forecast = Condition(date=date(2022, 5, 4), max_temperature=72, max_humidity=10, max_wind_speed=8, rain=5, visibility=92)
+    omaha_airport = Airport(name='Omaha Airport', code='SEAL', latitude=90, longitude=90, cities=[lincoln, omaha], conditions=[first_omaha_airport_forecast, second_omaha_airport_forecast])
+    denver_airport = Airport(name='Denver Airport', code='ABCD', latitude=120, longitude=57.4, cities=[omaha], conditions=[first_denver_airport_forecast, second_denver_airport_forecast])
     session.add(lincoln)
     session.add(omaha)
     session.add(omaha_airport)
@@ -75,13 +75,13 @@ def add_starter_data(session):
 def main():
     try:
         url = Database.construct_mysql_url('cse.unl.edu', 3306, 'kandrews', 'kandrews', 'qUc:6M')
+        #url = Database.construct_mysql_url('localhost', 33060, 'test', 'root', 'cse1208')
         database = Database(url)
         database.ensure_tables_exist()
-        print('Tables created.')
         session = database.create_session()
         add_starter_data(session)
         session.commit()
-        print('Records created.')
+        print('Tables and records created.')
     except SQLAlchemyError as exception:
         print('Database setup failed!', file=stderr)
         print(f'Cause: {exception}', file=stderr)
