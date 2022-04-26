@@ -19,8 +19,8 @@ def valid_welp_score(score):
 class EntertainmentTrackerApp(App):
     def __init__(self, **kwargs):
         super(EntertainmentTrackerApp, self).__init__(**kwargs)
-        url = EntertainmentDatabase.construct_mysql_url('localhost', 3306, 'entertainment', 'root', 'cse1208')
-        self.entertainment_database = EntertainmentDatabase(url)
+        url = Database.construct_mysql_url('localhost', 3306, 'entertainment', 'root', 'cse1208')
+        self.entertainment_database = Database(url)
         self.session = self.entertainment_database.create_session()
 
     def build(self):
@@ -50,7 +50,7 @@ class EntertainmentTrackerApp(App):
         elif query.count() > 0:
             self.root.ids.city_creation_message.text = f'A city with the name {name} already exists.'
         else:
-            city = City(city_name=name, latitude=lat, longitude=long, ege=entity)
+            city = City(city_name=name, latitude=lat, longitude=long, encompassing_geographic_entity=entity)
             self.session.add(city)
             self.root.ids.city_creation_message.text = ''
             self.session.commit()
@@ -176,17 +176,12 @@ class EntertainmentTrackerApp(App):
 
     def add_welp_score(self, score):
         if valid_welp_score(score):
+            review = Review()
+            self.session.add(review)
             self.root.transition.direction = 'left'
             self.root.current = 'review_added_success'
         else:
             self.root.ids.invalid_new_welp_score.text = 'Welp scores must be an integer 1-5.'
-
-    def update_welp_score(self, score):
-        if valid_welp_score(score):
-            self.root.transition.direction = 'left'
-            self.root.current = 'review_edited_success'
-        else:
-            self.root.ids.invalid_edit_welp_score.text = 'Welp scores must be an integer 1-5.'
 
 
 if __name__ == '__main__':

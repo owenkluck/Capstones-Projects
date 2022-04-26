@@ -522,34 +522,6 @@ ScreenManager:
                         root.current = 'choose_venue_new_review'
                         app.update_venue_list(add_review_city_selection.text)
     Screen:
-        name: 'edit_review_page'
-        BoxLayout:
-            orientation: 'vertical'
-            Label:
-                text: 'Edit An Existing Review'
-                font_size: sp(32)
-            Label:
-                text: 'What city is the venue you are editing the rating of in?'
-                font_size: sp(25)
-            Spinner:
-                id: edit_review_city_selection
-                text: 'Select a City'
-                values: associated_city.values
-            BoxLayout:
-                orientation: 'horizontal'
-                Button:
-                    text: 'BACK'
-                    on_press:
-                        root.transition.direction = 'right'
-                        root.current = 'reviews'
-                Widget:
-                Button:
-                    text: 'NEXT'
-                    on_press:
-                        root.transition.direction = 'left'
-                        root.current = 'choose_venue_edit_review'
-                        app.update_venue_list(edit_review_city_selection.text)
-    Screen:
         name: 'choose_venue_new_review'
         BoxLayout:
             orientation: 'vertical'
@@ -573,30 +545,6 @@ ScreenManager:
                     on_press:
                         root.transition.direction = 'left'
                         root.current = 'new_venue_score'
-    Screen:
-        name: 'choose_venue_edit_review'
-        BoxLayout:
-            orientation: 'vertical'
-            Label:
-                text: 'Edit An Existing Review'
-                font_size: sp(32)
-            Spinner:
-                id: welp_edit
-                text: 'Choose a Venue'
-                values: venue_edit_selection.values
-            BoxLayout:
-                orientation: 'horizontal'
-                Button:
-                    text: 'BACK'
-                    on_press:
-                        root.transition.direction = 'right'
-                        root.current = 'edit_review_page'
-                Widget:
-                Button:
-                    text: 'NEXT'
-                    on_press:
-                        root.transition.direction = 'left'
-                        root.current = 'edit_venue_score'
     Screen:
         name: 'new_venue_score'
         BoxLayout:
@@ -626,48 +574,11 @@ ScreenManager:
                     on_press:
                         app.add_welp_score(new_welp_score.text)
     Screen:
-        name: 'edit_venue_score'
-        BoxLayout:
-            orientation: 'vertical'
-            Label:
-                text: f"Editing {welp_edit.text}'s Welp Score"
-                font_size: sp(32)
-            TextInput:
-                id: edit_welp_score
-            Label:
-                id: invalid_edit_welp_score
-                text: ''
-                font_size: sp(20)
-            BoxLayout:
-                orientation: 'horizontal'
-                Button:
-                    text: 'BACK'
-                    on_press:
-                        root.transition.direction = 'right'
-                        root.current = 'choose_venue_edit_review'
-                Widget:
-                Button:
-                    text: 'NEXT'
-                    on_press:
-                        app.update_welp_score(edit_welp_score.text)
-    Screen:
         name: 'review_added_success'
         BoxLayout:
             orientation: 'vertical'
             Label:
                 text: f'Thank you for reviewing {welp_new.text} on Welp!'
-                font_size: sp(25)
-            Button:
-                text: 'OK'
-                on_press:
-                    root.transition.direction = 'right'
-                    root.current = 'home'
-    Screen:
-        name: 'review_edited_success'
-        BoxLayout:
-            orientation: 'vertical'
-            Label:
-                text: f'Review edited for {welp_new.text} on Welp.'
                 font_size: sp(25)
             Button:
                 text: 'OK'

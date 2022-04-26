@@ -2,12 +2,12 @@ from sys import stderr
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from entertainment import City, Venue, Condition, EntertainmentDatabase, VenueCondition
+from database import City, Venue, Condition, Database, VenueCondition, Review
 
 
 def add_starter_data(session):
-    san_fran = City(city_name='San Francisco', latitude=37.8, longitude=-122.4, ege='California')
-    denver = City(city_name='Denver', latitude=39.7, longitude=-105.0, ege='Colorado')
+    san_fran = City(city_name='San Francisco', latitude=37.8, longitude=-122.4, encompassing_geographic_entity='California')
+    denver = City(city_name='Denver', latitude=39.7, longitude=-105.0, encompassing_geographic_entity='Colorado')
     session.add(san_fran)
     session.add(denver)
     session.commit()
@@ -70,8 +70,8 @@ def add_starter_data(session):
 
 def main():
     try:
-        url = EntertainmentDatabase.construct_mysql_url('localhost', 3306, 'entertainment', 'root', 'cse1208')
-        entertainment_database = EntertainmentDatabase(url)
+        url = Database.construct_mysql_url('localhost', 3306, 'entertainment', 'root', 'cse1208')
+        entertainment_database = Database(url)
         entertainment_database.ensure_tables_exist()
         print('Tables created.')
         session = entertainment_database.create_session()
