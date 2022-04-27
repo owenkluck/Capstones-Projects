@@ -36,8 +36,8 @@ class Review(Persisted):
     __tablename__ = 'reviews'
     review_id = Column(Integer, primary_key=True, autoincrement=True)
     venue_id = Column(Integer, ForeignKey('venues.venue_id', ondelete='CASCADE'))
-    score = Column(Integer)
-    validated = Column(Boolean)
+    score = Column(Integer, nullable=False)
+    validated = Column(Boolean, default=False)
     venue = relationship('Venue', back_populates='reviews')
 
 
