@@ -4,7 +4,7 @@ from kivy.modules import inspector
 from kivy.core.window import Window
 from kivy.uix.button import Button
 from sqlalchemy.exc import SQLAlchemyError
-from airport import Airport, City, AirportDatabase, Forecast
+from database import Airport, City, Condition, Database
 
 
 class AirportButtons(Button):
@@ -18,8 +18,8 @@ class CityButtons(Button):
 class AirportApp(App):
     def __init__(self, **kwargs):
         super(AirportApp, self).__init__(**kwargs)
-        url = AirportDatabase.construct_mysql_url('localhost', 33060, 'airports', 'root', 'cse1208')
-        self.airport_database = AirportDatabase(url)
+        url = Database.construct_mysql_url('localhost', 33060, 'airports', 'root', 'cse1208')
+        self.airport_database = Database(url)
         self.session = self.airport_database.create_session()
         self.airport_database.ensure_tables_exist()
         self.current_airport = None
@@ -28,9 +28,9 @@ class AirportApp(App):
     def build(self):
         inspector.create_inspector(Window, self)
 
-    def submit_data_airport(self, name, code, location):
-        if len(name) > 0 and len(code) > 0 and len(location) > 0:
-            airport = Airport(name=name, code=code, location=location)
+    def submit_data_airport(self, name, code, latitude, longitude):
+        if len(name) > 0 and len(code) > 0 and len(latitude) > 0 and len(longitude) > 0:
+            airport = Airport(name=name, code=code, latitude=int(latitude), longitude=int(longitude))
             self.session.add(airport)
             try:
                 self.session.commit()
@@ -43,9 +43,9 @@ class AirportApp(App):
                                                           '\nis currently in the database'
         self.root.ids.create_airport_error.text = 'Some information inputs were left blank, \nplease fill out all inputs'
 
-    def submit_data_city(self, name, geographic_entity, location):
-        if len(name) > 0 and len(geographic_entity) > 0 and len(location) > 0:
-            city = City(name=name, geographic_entity=geographic_entity, location=location)
+    def submit_data_city(self, name, geographic_entity, latitude, longitude):
+        if len(name) > 0 and len(geographic_entity) > 0 and len(latitude) > 0 and len(longitude) > 0:
+            city = City(name=name, geographic_entity=geographic_entity, latitude=int(latitude), longitude=int(longitude))
             self.session.add(city)
             try:
                 self.session.commit()
@@ -71,11 +71,11 @@ class AirportApp(App):
             self.root.ids.check_forecast_error.text = 'No airport was selected'
         try:
             date_values = date_1.split('/')
-            forecasts = self.session.query(Forecast).filter(Forecast.date == date(int(date_values[2]), int(date_values[1]), int(date_values[0])) and Forecast.airport_id == airport_id)
+            forecasts = self.session.query(Condition).filter(Condition.date == date(int(date_values[2]), int(date_values[1]), int(date_values[0])) and Condition.airport_id == airport_id)
             self.root.ids.forecast.text = f'On {forecasts[0].date}, the weather will be:\n' \
-                                          f'temperature: {forecasts[0].temperature}\n' \
+                                          f'temperature: {forecasts[0].max_temperature}\n' \
                                           f'wind_speed: {forecasts[0].wind_speed}\n' \
-                                          f'humidity: {forecasts[0].humidity}\n' \
+                                          f'humidity: {forecasts[0].max_humidity}\n' \
                                           f'rain: {forecasts[0].rain}\n' \
                                           f'visibility: {forecasts[0].visibility}'
         except (IndexError, SQLAlchemyError, ValueError):
@@ -93,9 +93,13 @@ class AirportApp(App):
     def add_city(self, city):
         try:
             place = self.session.query(City).filter(City.name == city)[0]
-            self.current_airport.cities.append(place)
-            self.session.add(self.current_airport)
-            self.session.commit()
+            if self.current_airport.latitude - 1 <= place.latitude <= self.current_airport.latitude + 1 and \
+                    self.current_airport.longitude - 1 <= place.longitude <= self.current_airport.longitude + 1:
+                self.current_airport.cities.append(place)
+                self.session.add(self.current_airport)
+                self.session.commit()
+            else:
+                self.root.ids.select_city_error.text = 'The city you have chosen is not within range of this airport. Please select a in range city'
         except SQLAlchemyError:
             self.root.ids.select_city_error.text = 'The city you have selected could not be added to the database,' \
                                                    ' there may be multiple of this city or the database may have failed'
@@ -103,9 +107,13 @@ class AirportApp(App):
     def add_airport(self, airport):
         try:
             place = self.session.query(Airport).filter(Airport.name == airport)[0]
-            self.current_city.airports.append(place)
-            self.session.add(self.current_city)
-            self.session.commit()
+            if self.current_city.latitude - 1 <= place.latitude <= self.current_city.latitude + 1 and \
+                    self.current_city.longitude - 1 <= place.longitude <= self.current_city.longitude + 1:
+                self.current_city.airports.append(place)
+                self.session.add(self.current_city)
+                self.session.commit()
+            else:
+                self.root.ids.select_airport_error.text = 'The airport you have chosen is not within range of this city. Please select a in range airport'
         except SQLAlchemyError:
             self.root.ids.select_airport_error.text = 'The airport you have selected could not be added to the database,' \
                                                       ' there may be multiple of this airport or the database may have failed'
@@ -132,9 +140,7 @@ if __name__ == '__main__':
 # Things to clean up:
     # Re-organize main.py functions.
     # Add range determination to main.py.
-    ## import geopy.distance
-    ## def is_in_range(coordinate_1, coordinate_2)
-    ##      if geopy.distance.geodesic(coordinate_1, coordinate_2).km > 30000
-    ##           return False
-    ##      return True
     # Make screen take you back after making new city from button.
+    # add view itinerary screen
+    # make one call work
+    # add method to update Condition if it doesn't exist for a day

@@ -35,7 +35,7 @@ class Forecast(Persisted):
     __tablename__ = 'forecasts'
     forecast_id = Column(Integer, primary_key=True)
     airport_id = Column(Integer, ForeignKey('airports.airport_id'))
-    city_id = Column(Integer, ForeignKey('city.city_id'))
+    city_id = Column(Integer, ForeignKey('cities.city_id'))
     date = Column(Date)
     temperature = Column(Float)
     humidity = Column(Float)
