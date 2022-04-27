@@ -60,7 +60,11 @@ class TravelPlannerApp(App):
         return unvalidated_airports, unvalidated_cities
 
     def get_venues_to_validate(self):
-        unvalidated_venues = self.session.query(Venue).all()
+        venue_ids = set()
+        unvalidated_reviews = self.session.query(Review).filter(Review.validated is False)
+        for review in unvalidated_reviews:
+            venue_ids.add(review.venue_id)
+        unvalidated_venues = self.session.query(Venue.venue_id in venue_ids)
         return unvalidated_venues
 
     def validate_airport(self, airport_name):
