@@ -2,11 +2,14 @@ from datetime import date
 from sys import stderr
 
 from sqlalchemy.exc import SQLAlchemyError
-
-from database import Database, City, Airport, Venue, Condition
+from datetime import timedelta
+from database import Database, City, Airport, Venue, Condition, Itinerary
 
 
 def add_starter_data(session):
+    day = Itinerary(airport='Omaha Airport', city='Omaha', date=date(2002, 1, 1))
+    session.add(day)
+    session.commit()
     san_fran = City(city_name='San Francisco', latitude=37.8, longitude=-122.4, encompassing_geographic_entity='California')
     denver = City(city_name='Denver', latitude=39.7, longitude=-105.0, encompassing_geographic_entity='Colorado')
     session.add(denver)
@@ -74,8 +77,8 @@ def add_starter_data(session):
 
 def main():
     try:
-        url = Database.construct_mysql_url('cse.unl.edu', 3306, 'kandrews', 'kandrews', 'qUc:6M')
-        #url = Database.construct_mysql_url('localhost', 33060, 'test', 'root', 'cse1208')
+        #url = Database.construct_mysql_url('cse.unl.edu', 3306, 'kandrews', 'kandrews', 'qUc:6M')
+        url = Database.construct_mysql_url('localhost', 33060, 'airports', 'root', 'cse1208')
         database = Database(url)
         database.ensure_tables_exist()
         session = database.create_session()

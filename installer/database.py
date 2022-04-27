@@ -85,11 +85,12 @@ class AirportCity(Persisted):
 class Itinerary(Persisted):
     __tablename__ = 'itineraries'
     itinerary_id = Column(Integer, primary_key=True, autoincrement=True)
-    airport_id = Column(Integer, ForeignKey('airports.airport_id', ondelete='CASCADE'))
-    city_id = Column(Integer, ForeignKey('cities.city_id', ondelete='CASCADE'))
-    venues = relationship('Venue', uselist=True, back_populates='itinerary')
+    airport = Column(String(256))
+    city = Column(String(256))
     date = Column(Date)
-
+    # airport_id = Column(Integer, ForeignKey('airports.airport_id', ondelete='CASCADE'))
+    # city_id = Column(Integer, ForeignKey('cities.city_id', ondelete='CASCADE'))
+    venues = relationship('Venue', uselist=True, back_populates='itinerary')
 
 class Database(object):
     @staticmethod
