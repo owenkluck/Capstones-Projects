@@ -23,9 +23,10 @@ class RESTConnection:
         return f'https://{self.authority}:{self.port}{self.root_path}/{resource}?{parameter_string}'
 
     def send_request_by_url(self, url, post_parameters, on_success, on_failure, on_error):
-        UrlRequest(url, req_headers=self.headers,
-                   req_body=json.dumps(post_parameters) if post_parameters is not None else None,
-                   on_success=on_success, on_failure=on_failure, on_error=on_error)
+        response = UrlRequest(url, req_headers=self.headers,
+                              req_body=json.dumps(post_parameters) if post_parameters is not None else None,
+                              on_success=on_success, on_failure=on_failure, on_error=on_error)
+        response.wait()
 
     def send_request(self, resource, get_parameters, post_parameters, on_success, on_failure, on_error):
         url = self.construct_url(resource, get_parameters)
