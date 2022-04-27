@@ -35,6 +35,7 @@ class TravelPlannerApp(App):
         self.outdoor_restaurants = 0
         self.current_date = date
         self.updated_forecast = None
+        self.destination = None
 
     def build(self):
         inspector.create_inspector(Window, self)
@@ -69,13 +70,12 @@ class TravelPlannerApp(App):
 
     def validate_airport(self, airport_name):
         airport = self.session.query(Airport).filter(Airport.name == airport_name).one()
-        # May need to update to make comparison forgiving
         with open('airports.csv') as csvfile:
             reader = csv.DictReader(csvfile)
             for item in reader:
                 if item['ICAO'] == airport.airport_code:
-                    # Change to int to make forgiving comparison
-                    if item['Latitude'] == str(airport.latitude) and item['Longitude'] == str(airport.longitude):
+                    if (int(item['Latitude']) - .009) <= airport.latitude <= (int(item['Latitude']) + .009) and \
+                            (int(item['Longitude']) - .009) <= airport.longitude <= (int(item['Longitude']) + .009):
                         airport.validated = True
                         self.submit_data(airport)
                         return True
@@ -94,8 +94,9 @@ class TravelPlannerApp(App):
             self.on_records_not_loaded,
             self.on_records_not_loaded,
         )
-        if self.validate_city_records['lat'] == city.latitude\
-                and self.validate_city_records['lon'] == city.longitude\
+        if (self.validate_city_records['lat'] - .009) <= city.latitude <= (self.validate_city_records['lat'] + .009) \
+                and (self.validate_city_records['lon'] - .009) <= city.longitude <= (
+                self.validate_city_records['lon'] + .009) \
                 and city.name == self.validate_city_records['name']:
             city.validated = True
             self.submit_data(city)
@@ -115,21 +116,28 @@ class TravelPlannerApp(App):
         Logger.error(f'{self.__class__.__name__}: {error}')
 
     def get_average_rating(self, venue_name):
-        return self.session.query(Venue).filter(Venue.name == venue_name).one().average_welp.score
+        try:
+            return self.session.query(Venue).filter(Venue.name == venue_name).one().average_welp.score
+        except SQLAlchemyError:
+            print('There seems to be two venues with the same name in the database,'
+                  ' that or the name in the database doesn\'t exist')
 
     def get_new_ratings(self):
         new_ratings = self.session.query(Review).filter(Review.validated is False)
         return new_ratings
 
     def update_rating(self, rating, venue_name, review_id):
-        venue = self.session.query(Venue).filter(Venue.name == venue_name).one()
-        review = self.session.query(Review).filter(Review.review_id == review_id).one()
-        new_average_score = (len(venue.reviews) * venue.average_welp_score + rating) / (len(venue.reviews + 1))
-        venue.average_welp_score = new_average_score
-        venue.welp_score_needs_update = False
-        self.submit_data(venue)
-        review.validated = True
-        self.submit_data(review)
+        try:
+            venue = self.session.query(Venue).filter(Venue.name == venue_name).one()
+            review = self.session.query(Review).filter(Review.review_id == review_id).one()
+            new_average_score = (len(venue.reviews) * venue.average_welp_score + rating) / (len(venue.reviews + 1))
+            venue.average_welp_score = new_average_score
+            venue.welp_score_needs_update = False
+            self.submit_data(venue)
+            review.validated = True
+            self.submit_data(review)
+        except SQLAlchemyError:
+            print('it seems the database refuses your request, make a better request.')
 
     def find_best_entertainment_airport_and_city(self, in_range_airports, current_date):
         best_score = 0
@@ -275,14 +283,21 @@ class TravelPlannerApp(App):
         city_forecast = self.session.query(Condition).filter(
             Condition.date == current_date and Condition.city_id == city.city_id).one()
         venues_to_visit = self.get_open_venues_list(city, city_forecast)
+        venues = self.determine_venues(venues_to_visit)
+        itinerary = Itinerary(airport=airport.name, city=city.name, venues=venues, date=current_date)
+        self.submit_data(itinerary)
+        print('Success')
 
     def create_entertainment_itinerary(self, destination, current_date, current_airport):
         airport, city = self.find_best_entertainment_airport_and_city(
-            self.get_airports_in_range(current_airport, current_date), destination, current_date)
+            self.get_airports_in_range(current_airport, current_date), current_date)
         city_forecast = self.session.query(Condition).filter(
             Condition.date == current_date and Condition.city_id == city.city_id).one()
         venues_to_visit = self.get_open_venues_list(city, city_forecast)
         venues = self.determine_venues(venues_to_visit)
+        itinerary = Itinerary(airport=airport.name, city=city.name, venues=venues, date=current_date)
+        self.submit_data(itinerary)
+        print('Success')
 
     def get_previous_itinerary(self):
         itineraries = self.session.query(Itinerary).filter(Itinerary.date < self.current_date)
@@ -294,16 +309,33 @@ class TravelPlannerApp(App):
         return airport.latitude, airport.longitude
 
     def prepare_itinerary(self):
-        pass
+        current_itineraries = self.session.query(Itinerary).filter(Itinerary.date >= self.current_date)
+        max_date = self.current_date
+        current_airport = None
+        for itinerary in current_itineraries:
+            self.update_existing_itinerary(itinerary)
+            if itinerary.date > max_date:
+                max_date = itinerary.date
+            if itinerary.date == self.current_date:
+                current_airport = self.session.query(Airport).filter(Airport.name == itinerary.airport).one()
+        new_itineraries = (max_date - self.current_date).days
+        for i in range(new_itineraries):
+            max_date += timedelta(days=1)
+            self.create_closest_itinerary_day(self.destination, max_date, current_airport)
+            self.create_entertainment_itinerary(self.destination, max_date, current_airport)
 
-    def update_existing_itinerary(self, itinerary_date):
-        itinerary = self.session.query(Itinerary).filter(Itinerary.date == itinerary_date).one()
+    def update_existing_itinerary(self, itinerary):
         airport = self.session.query(Airport).filter(Airport.name == itinerary.airport).one()
-        outdated_forecast = self.session.query(Condition).filter(Condition.airport_id == airport.airport_id and
-                                                                 Condition.date == itinerary_date).one()
-        self.request_onecall_for_place(airport.latitude, airport.longitude, itinerary_date, outdated_forecast)
+        if len(airport.conditions) > 0:
+            outdated_forecast = self.session.query(Condition).filter(Condition.airport_id == airport.airport_id and
+                                                                     Condition.date == itinerary.date).one()
+            self.request_onecall_for_place(airport.latitude, airport.longitude, itinerary.date, outdated_forecast, airport,
+                                           'update')
+        else:
+            self.request_onecall_for_place(airport.latitude, airport.longitude, itinerary.date, None, airport, 'create')
 
-    def request_onecall_for_place(self, latitude, longitude, itinerary_date, outdated_forecast):
+    def request_onecall_for_place(self, latitude, longitude, itinerary_date, outdated_forecast, airport,
+                                  update_or_create):
         self.weather_connection.send_request(
             'onecall',
             {
@@ -316,6 +348,13 @@ class TravelPlannerApp(App):
             self.on_records_not_loaded,
             self.on_records_not_loaded,
         )
+        if update_or_create == 'update':
+            self.update_old_forecast(itinerary_date, outdated_forecast)
+        else:
+            self.create_new_forecasts(airport)
+        pass
+
+    def update_old_forecast(self, itinerary_date, outdated_forecast):
         forecast = None
         for day in self.updated_forecast['daily']:
             if date.fromtimestamp(int(day['dt'])) == itinerary_date:
@@ -331,11 +370,23 @@ class TravelPlannerApp(App):
             self.submit_data(new_forecast)
         else:
             print('No forecast matched the date of the itinerary')
-        pass
 
     def update_forecast(self, _, response):
         print(dumps(response, indent=4, sort_keys=True))
         self.updated_forecast = response
+
+    def create_new_forecasts(self, airport):
+        for day in self.updated_forecast['daily']:
+            max_temperature = int(day['temp']['max'])
+            min_temperature = int(day['temp']['min'])
+            humidity = int(day['humidity'])
+            wind_speed = int(day['wind_speed'])
+            visibility = 10
+            rain = int(day['dew_point'])
+            forecast = Condition(date=date.fromtimestamp(int(day['dt'])), max_temperature=max_temperature,
+                                 min_temperature=min_temperature, max_humidity=humidity, wind_speed=wind_speed,
+                                 visibility=visibility, rain=rain, airport=airport)
+            self.submit_data(forecast)
 
     def submit_data(self, data):
         try:
