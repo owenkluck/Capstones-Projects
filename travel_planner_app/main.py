@@ -15,12 +15,18 @@ from sqlalchemy.exc import SQLAlchemyError
 
 class TravelPlannerApp(App):
     def __init__(self, authority='localhost', port=33060, database='airports', username='root', password='cse1208',
-                 port_api=443, api_key=API_KEY, **kwargs):
+                 api_key=API_KEY, **kwargs):
         super(TravelPlannerApp, self).__init__(**kwargs)
-        url = construct_mysql_url(authority, port, database, username, password)
-        self.database = Database(url)
-        self.session = self.database.create_session()
-        self.connection = RESTConnection('api.openweathermap.org', port_api, '/data/2.5')
+        self.authority = authority
+        self.port = port
+        self.database_name = database
+        self.username = username
+        self.password = password
+        self.url = None
+        self.database = None
+        self.session = None
+        self.weather_connection = None
+        self.geo_connection = None
         self.api_key = api_key
         self.validate_city_records = None
         self.current_location = None
@@ -32,6 +38,21 @@ class TravelPlannerApp(App):
 
     def build(self):
         inspector.create_inspector(Window, self)
+
+    def connect_to_database(self, authority, port, database, username, password):
+        try:
+            url = construct_mysql_url(authority, port, database, username, password)
+            database = Database(url)
+            session = database.create_session()
+            self.session = session
+            self.database = database
+            self.url = url
+        except SQLAlchemyError:
+            print('could not connect to database')
+
+    def connect_to_open_weather(self, port_api=443):
+        self.weather_connection = RESTConnection('api.openweathermap.org', port_api, '/data/2.5')
+        self.geo_connection = RESTConnection('api.openweathermap.org', 443, '/geo/1.0')
 
     def get_places_to_validate(self):
         unvalidated_airports = self.session.query(Airport).filter(Airport.validated is False)
@@ -58,8 +79,7 @@ class TravelPlannerApp(App):
 
     def validate_city(self, city_name):
         city = self.session.query(City).filter(City.name == city_name).one()
-        geo_connection = RESTConnection('api.openweathermap.org', 443, '/geo/1.0')
-        geo_connection.send_request(
+        self.geo_connection.send_request(
             'direct',
             {
                 'q': city_name,
@@ -280,7 +300,7 @@ class TravelPlannerApp(App):
         self.request_onecall_for_place(airport.latitude, airport.longitude, itinerary_date, outdated_forecast)
 
     def request_onecall_for_place(self, latitude, longitude, itinerary_date, outdated_forecast):
-        self.connection.send_request(
+        self.weather_connection.send_request(
             'onecall',
             {
                 'lat': latitude,
@@ -292,7 +312,6 @@ class TravelPlannerApp(App):
             self.on_records_not_loaded,
             self.on_records_not_loaded,
         )
-        print('hi')
         forecast = None
         for day in self.updated_forecast['daily']:
             if date.fromtimestamp(int(day['dt'])) == itinerary_date:
