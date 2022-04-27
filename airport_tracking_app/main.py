@@ -45,7 +45,7 @@ class AirportApp(App):
 
     def submit_data_city(self, name, geographic_entity, latitude, longitude):
         if len(name) > 0 and len(geographic_entity) > 0 and len(latitude) > 0 and len(longitude) > 0:
-            city = City(name=name, geographic_entity=geographic_entity, latitude=int(latitude), longitude=int(longitude))
+            city = City(city_name=name, geographic_entity=geographic_entity, latitude=int(latitude), longitude=int(longitude))
             self.session.add(city)
             try:
                 self.session.commit()
@@ -88,11 +88,11 @@ class AirportApp(App):
         for airport in airports:
             self.root.ids.scroll_box_2.add_widget(AirportButtons(text=airport.name))
         for city in cities:
-            self.root.ids.scroll_box_1.add_widget(CityButtons(text=city.name))
+            self.root.ids.scroll_box_1.add_widget(CityButtons(text=city.city_name))
 
     def add_city(self, city):
         try:
-            place = self.session.query(City).filter(City.name == city)[0]
+            place = self.session.query(City).filter(City.city_name == city)[0]
             if self.current_airport.latitude - 1 <= place.latitude <= self.current_airport.latitude + 1 and \
                     self.current_airport.longitude - 1 <= place.longitude <= self.current_airport.longitude + 1:
                 self.current_airport.cities.append(place)
@@ -119,7 +119,7 @@ class AirportApp(App):
                                                       ' there may be multiple of this airport or the database may have failed'
 
     def set_current_city(self, city):
-        self.current_city = self.session.query(City).filter(City.name == city).one()
+        self.current_city = self.session.query(City).filter(City.city_name == city).one()
 
     def set_current_airport(self, airport):
         self.current_airport = self.session.query(Airport).filter(Airport.name == airport).one()
