@@ -79,14 +79,14 @@ class EntertainmentTrackerApp(App):
                 duplicate_name = True
         return duplicate_name
 
-    def add_venue(self, name, v_type, city, min_t, max_t, min_h, max_h, max_ws, owc):
-        c_id = self.session.query(City).filter(City.city_name == city).one().city_id
-        venue = Venue(venue_name=name, venue_type=v_type, city_id=c_id)
+    def add_venue(self, ven_name, ven_type, city, min_temp, max_temp, min_humidity, max_humidity, max_wind_speed, weather_condition_code):
+        city_query_id = self.session.query(City).filter(City.city_name == city).one().city_id
+        venue = Venue(venue_name=ven_name, venue_type=ven_type, city_id=city_query_id)
         self.session.add(venue)
         self.session.commit()
-        self.root.ids.venue_edit_selection.values.append(name)
+        self.root.ids.venue_edit_selection.values.append(ven_name)
         self.session.commit()
-        self.add_condition(name, min_t, max_t, min_h, max_h, max_ws, owc)
+        self.add_condition(ven_name, min_temp, max_temp, min_humidity, max_humidity, max_wind_speed, weather_condition_code)
         self.session.commit()
 
     def add_condition(self, name, min_t, max_t, min_h, max_h, max_ws, owc):
