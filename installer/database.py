@@ -92,6 +92,7 @@ class Itinerary(Persisted):
     # city_id = Column(Integer, ForeignKey('cities.city_id', ondelete='CASCADE'))
     venues = relationship('Venue', uselist=True, back_populates='itinerary')
 
+
 class Database(object):
     @staticmethod
     def construct_mysql_url(authority, port, database, username, password):
