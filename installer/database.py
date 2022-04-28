@@ -36,8 +36,8 @@ class Review(Persisted):
     __tablename__ = 'reviews'
     review_id = Column(Integer, primary_key=True, autoincrement=True)
     venue_id = Column(Integer, ForeignKey('venues.venue_id', ondelete='CASCADE'))
-    score = Column(Integer)
-    validated = Column(Boolean)
+    score = Column(Integer, nullable=False)
+    validated = Column(Boolean, default=False)
     venue = relationship('Venue', back_populates='reviews')
 
 
@@ -85,11 +85,12 @@ class AirportCity(Persisted):
 class Itinerary(Persisted):
     __tablename__ = 'itineraries'
     itinerary_id = Column(Integer, primary_key=True, autoincrement=True)
-    airport_id = Column(Integer, ForeignKey('airports.airport_id', ondelete='CASCADE'))
-    city_id = Column(Integer, ForeignKey('cities.city_id', ondelete='CASCADE'))
-    venues = relationship('Venue', uselist=True, back_populates='itinerary')
+    airport = Column(String(256))
+    city = Column(String(256))
     date = Column(Date)
-
+    # airport_id = Column(Integer, ForeignKey('airports.airport_id', ondelete='CASCADE'))
+    # city_id = Column(Integer, ForeignKey('cities.city_id', ondelete='CASCADE'))
+    venues = relationship('Venue', uselist=True, back_populates='itinerary')
 
 class Database(object):
     @staticmethod

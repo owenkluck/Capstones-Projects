@@ -346,6 +346,108 @@ ScreenManager:
                                 text: 'UPDATE REVIEWS'
                                 size_hint: (0.5, 0.5)
                                 on_press:
+    Screen:
+        name: 'prepare_itienary'
+        on_enter:
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_max_y: 80
+                Label:
+                    text: 'Prepare Itienary'
+                    font_size: '25sp'
+            BoxLayout:
+                orientation: 'vertical'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    BoxLayout:
+                        size_hint_max_x: 20
+                    BoxLayout:
+                        orientation: 'vertical'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text:
+                        BoxLayout:
+                            size_hint_max_y: 10
+    Screen:
+        name: 'prepare_itienary'
+        on_enter:
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_max_y: 80
+                Label:
+                    text: 'Prepare Itienary'
+                    font_size: '25sp'
+            BoxLayout:
+                orientation: 'vertical'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    BoxLayout:
+                        size_hint_max_x: 20
+                    BoxLayout:
+                        orientation: 'vertical'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text:
+                        BoxLayout:
+                            size_hint_max_y: 10
+    Screen:
+        name: 'loading_screen'
+        on_enter:
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_max_y: 80
+                Label:
+                    text: 'Loading Screen
+                    font_size: '25sp'
+            BoxLayout:
+                orientation: 'vertical'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    BoxLayout:
+                        size_hint_max_x: 20
+                    BoxLayout:
+                        orientation: 'vertical'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Locations that need information validated'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            Label:
+                                id: unvalidated_locations
+                                text: root.unvalidated_airports
+                                text: root.unvalidated_cities
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Operators and Venues that need venue ratings updated.'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            Label:
+                                id: update_venues_and_operators
+                                text: root.unvalidated_venues
 <Screen>:
     canvas.before:
         Color:

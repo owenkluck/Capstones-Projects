@@ -179,14 +179,14 @@ class EntertainmentTrackerApp(App):
             c_id = self.session.query(City).filter(City.city_name == city).one().city_id
             venue = self.session.query(Venue).filter(Venue.venue_name == venue_being_reviewed,
                                                      Venue.city_id == c_id).one()
-            v_id = venue.venue_id
-            review = Review(venue_id=v_id, score=review_score)
-            self.session.add(review)
-            self.session.commit()
             if venue.average_welp_score is None:
                 venue.average_welp_score = review_score
             else:
-                venue.average_welp_score = (venue.average_welp_score + float(review_score)) / 2
+                venue.average_welp_score = (len(venue.reviews) * venue.average_welp_score + int(review_score)) \
+                                           / (len(venue.reviews) + 1)
+            v_id = venue.venue_id
+            review = Review(venue_id=v_id, score=review_score)
+            self.session.add(review)
             self.session.commit()
             self.root.transition.direction = 'left'
             self.root.current = 'review_added_success'

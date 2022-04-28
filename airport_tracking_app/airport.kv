@@ -92,9 +92,17 @@ ScreenManager:
                             size_hint_max_y: 45
                             orientation: 'horizontal'
                             Label:
-                                text: 'Location'
+                                text: 'Latitude'
                             TextInput:
-                                id: airport_location
+                                id: airport_latitude
+                                multiline: False
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Longitude'
+                            TextInput:
+                                id: airport_longitude
                                 multiline: False
                         BoxLayout:
                             size_hint_max_y: 40
@@ -125,17 +133,19 @@ ScreenManager:
                             root.current = 'main_menu'
                             root.ids.city_name.text = ''
                             root.ids.city_geo.text = ''
-                            root.ids.city_location.text = ''
+                            root.ids.city_latitude.text = ''
+                            root.ids.city_longitude.text = ''
                     Button:
                         text: 'CREATE AIRPORT'
                         size_hint: (0.30, 0.30)
                         pos_hint: {'x':.25, 'y':0}
                         on_press:
-                            app.submit_data_airport(root.ids.airport_name.text, root.ids.airport_code.text, root.ids.airport_location.text)
+                            app.submit_data_airport(root.ids.airport_name.text, root.ids.airport_code.text, root.ids.airport_latitude.text, root.ids.airport_longitude.text)
                             root.current = 'success_airport'
                             root.ids.airport_name.text = ''
                             root.ids.airport_code.text = ''
-                            root.ids.airport_location.text = ''
+                            root.ids.airport_latitude.text = ''
+                            root.ids.airport_longitude.text = ''
     Screen:
         name: 'create_city'
         on_leave: root.ids.create_city_error.text = ''
@@ -181,9 +191,17 @@ ScreenManager:
                             size_hint_max_y: 45
                             orientation: 'horizontal'
                             Label:
-                                text: 'Location'
+                                text: 'Latitude'
                             TextInput:
-                                id: city_location
+                                id: city_latitude
+                                multiline: False
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Longitude'
+                            TextInput:
+                                id: city_longitude
                                 multiline: False
                     BoxLayout:
                         size_hint_max_x: 20
@@ -195,7 +213,8 @@ ScreenManager:
                             on_press:
                                 root.ids.city_name.text = ''
                                 root.ids.city_geo.text = ''
-                                root.ids.city_location.text = ''
+                                root.ids.city_latitude.text = ''
+                                root.ids.city_longitude.text = ''
                 BoxLayout:
                     Label:
                         text: ''
@@ -218,11 +237,12 @@ ScreenManager:
                         size_hint: (0.30, 0.30)
                         pos_hint: {'x':.25, 'y':0}
                         on_press:
-                            app.submit_data_city(root.ids.city_name.text, root.ids.city_geo.text, root.ids.city_location.text)
+                            app.submit_data_city(root.ids.city_name.text, root.ids.city_geo.text, root.ids.city_latitude.text, root.ids.city_longitude.text)
                             root.ids.success_city_name.text = root.ids.city_name.text
                             root.ids.city_name.text = ''
                             root.ids.city_geo.text = ''
-                            root.ids.city_location.text = ''
+                            root.ids.city_latitude.text = ''
+                            root.ids.city_longitude.text = ''
     Screen:
         name: 'success_airport'
         on_enter: app.add_buttons()
