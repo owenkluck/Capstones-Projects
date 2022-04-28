@@ -1,7 +1,487 @@
-# This is just so I can test my code against a simple gui
-BoxLayout:
-    Button:
-        on_press: app.request_onecall_for_place(90, 90)
-    Label:
-        text: ''
-        id: forecast
+ScreenManager:
+    Screen:
+        name: 'home'
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_max_y: 80
+                Label:
+                    text: 'Conrhusker Entertainment Tracker'
+                    font_size: '25sp'
+            BoxLayout:
+                orientation: 'vertical'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    BoxLayout:
+                        size_hint_max_x: 20
+                    BoxLayout:
+                        orientation: 'vertical'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Remote Database Information'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Authority'
+                            TextInput:
+                                text: 'cse.unl.edu'
+                                id: +
+                                multiline: False
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Port Number'
+                            TextInput:
+                                id: +
+                                text: '3306'
+                                multiline: False
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Database Name'
+                            TextInput:
+                                id: +
+                                text: 'kandrews'
+                                multiline: False
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Username'
+                            TextInput:
+                                id: +
+                                text: 'kandrews'
+                                multiline: False
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Password'
+                                foreground_color: 'red'
+                            TextInput:
+                                id: +
+                                multiline: False
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: ''
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'OpenWeather API Information'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Authority'
+                            TextInput:
+                                id: +
+                                text: 'api.openweathermap.org'
+                                multiline: False
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Port Number'
+                                foreground_color: 'red'
+                            TextInput:
+                                id: +
+                                text: '443'
+                                multiline: False
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'API Key'
+                            TextInput:
+                                id: +
+                                multiline: False
+                        BoxLayout:
+                            size_hint_max_y: 40
+                    BoxLayout:
+                        size_hint_max_x: 20
+                    BoxLayout:
+                        orientation: 'vertical'
+                        size_hint_max_x: 80
+                        Button:
+                            text: 'Discard\nChanges'
+                            font_size: '15sp'
+                            on_press:
+                BoxLayout:
+                    orientation: 'horizontal'
+                    Button:
+                        text: 'SUBMIT'
+                        size_hint: (0.30, 0.30)
+                        pos_hint: {'x':.25, 'y':0}
+                        on_press:
+                            root.transition.direction = 'left'
+                            root.current = 'mainmenu1'
+    Screen:
+        name: 'mainmenu1'
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout:
+                size_hint_max_y: 80
+                Label:
+                    text: 'Main Menu'
+                    font_size: '25sp'
+            BoxLayout:
+                orientation: 'horizontal'
+                BoxLayout:
+                    size_hint_max_x: 40
+                BoxLayout:
+                    orientation: 'vertical'
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        Label:
+                            text: 'Cities need to be validated.'
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        Label:
+                            text: 'Airports need to be validated.'
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        Label:
+                            text: 'Operators need their RateMyPilot scores updated.'
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        Label:
+                            text: 'Venues need their welp scores updated.'
+                    BoxLayout:
+                        size_hint_max_y: 10
+                    Button:
+                        text: 'Validate Locations'
+                        font_size: '20sp'
+                        on_press:
+                            root.transition.direction = 'left'
+                            root.current = 'validate_locations'
+                    BoxLayout:
+                        size_hint_max_y: 10
+                    Button:
+                        text: 'Update Ratings'
+                        font_size: '20sp'
+                        on_press:
+                            root.transition.direction = 'left'
+                            root.current = 'update_ratings'
+                    BoxLayout:
+                        size_hint_max_y: 10
+                    Button:
+                        text: 'Prepare Itinerary'
+                        font_size: '20sp'
+                        on_press:
+                            root.transition.direction = 'left'
+                            root.current = 'prepare_itinerary'
+                    BoxLayout:
+                        size_hint_max_y: 10
+                    Button:
+                        text: 'Click this to advance calendar by one day.'
+                        font_size: '20sp'
+                        on_press:
+                    BoxLayout:
+                        size_hint_max_y: 20
+                    BoxLayout:
+                        size_hint_max_y: 60
+                        orientation: 'horizontal'
+                        BoxLayout:
+                            size_hint_min_x: 600
+                        Button:
+                            text: 'Quit'
+                            on_press: app.stop()
+                    BoxLayout:
+                        size_hint_max_y: 20
+                BoxLayout:
+                    size_hint_max_x: 40
+    Screen:
+        name: 'validate_locations'
+        on_enter: app.add_airports_city_spinner()
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_max_y: 80
+                Label:
+                    text: 'Validate Locations'
+                    font_size: '25sp'
+            BoxLayout:
+                orientation: 'vertical'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    BoxLayout:
+                        size_hint_max_x: 20
+                    BoxLayout:
+                        orientation: 'vertical'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Locations'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                id: location_list
+                                text: ''
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            Spinner:
+                                id: airports_city_spinner
+                                text: 'Select Airport or City to Validate'
+                                values:
+                                    unvalidated_airport.values
+                                    unvalidated_city.values
+                        BoxLayout:
+                            Label:
+                                text: ''
+                                id: create_city_error
+                            BoxLayout:
+                                size_hint_max_x: 20
+                        BoxLayout:
+                            orientation: 'horizontal'
+                            Button:
+                                text: 'BACK'
+                                size_hint: (0.5, 0.5)
+                                on_press:
+                                    root.current = 'main_menu'
+                                    root.ids.forecast_date.text = ''
+                            Button:
+                                text: 'VALIDATE LOCATION'
+                                size_hint: (0.5, 0.5)
+                                on_press:
+                                    root.current = 'create_forecast'
+    Screen:
+        name: 'update_ratings'
+        on_enter:
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_max_y: 80
+                Label:
+                    text: 'Update Ratings'
+                    font_size: '25sp'
+            BoxLayout:
+                orientation: 'vertical'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    BoxLayout:
+                        size_hint_max_x: 20
+                    BoxLayout:
+                        orientation: 'vertical'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                id:
+                                text: f"New Review for {}.text"
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                        Label:
+                            id:
+                            text: 'Current average Rating {}.text'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                        Label:
+                            id: review_text
+                            text: 'New Review: {}.text'
+                        BoxLayout:
+                            Label:
+                                text: ''
+                                id: create_city_error
+                            BoxLayout:
+                                size_hint_max_x: 20
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            Spinner:
+                                id: accept_reject_review
+                                text: 'Accept or Reject Review'
+                                values: ('Accept', 'Reject')
+                        BoxLayout:
+                            orientation: 'horizontal'
+                            Button:
+                                text: 'BACK'
+                                size_hint: (0.5, 0.5)
+                                on_press:
+                                    root.current = 'main_menu'
+                            Button:
+                                text: 'UPDATE REVIEWS'
+                                size_hint: (0.5, 0.5)
+                                on_press:
+    Screen:
+        name: 'prepare_itienary'
+        on_enter:
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_max_y: 80
+                Label:
+                    text: 'Prepare Itienary'
+                    font_size: '25sp'
+            BoxLayout:
+                orientation: 'vertical'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    BoxLayout:
+                        size_hint_max_x: 20
+                    BoxLayout:
+                        orientation: 'vertical'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text:
+                        BoxLayout:
+                            size_hint_max_y: 10
+    Screen:
+        name: 'prepare_itienary'
+        on_enter:
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_max_y: 80
+                Label:
+                    text: 'Prepare Itienary'
+                    font_size: '25sp'
+            BoxLayout:
+                orientation: 'vertical'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    BoxLayout:
+                        size_hint_max_x: 20
+                    BoxLayout:
+                        orientation: 'vertical'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text:
+                        BoxLayout:
+                            size_hint_max_y: 10
+    Screen:
+        name: 'loading_screen'
+        on_enter:
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_max_y: 80
+                Label:
+                    text: 'Loading Screen
+                    font_size: '25sp'
+            BoxLayout:
+                orientation: 'vertical'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    BoxLayout:
+                        size_hint_max_x: 20
+                    BoxLayout:
+                        orientation: 'vertical'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Locations that need information validated'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            Label:
+                                id: unvalidated_locations
+                                text: root.unvalidated_airports
+                                text: root.unvalidated_cities
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                text: 'Operators and Venues that need venue ratings updated.'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            Label:
+                                id: update_venues_and_operators
+                                text: root.unvalidated_venues
+<Screen>:
+    canvas.before:
+        Color:
+            rgba: (1.0, 1.0, 1.0, 1.0)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<Label>:
+    color: (0.0, 0.0, 0.75, 1.0)
+    halign: 'center'
+
+<Button>:
+    color: (1, 1, 1, 1)
+    font_size: sp(25)
+    halign: 'center'
+
+<TextInput>:
+    multiline: False
+    write_tab: False
+
+<CheckBox>:
+    canvas:
+        Color:
+            rgba: (0.0, 0.0, 0.75, 1.0)
+        Rectangle:
+            source: f'atlas://data/images/defaulttheme/checkbox{"_radio" if self.group else ""}{"_disabled" if self.disabled else ""}{"_on" if self.active else "_off"}'
+            size: sp(32), sp(32)
+            pos: int(self.center_x - sp(16)), int(self.center_y - sp(16))
+
+<AirportAndCityButtons>
+    on_press: app.add_validated_buttons(self.text)
+
+<ValidateLocationsLabel>
+    on_press: app.get_places_to_validate(self.text)
+
+

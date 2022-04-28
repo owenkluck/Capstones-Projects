@@ -64,6 +64,12 @@ class TravelPlannerApp(App):
     def get_places_to_validate(self):
         unvalidated_airports = self.session.query(Airport).filter(Airport.validated is False)
         unvalidated_cities = self.session.query(City).filter(City.validated is False)
+        # for airport in range(len(unvalidated_airports)):
+        #     unvalidated_airports[airport] = unvalidated_airports[airport].name
+        # for city in range(len(unvalidated_cities)):
+        #     unvalidated_airports[city] = unvalidated_airports[city].name
+        self.root.ids.unvalidated_airport.values = unvalidated_airports
+        self.root.ids.unvalidated_city.values = unvalidated_cities
         return unvalidated_airports, unvalidated_cities
 
     def get_venues_to_validate(self):
@@ -434,6 +440,18 @@ class TravelPlannerApp(App):
             self.session.commit()
         except SQLAlchemyError:
             print('could not submit data')
+
+    def add_airports_spinner(self):
+        values = [airport.name for airport in self.session.query(Airport).all()]
+        self.root.ids.airport_spinner.values = values
+
+    def add_airports_city_spinner(self):
+        values = [airport.name for airport in self.session.query(Airport).all()] and [city.name for city in self.session.query(City).all()]
+        self.root.ids.airports_city_spinner.values = values
+
+    def delete_buttons(self):
+        self.root.ids.scroll_box_1.clear_widgets()
+        self.root.ids.scroll_box_2.clear_widgets()
 
 
 def construct_mysql_url(authority, port, database, username, password):
