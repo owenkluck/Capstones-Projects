@@ -367,8 +367,6 @@ ScreenManager:
     Screen:
         name: 'success_city'
         on_enter: app.add_buttons()
-        on_leave:
-            app.delete_buttons()
             root.ids.select_airport_error.text = ''
         BoxLayout:
             orientation: 'vertical'

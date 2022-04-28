@@ -16,6 +16,11 @@ def valid_welp_score(score):
     return str(score).isdigit() and 1 <= eval(score) <= 5
 
 
+def bad_lat_long(lat, long):
+    return not str(lat).strip('-.').replace('.', '', 1).isdecimal() or \
+           not str(long).strip('-.').replace('.', '', 1).isdecimal()
+
+
 class EntertainmentTrackerApp(App):
     def __init__(self, **kwargs):
         super(EntertainmentTrackerApp, self).__init__(**kwargs)
@@ -44,8 +49,7 @@ class EntertainmentTrackerApp(App):
                 empty_field = True
         if empty_field:
             self.root.ids.city_creation_message.text = 'Please fill in all of the data fields.'
-        elif not str(lat).strip('-.').replace('.', '', 1).isdecimal() or not str(long).strip('-.').replace('.', '',
-                                                                                                           1).isdecimal():
+        elif bad_lat_long(lat, long):
             self.root.ids.city_creation_message.text = f'Lat and Long must be a decimal or whole number.'
         elif query.count() > 0:
             self.root.ids.city_creation_message.text = f'A city with the name {name} already exists.'
@@ -63,28 +67,32 @@ class EntertainmentTrackerApp(App):
         query = self.session.query(City).filter(City.city_name == candidate_name)
         return query.count() > 0
 
-    def duplicate_name_venue(self, original_name, candidate_name, city_selection):
+    def duplicate_name_venue(self, original_name, candidate_name, city_selection, create_or_edit):
+        message = f'A venue under the name {candidate_name} already exists in the chosen city.'
+        duplicate_name = False
         c_id = self.session.query(City).filter(City.city_name == city_selection).one().city_id
-        same_name = self.session.query(Venue).filter(Venue.venue_name == candidate_name, Venue.city_id == c_id).count()
-        return same_name > 0 and original_name != candidate_name
+        venues_to_check = self.session.query(Venue).filter(Venue.city_id == c_id)
+        for venue in venues_to_check:
+            if create_or_edit == 'CREATE' and venue.venue_name == candidate_name:
+                duplicate_name = True
+            if create_or_edit == 'EDIT' and venue.venue_name == candidate_name and original_name != candidate_name:
+                duplicate_name = True
+        return duplicate_name
 
     def add_venue(self, name, v_type, city, min_t, max_t, min_h, max_h, max_ws, owc):
-        the_id = self.session.query(City).filter(City.city_name == city).one().city_id
-        if self.duplicate_name_venue(name, name, city):
-            self.root.ids.venue_creation_message.text = f'A venue under the name {name} already exists in the chosen city.'
-        else:
-            venue = Venue(venue_name=name, venue_type=v_type, city_id=the_id)
-            self.session.add(venue)
-            self.session.commit()
-            self.root.ids.venue_edit_selection.values.append(name)
-            self.session.commit()
-            self.add_condition(name, min_t, max_t, min_h, max_h, max_ws, owc)
-            self.session.commit()
+        c_id = self.session.query(City).filter(City.city_name == city).one().city_id
+        venue = Venue(venue_name=name, venue_type=v_type, city_id=c_id)
+        self.session.add(venue)
+        self.session.commit()
+        self.root.ids.venue_edit_selection.values.append(name)
+        self.session.commit()
+        self.add_condition(name, min_t, max_t, min_h, max_h, max_ws, owc)
+        self.session.commit()
 
     def add_condition(self, name, min_t, max_t, min_h, max_h, max_ws, owc):
         data = [min_t, min_h, max_t, max_h, max_ws, owc]
         if bad_condition_entry(data):
-            self.root.ids.venue_creation_message.text = 'All weather condition entries must be an integer.'
+            self.root.ids.venue_condition_error.text = 'All weather condition entries must be an integer.'
         else:
             query = self.session.query(Venue).filter(Venue.venue_name == name).one()
             v_id = query.venue_id
@@ -110,7 +118,7 @@ class EntertainmentTrackerApp(App):
             self.root.ids.venue_edit_message.text = "Venue name can't be an empty string."
         elif bad_condition_entry(data):
             self.root.ids.venue_edit_message.text = 'Venue conditions must be integers.'
-        elif self.duplicate_name_venue(name, new_name, city):
+        elif self.duplicate_name_venue(name, new_name, city, 'EDIT'):
             self.root.ids.venue_edit_message.text = f'A venue under the name {new_name} already exists.'
         else:
             # Check for empty strings
