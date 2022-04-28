@@ -16,6 +16,11 @@ def valid_welp_score(score):
     return str(score).isdigit() and 1 <= eval(score) <= 5
 
 
+def bad_lat_long(lat, long):
+    return not str(lat).strip('-.').replace('.', '', 1).isdecimal() or \
+           not str(long).strip('-.').replace('.', '', 1).isdecimal()
+
+
 class EntertainmentTrackerApp(App):
     def __init__(self, **kwargs):
         super(EntertainmentTrackerApp, self).__init__(**kwargs)
@@ -44,8 +49,7 @@ class EntertainmentTrackerApp(App):
                 empty_field = True
         if empty_field:
             self.root.ids.city_creation_message.text = 'Please fill in all of the data fields.'
-        elif not str(lat).strip('-.').replace('.', '', 1).isdecimal() or not str(long).strip('-.').replace('.', '',
-                                                                                                           1).isdecimal():
+        elif bad_lat_long(lat, long):
             self.root.ids.city_creation_message.text = f'Lat and Long must be a decimal or whole number.'
         elif query.count() > 0:
             self.root.ids.city_creation_message.text = f'A city with the name {name} already exists.'
