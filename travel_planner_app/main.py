@@ -13,6 +13,10 @@ import csv
 from sqlalchemy.exc import SQLAlchemyError
 
 
+PRIME_MERIDIAN = [0, 0]
+OPPOSITE_PRIME_MERIDIAN = [0, 180]
+
+
 class TravelPlannerApp(App):
     def __init__(self, authority='localhost', port=33060, database='airports', username='root', password='cse1208',
                  api_key=API_KEY, **kwargs):
@@ -35,7 +39,9 @@ class TravelPlannerApp(App):
         self.outdoor_restaurants = 0
         self.current_date = date
         self.updated_forecast = None
+        self.previous_destination = None
         self.destination = None
+        self.final_destination = None
 
     def build(self):
         inspector.create_inspector(Window, self)
@@ -139,28 +145,62 @@ class TravelPlannerApp(App):
         except SQLAlchemyError:
             print('it seems the database refuses your request, make a better request.')
 
-    def find_best_entertainment_airport_and_city(self, in_range_airports, current_date):
-        best_score = 0
-        best_city = None
-        best_airport = None
-        for airport in in_range_airports:
-            city = self.determine_best_city(airport, current_date)
-            score = self.get_city_score(city, current_date)
-            if score > best_score:
-                best_score = score
-                best_city = city
-                best_airport = airport
+    def find_airport_to_cross_meridian(self, current_airport, in_range_airports):
+        cross_airports = []
+        if current_airport.longitude < 0:
+            for airport in in_range_airports:
+                if airport.longitude > 0:
+                    cross_airports.append(airport)
+        if current_airport.longitude > 0:
+            for airport in in_range_airports:
+                if airport.longitude < 0:
+                    cross_airports.append(airport)
+        max_airport = None
+        for airport in cross_airports:
+            if airport > max_airport:
+                max_airport = airport
+        if max_airport is not None:
+            if self.previous_destination != PRIME_MERIDIAN or self.previous_destination != OPPOSITE_PRIME_MERIDIAN:
+                if self.destination == PRIME_MERIDIAN:
+                    self.destination = OPPOSITE_PRIME_MERIDIAN
+                elif self.destination == OPPOSITE_PRIME_MERIDIAN:
+                    self.destination = PRIME_MERIDIAN
+            else:
+                self.destination = self.final_destination
+        return max_airport
+
+    def can_meridian_be_passed(self, current_airport, in_range_airports):
+        airport = None
+        if abs(self.find_distance(current_airport.latitude, current_airport.longitude, self.destination[0], self.destination[1])) < 3500:
+            airport = self.find_airport_to_cross_meridian(current_airport, in_range_airports)
+        return airport
+
+    def find_best_entertainment_airport_and_city(self, in_range_airports, current_date, current_airport):
+        best_airport = self.can_meridian_be_passed(current_airport, in_range_airports)
+        if best_airport is None:
+            best_score = 0
+            best_city = None
+            for airport in in_range_airports:
+                city = self.determine_best_city(airport, current_date)
+                score = self.get_city_score(city, current_date)
+                if score > best_score:
+                    best_score = score
+                    best_city = city
+                    best_airport = airport
+        else:
+            best_city = self.determine_best_city(best_airport, current_date)
         return best_airport, best_city
 
-    def find_closest_airport_to_destination(self, in_range_airports, destination):
-        best_option = None
-        max_distance = 0
-        for airport in in_range_airports:
-            if self.find_distance(airport.latitude, airport.longitude, destination.latitude,
-                                  destination.longitude) > max_distance:
-                max_distance = self.find_distance(airport.latitude, airport.longitude, destination.latitude,
-                                                  destination.longitude)
-                best_option = airport
+    def find_closest_airport_to_destination(self, in_range_airports, destination, current_airport):
+        best_option = self.can_meridian_be_passed(current_airport, in_range_airports)
+        if best_option is None:
+            max_distance = 0
+            for airport in in_range_airports:
+                if self.find_distance(airport.latitude, airport.longitude, destination.latitude,
+                                      destination.longitude) > max_distance:
+                    max_distance = self.find_distance(airport.latitude, airport.longitude, destination.latitude,
+                                                      destination.longitude)
+                    best_option = airport
         return best_option
 
     def get_airports_in_range(self, current_airport, current_date):
@@ -278,7 +318,7 @@ class TravelPlannerApp(App):
 
     def create_closest_itinerary_day(self, destination, current_date, current_airport):
         airport = self.find_closest_airport_to_destination(self.get_airports_in_range(current_airport, current_date),
-                                                           destination)
+                                                           destination, current_date)
         city = self.determine_best_city(airport, current_date)
         city_forecast = self.session.query(Condition).filter(
             Condition.date == current_date and Condition.city_id == city.city_id).one()
@@ -290,7 +330,7 @@ class TravelPlannerApp(App):
 
     def create_entertainment_itinerary(self, destination, current_date, current_airport):
         airport, city = self.find_best_entertainment_airport_and_city(
-            self.get_airports_in_range(current_airport, current_date), current_date)
+            self.get_airports_in_range(current_airport, current_date), current_date, current_airport)
         city_forecast = self.session.query(Condition).filter(
             Condition.date == current_date and Condition.city_id == city.city_id).one()
         venues_to_visit = self.get_open_venues_list(city, city_forecast)
@@ -363,7 +403,7 @@ class TravelPlannerApp(App):
             outdated_forecast.max_temperature = int(forecast['temp']['max'])
             outdated_forecast.min_temperature = int(forecast['temp']['min'])
             outdated_forecast.humidity = int(forecast['humidity'])
-            outdated_forecast.rain = int(forecast['dew_point'])
+            outdated_forecast.rain = int(forecast['pop'])
             outdated_forecast.visibility = 10
             outdated_forecast.wind_speed = int(forecast['wind_speed'])
             new_forecast = outdated_forecast
@@ -382,7 +422,7 @@ class TravelPlannerApp(App):
             humidity = int(day['humidity'])
             wind_speed = int(day['wind_speed'])
             visibility = 10
-            rain = int(day['dew_point'])
+            rain = int(day['pop'])
             forecast = Condition(date=date.fromtimestamp(int(day['dt'])), max_temperature=max_temperature,
                                  min_temperature=min_temperature, max_humidity=humidity, wind_speed=wind_speed,
                                  visibility=visibility, rain=rain, airport=airport)
@@ -421,7 +461,7 @@ def main():
     # print(app.get_airports_in_range(f, current_date)[0].name)
     # current_date += timedelta(days=1)
     # city = app.session.query(City).filter(City.city_name == 'Omaha').one()
-    app.update_existing_itinerary(date(2002, 1, 1))
+    # app.update_existing_itinerary(date(2002, 1, 1))
     app.run()
 
 
