@@ -522,6 +522,9 @@ ScreenManager:
                         root.current = 'new_venue_score'
     Screen:
         name: 'new_venue_score'
+        on_pre_enter:
+            welp_score.text = ''
+            invalid_welp_score.text = ''
         BoxLayout:
             orientation: 'vertical'
             Label:
