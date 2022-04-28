@@ -62,20 +62,15 @@ class TravelPlannerApp(App):
         self.geo_connection = RESTConnection('api.openweathermap.org', 443, '/geo/1.0')
 
     def get_places_to_validate(self):
-<<<<<<< HEAD
-        unvalidated_airports = self.session.query(Airport).all()
-        unvalidated_cities = self.session.query(City).all()
+        unvalidated_airports = self.session.query(Airport).filter(Airport.validated is False)
+        unvalidated_cities = self.session.query(City).filter(City.validated is False)
         # for airport in range(len(unvalidated_airports)):
         #     unvalidated_airports[airport] = unvalidated_airports[airport].name
         # for city in range(len(unvalidated_cities)):
         #     unvalidated_airports[city] = unvalidated_airports[city].name
         self.root.ids.unvalidated_airport.values = unvalidated_airports
         self.root.ids.unvalidated_city.values = unvalidated_cities
-=======
-        unvalidated_airports = self.session.query(Airport).filter(Airport.validated is False)
-        unvalidated_cities = self.session.query(City).filter(City.validated is False)
         return unvalidated_airports, unvalidated_cities
->>>>>>> e40ef6829abce038283a9487c1a9ce9f59d64951
 
     def get_venues_to_validate(self):
         venue_ids = set()
