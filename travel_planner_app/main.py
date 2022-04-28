@@ -2,7 +2,7 @@ import math
 from kivy.app import App
 from kivy.modules import inspector
 from kivy.core.window import Window
-from datetime import timedelta, date
+from datetime import timedelta, date, datetime
 from travel_planner_app.database import Database
 from travel_planner_app.rest import RESTConnection
 from api_key import API_KEY
@@ -37,7 +37,7 @@ class TravelPlannerApp(App):
         self.outdoor_sporting_events = 0
         self.outdoor_plays = 0
         self.outdoor_restaurants = 0
-        self.current_date = date
+        self.current_date = date(2000, 1, 1)
         self.updated_forecast = None
         self.previous_destination = None
         self.destination = None
@@ -201,7 +201,11 @@ class TravelPlannerApp(App):
         best_option = self.can_meridian_be_passed(current_airport, in_range_airports)
         if best_option is None:
             max_distance = 0
+            print(in_range_airports)
             for airport in in_range_airports:
+                print(airport)
+                print(airport.airport_id)
+                print(airport.latitude)
                 if self.find_distance(airport.latitude, airport.longitude, destination.latitude,
                                       destination.longitude) > max_distance:
                     max_distance = self.find_distance(airport.latitude, airport.longitude, destination.latitude,
@@ -222,6 +226,8 @@ class TravelPlannerApp(App):
     def is_weather_ok_airport(self, airport, current_date):
         # Figure out severe weather
         next_day = current_date + timedelta(days=1)
+        if len(airport.conditions) is 0:
+            return True
         for forecast in airport.conditions:
             if next_day == forecast.date:
                 if forecast.max_temperature < 45 and forecast.visibility > 5:
@@ -324,7 +330,7 @@ class TravelPlannerApp(App):
 
     def create_closest_itinerary_day(self, destination, current_date, current_airport):
         airport = self.find_closest_airport_to_destination(self.get_airports_in_range(current_airport, current_date),
-                                                           destination, current_date)
+                                                           destination, current_airport)
         city = self.determine_best_city(airport, current_date)
         city_forecast = self.session.query(Condition).filter(
             Condition.date == current_date and Condition.city_id == city.city_id).one()
@@ -364,7 +370,7 @@ class TravelPlannerApp(App):
                 max_date = itinerary.date
             if itinerary.date == self.current_date:
                 current_airport = self.session.query(Airport).filter(Airport.name == itinerary.airport).one()
-        new_itineraries = (max_date - self.current_date).days
+        new_itineraries = (7 - (max_date - self.current_date).days)
         for i in range(new_itineraries):
             max_date += timedelta(days=1)
             self.create_closest_itinerary_day(self.destination, max_date, current_airport)
@@ -480,6 +486,16 @@ def main():
     # current_date += timedelta(days=1)
     # city = app.session.query(City).filter(City.city_name == 'Omaha').one()
     # app.update_existing_itinerary(date(2002, 1, 1))
+    # datte = date(2000, 1, 1)
+    # datte = timedelta(days=1) + datte
+    # print(datte)
+    app.connect_to_database('localhost', 33060, 'airports', 'root', 'cse1208')
+    app.destination = PRIME_MERIDIAN
+    # airport = Airport(name='Strawberry Airport', latitude=90, longitude=91, code='EEEE')
+    # app.session.add(airport)
+    # app.session.commit()
+    airport = app.session.query(Airport).filter(Airport.name == 'Omaha Airport').one()
+    app.create_closest_itinerary_day(PRIME_MERIDIAN, app.current_date, airport)
     app.run()
 
 
