@@ -30,10 +30,8 @@ class AirportApp(App):
 
     def submit_data_airport(self, name, code, latitude, longitude):
         if len(name) > 0 and len(code) > 0 and len(latitude) > 0 and len(longitude) > 0:
-            airport = Airport(name=name, code=code, latitude=int(latitude), longitude=int(longitude))
-            self.session.add(airport)
             try:
-                self.session.commit()
+                self.commit_airport_to_database(code, latitude, longitude, name)
                 self.set_current_airport(name)
                 self.root.current = 'success_airport'
             except SQLAlchemyError:
@@ -43,12 +41,15 @@ class AirportApp(App):
                                                           '\nis currently in the database'
         self.root.ids.create_airport_error.text = 'Some information inputs were left blank, \nplease fill out all inputs'
 
+    def commit_airport_to_database(self, code, latitude, longitude, name):
+        airport = Airport(name=name, code=code, latitude=int(latitude), longitude=int(longitude))
+        self.session.add(airport)
+        self.session.commit()
+
     def submit_data_city(self, name, geographic_entity, latitude, longitude):
         if len(name) > 0 and len(geographic_entity) > 0 and len(latitude) > 0 and len(longitude) > 0:
-            city = City(city_name=name, encompassing_geographic_entity=geographic_entity, latitude=int(latitude), longitude=int(longitude))
-            self.session.add(city)
             try:
-                self.session.commit()
+                self.commit_city_to_database(geographic_entity, latitude, longitude, name)
                 self.set_current_city(name)
                 self.root.current = 'success_city'
             except SQLAlchemyError:
@@ -57,6 +58,12 @@ class AirportApp(App):
                                                        '\nThe information added may match a city that' \
                                                        '\nis currently in the database.'
         self.root.ids.create_city_error.text = 'Some information inputs were left blank, \nplease fill out all inputs'
+
+    def commit_city_to_database(self, geographic_entity, latitude, longitude, name):
+        city = City(city_name=name, encompassing_geographic_entity=geographic_entity, latitude=int(latitude),
+                    longitude=int(longitude))
+        self.session.add(city)
+        self.session.commit()
 
     def add_airports_spinner(self):
         values = [airport.name for airport in self.session.query(Airport).all()]
@@ -92,18 +99,21 @@ class AirportApp(App):
 
     def add_city(self, city):
         try:
-            self.root.ids.select_city_error.text = ''
             place = self.session.query(City).filter(City.city_name == city)[0]
             if self.current_airport.latitude - 1 <= place.latitude <= self.current_airport.latitude + 1 and \
                     self.current_airport.longitude - 1 <= place.longitude <= self.current_airport.longitude + 1:
-                self.current_airport.cities.append(place)
-                self.session.add(self.current_airport)
-                self.session.commit()
+                self.append_city_to_current_airport(place)
+                self.root.ids.select_city_error.text = ''
             else:
                 self.root.ids.select_city_error.text = 'The city you have chosen is not within range of this airport. Please select a in range city'
         except SQLAlchemyError:
             self.root.ids.select_city_error.text = 'The city you have selected could not be added to the database,' \
                                                    ' there may be multiple of this city or the database may have failed'
+
+    def append_city_to_current_airport(self, place):
+        self.current_airport.cities.append(place)
+        self.session.add(self.current_airport)
+        self.session.commit()
 
     def add_airport(self, airport):
         try:
@@ -111,14 +121,17 @@ class AirportApp(App):
             place = self.session.query(Airport).filter(Airport.name == airport)[0]
             if self.current_city.latitude - 1 <= place.latitude <= self.current_city.latitude + 1 and \
                     self.current_city.longitude - 1 <= place.longitude <= self.current_city.longitude + 1:
-                self.current_city.airports.append(place)
-                self.session.add(self.current_city)
-                self.session.commit()
+                self.append_airport_to_current_city(place)
             else:
                 self.root.ids.select_airport_error.text = 'The airport you have chosen is not within range of this city. Please select a in range airport'
         except SQLAlchemyError:
             self.root.ids.select_airport_error.text = 'The airport you have selected could not be added to the database,' \
                                                       ' there may be multiple of this airport or the database may have failed'
+
+    def append_airport_to_current_city(self, place):
+        self.current_city.airports.append(place)
+        self.session.add(self.current_city)
+        self.session.commit()
 
     def set_current_city(self, city):
         self.current_city = self.session.query(City).filter(City.city_name == city).one()
