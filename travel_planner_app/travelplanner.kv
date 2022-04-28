@@ -183,18 +183,24 @@ ScreenManager:
                         text: 'Validate Locations'
                         font_size: '20sp'
                         on_press:
+                            root.transition.direction = 'left'
+                            root.current = 'validate_locations'
                     BoxLayout:
                         size_hint_max_y: 10
                     Button:
                         text: 'Update Ratings'
                         font_size: '20sp'
                         on_press:
+                            root.transition.direction = 'left'
+                            root.current = 'update_ratings'
                     BoxLayout:
                         size_hint_max_y: 10
                     Button:
                         text: 'Prepare Itinerary'
                         font_size: '20sp'
                         on_press:
+                            root.transition.direction = 'left'
+                            root.current = 'prepare_itinerary'
                     BoxLayout:
                         size_hint_max_y: 10
                     Button:
@@ -217,7 +223,7 @@ ScreenManager:
                     size_hint_max_x: 40
     Screen:
         name: 'validate_locations'
-        on_enter: app.add_airports_spinner()
+        on_enter: app.add_airports_city_spinner()
         BoxLayout:
             orientation: 'vertical'
             BoxLayout:
@@ -240,16 +246,106 @@ ScreenManager:
                             size_hint_max_y: 45
                             orientation: 'horizontal'
                             Label:
-                                text: 'Airports'
+                                text: 'Locations'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                id: location_list
+                                text: ''
                         BoxLayout:
                             size_hint_max_y: 10
                         BoxLayout:
                             Spinner:
-                                id: airport_spinner
-                                text: 'Select Airport to Validate'
-                                values:()
+                                id: airports_city_spinner
+                                text: 'Select Airport or City to Validate'
+                                values:
+                                    unvalidated_airport.values
+                                    unvalidated_city.values
                         BoxLayout:
-                            size_hint_max_x: 40
+                            Label:
+                                text: ''
+                                id: create_city_error
+                            BoxLayout:
+                                size_hint_max_x: 20
+                        BoxLayout:
+                            orientation: 'horizontal'
+                            Button:
+                                text: 'BACK'
+                                size_hint: (0.5, 0.5)
+                                on_press:
+                                    root.current = 'main_menu'
+                                    root.ids.forecast_date.text = ''
+                            Button:
+                                text: 'VALIDATE LOCATION'
+                                size_hint: (0.5, 0.5)
+                                on_press:
+                                    root.current = 'create_forecast'
+    Screen:
+        name: 'update_ratings'
+        on_enter:
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_max_y: 80
+                Label:
+                    text: 'Update Ratings'
+                    font_size: '25sp'
+            BoxLayout:
+                orientation: 'vertical'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    BoxLayout:
+                        size_hint_max_x: 20
+                    BoxLayout:
+                        orientation: 'vertical'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            size_hint_max_y: 45
+                            orientation: 'horizontal'
+                            Label:
+                                id:
+                                text: f"New Review for {}.text"
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                        Label:
+                            id:
+                            text: 'Current average Rating {}.text'
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                        Label:
+                            id: review_text
+                            text: 'New Review: {}.text'
+                        BoxLayout:
+                            Label:
+                                text: ''
+                                id: create_city_error
+                            BoxLayout:
+                                size_hint_max_x: 20
+                        BoxLayout:
+                            size_hint_max_y: 10
+                        BoxLayout:
+                            Spinner:
+                                id: accept_reject_review
+                                text: 'Accept or Reject Review'
+                                values: ('Accept', 'Reject')
+                        BoxLayout:
+                            orientation: 'horizontal'
+                            Button:
+                                text: 'BACK'
+                                size_hint: (0.5, 0.5)
+                                on_press:
+                                    root.current = 'main_menu'
+                            Button:
+                                text: 'UPDATE REVIEWS'
+                                size_hint: (0.5, 0.5)
+                                on_press:
 <Screen>:
     canvas.before:
         Color:
@@ -280,8 +376,10 @@ ScreenManager:
             size: sp(32), sp(32)
             pos: int(self.center_x - sp(16)), int(self.center_y - sp(16))
 
-<AirportButtons>
-    on_press: app.add_airport(self.text)
+<AirportAndCityButtons>
+    on_press: app.add_validated_buttons(self.text)
 
-<CityButtons>
-    on_press: app.add_city(self.text)
+<ValidateLocationsLabel>
+    on_press: app.get_places_to_validate(self.text)
+
+

@@ -38,7 +38,8 @@ class TravelPlannerApp(App):
         #     unvalidated_airports[airport] = unvalidated_airports[airport].name
         # for city in range(len(unvalidated_cities)):
         #     unvalidated_airports[city] = unvalidated_airports[city].name
-        return unvalidated_airports, unvalidated_cities
+        self.root.ids.unvalidated_airport.values = unvalidated_airports
+        self.root.ids.unvalidated_city.values = unvalidated_cities
 
     def get_venues_to_validate(self):
         unvalidated_venues = self.session.query(Venue).all()
