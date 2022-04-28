@@ -45,7 +45,7 @@ class AirportApp(App):
 
     def submit_data_city(self, name, geographic_entity, latitude, longitude):
         if len(name) > 0 and len(geographic_entity) > 0 and len(latitude) > 0 and len(longitude) > 0:
-            city = City(city_name=name, geographic_entity=geographic_entity, latitude=int(latitude), longitude=int(longitude))
+            city = City(city_name=name, encompassing_geographic_entity=geographic_entity, latitude=int(latitude), longitude=int(longitude))
             self.session.add(city)
             try:
                 self.session.commit()
@@ -92,6 +92,7 @@ class AirportApp(App):
 
     def add_city(self, city):
         try:
+            self.root.ids.select_city_error.text = ''
             place = self.session.query(City).filter(City.city_name == city)[0]
             if self.current_airport.latitude - 1 <= place.latitude <= self.current_airport.latitude + 1 and \
                     self.current_airport.longitude - 1 <= place.longitude <= self.current_airport.longitude + 1:
@@ -106,6 +107,7 @@ class AirportApp(App):
 
     def add_airport(self, airport):
         try:
+            self.root.ids.select_airport_error.text = ''
             place = self.session.query(Airport).filter(Airport.name == airport)[0]
             if self.current_city.latitude - 1 <= place.latitude <= self.current_city.latitude + 1 and \
                     self.current_city.longitude - 1 <= place.longitude <= self.current_city.longitude + 1:
