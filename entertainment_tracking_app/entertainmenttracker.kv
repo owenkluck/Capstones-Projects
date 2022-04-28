@@ -207,9 +207,7 @@ ScreenManager:
                     Button:
                         text: 'NEXT'
                         on_press:
-                            app.check_venue_data(venue_name.text, associated_city.text, venue_type.text)
-                            root.transition.direction = 'left'
-                            root.current = 'choose_conditions'
+                            app.duplicate_name_venue(venue_name.text, venue_name.text, associated_city.text, 'CREATE')
     Screen:
         name: 'choose_conditions'
         BoxLayout:

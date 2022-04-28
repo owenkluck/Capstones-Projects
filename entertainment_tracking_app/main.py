@@ -67,13 +67,17 @@ class EntertainmentTrackerApp(App):
         query = self.session.query(City).filter(City.city_name == candidate_name)
         return query.count() > 0
 
-    def duplicate_name_venue(self, original_name, candidate_name, city_selection):
+    def duplicate_name_venue(self, original_name, candidate_name, city_selection, create_or_edit):
+        message = f'A venue under the name {candidate_name} already exists in the chosen city.'
+        duplicate_name = False
         c_id = self.session.query(City).filter(City.city_name == city_selection).one().city_id
-        same_name = self.session.query(Venue).filter(Venue.venue_name == candidate_name,
-                                                     Venue.city_id == c_id).count()
-        if same_name > 0 and original_name != candidate_name:
-            self.root.ids.venue_name_error.text = \
-                f'A venue under the name {candidate_name} already exists in the chosen city.'
+        venues_to_check = self.session.query(Venue).filter(Venue.city_id == c_id)
+        for venue in venues_to_check:
+            if create_or_edit == 'CREATE' and venue.venue_name == candidate_name:
+                duplicate_name = True
+            if create_or_edit == 'EDIT' and venue.venue_name == candidate_name and original_name != candidate_name:
+                duplicate_name = True
+        return duplicate_name
 
     def add_venue(self, name, v_type, city, min_t, max_t, min_h, max_h, max_ws, owc):
         c_id = self.session.query(City).filter(City.city_name == city).one().city_id
@@ -114,7 +118,7 @@ class EntertainmentTrackerApp(App):
             self.root.ids.venue_edit_message.text = "Venue name can't be an empty string."
         elif bad_condition_entry(data):
             self.root.ids.venue_edit_message.text = 'Venue conditions must be integers.'
-        elif self.duplicate_name_venue(name, new_name, city):
+        elif self.duplicate_name_venue(name, new_name, city, 'EDIT'):
             self.root.ids.venue_edit_message.text = f'A venue under the name {new_name} already exists.'
         else:
             # Check for empty strings
