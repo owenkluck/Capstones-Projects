@@ -51,6 +51,7 @@ class TravelPlannerApp(App):
         self.previous_destination = None
         self.destination = None
         self.final_destination = None
+        self.ratings_to_update = []
 
     def build(self):
         inspector.create_inspector(Window, self)
@@ -150,11 +151,15 @@ class TravelPlannerApp(App):
                 venues.append(rating.venue)
         for venue in venues:
             view = ReviewScrollView()
-            view.children[0].children[1].text = venue
+            view.children[0].children[1].text = venue.venue_name
             for rating in venue.reviews:
                 view.children[0].children[0].children[0].add_widget(CheckBox())
-                view.children[0].children[0].children[1].add_widget(Label(text=f'{rating.score}'))
+                view.children[0].children[0].children[1].add_widget(Label(text=f'score: {rating.score} id: {rating.review_id}'))
             self.root.ids.venue_and_review_scroll.add_widget(view)
+
+    def get_checkbox_states(self):
+        #self.root.ids.venue_and_review_scroll.children
+        pass
 
     def get_average_rating(self, venue_name):
         try:
@@ -164,14 +169,14 @@ class TravelPlannerApp(App):
                   ' that or the name in the database doesn\'t exist')
 
     def get_new_ratings(self):
-        new_ratings = self.session.query(Review).filter(Review.validated is False)
+        new_ratings = self.session.query(Review).filter(Review.validated == False)
         return new_ratings
 
-    def update_rating(self, rating, venue_name, review_id):
+    def update_rating(self, venue_name, review_id):
         try:
             venue = self.session.query(Venue).filter(Venue.name == venue_name).one()
             review = self.session.query(Review).filter(Review.review_id == review_id).one()
-            new_average_score = (len(venue.reviews) * venue.average_welp_score + rating) / (len(venue.reviews + 1))
+            new_average_score = (len(venue.reviews) * venue.average_welp_score + review.score) / (len(venue.reviews + 1))
             venue.average_welp_score = new_average_score
             venue.welp_score_needs_update = False
             self.submit_data(venue)
