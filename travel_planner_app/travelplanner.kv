@@ -1,3 +1,4 @@
+#:import Clock kivy.clock.Clock
 ScreenManager:
     Screen:
         name: 'home'
@@ -25,18 +26,20 @@ ScreenManager:
                             Label:
                                 text: 'Remote Database Information'
                         BoxLayout:
-                            size_hint_max_y: 10
+                            size_hint_max_y: 20
                         BoxLayout:
                             size_hint_max_y: 45
                             orientation: 'horizontal'
                             Label:
                                 text: 'Authority'
                             TextInput:
+                                size_hint: (1, None)
+                                height: 30
                                 text: 'cse.unl.edu'
                                 id: database_authority
                                 multiline: False
                         BoxLayout:
-                            size_hint_max_y: 10
+                            size_hint_max_y: 20
                         BoxLayout:
                             size_hint_max_y: 45
                             orientation: 'horizontal'
@@ -44,10 +47,12 @@ ScreenManager:
                                 text: 'Port Number'
                             TextInput:
                                 id: database_portnumber
+                                size_hint: (1, None)
+                                height: 30
                                 text: '3306'
                                 multiline: False
                         BoxLayout:
-                            size_hint_max_y: 10
+                            size_hint_max_y: 20
                         BoxLayout:
                             size_hint_max_y: 45
                             orientation: 'horizontal'
@@ -55,6 +60,8 @@ ScreenManager:
                                 text: 'Database Name'
                             TextInput:
                                 id: database_name
+                                size_hint: (1, None)
+                                height: 30
                                 text: 'kandrews'
                                 multiline: False
                         BoxLayout:
@@ -66,6 +73,8 @@ ScreenManager:
                                 text: 'Username'
                             TextInput:
                                 id: database_username
+                                size_hint: (1, None)
+                                height: 30
                                 text: 'kandrews'
                                 multiline: False
                         BoxLayout:
@@ -78,6 +87,8 @@ ScreenManager:
                                 foreground_color: 'red'
                             TextInput:
                                 id: database_password
+                                size_hint: (1, None)
+                                height: 30
                                 multiline: False
                         BoxLayout:
                             size_hint_max_y: 10
@@ -267,11 +278,9 @@ ScreenManager:
                             size_hint_max_y: 10
                         BoxLayout:
                             Spinner:
-                                id: airports_city_spinner
+                                id: airports_city_spinner1
                                 text: 'Select Airport or City to Validate'
-#                                values:
-#                                    airports_spinner.values
-#                                    city_spinner.values
+                                values:
                         BoxLayout:
                             Label:
                                 text: ''
@@ -284,7 +293,7 @@ ScreenManager:
                                 text: 'BACK'
                                 size_hint: (0.5, 0.5)
                                 on_press:
-                                    root.current = 'main_menu'
+                                    root.current = 'mainmenu1'
                             Button:
                                 text: 'VALIDATE LOCATION'
                                 size_hint: (0.5, 0.5)
@@ -383,14 +392,26 @@ ScreenManager:
                             size_hint_max_y: 10
     Screen:
         name: 'loading_screen'
-        on_enter: Clock.schedule_once(self, 3)
+        on_enter: Clock.schedule_once(app.load, 3)
         BoxLayout:
             orientation: 'vertical'
             BoxLayout:
                 orientation: 'horizontal'
                 size_hint_max_y: 80
                 Label:
-                    text: 'Loading Screen'
+                    text: ''
+                    font_size: '25sp'
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_max_y: 80
+                Label:
+                    text: ''
+                    font_size: '25sp'
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_max_y: 80
+                Label:
+                    text: 'Loading...'
                     font_size: '25sp'
             BoxLayout:
                 orientation: 'vertical'
@@ -400,13 +421,6 @@ ScreenManager:
                         size_hint_max_x: 20
                     BoxLayout:
                         orientation: 'vertical'
-                        BoxLayout:
-                            size_hint_max_y: 10
-                        BoxLayout:
-                            size_hint_max_y: 45
-                            orientation: 'horizontal'
-                            Label:
-                                text: 'Loading...'
                         BoxLayout:
                             size_hint_max_y: 10
 <Screen>:
