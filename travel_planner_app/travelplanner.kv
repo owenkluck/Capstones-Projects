@@ -149,7 +149,7 @@ ScreenManager:
                         size_hint: (0.30, 0.30)
                         pos_hint: {'x':.25, 'y':0}
                         on_press:
-                            root.connect_to_open_weather()
+                            app.connect_to_open_weather()
                             root.transition.direction = 'left'
                             root.current = 'loading_screen'
 
@@ -270,8 +270,8 @@ ScreenManager:
                                 id: airports_city_spinner
                                 text: 'Select Airport or City to Validate'
                                 values:
-                                    unvalidated_airport.values
-                                    unvalidated_airport.values
+                                    airports_spinner.values
+                                    city_spinner.values
                         BoxLayout:
                             Label:
                                 text: ''
@@ -324,8 +324,6 @@ ScreenManager:
                             id: venue_average_rating
                             text: 'Current average Rating {average_welp}.score'
                             values:
-                                unvalidated_airport.values
-                                unvalidated_airport.values
                         BoxLayout:
                             size_hint_max_y: 10
                         BoxLayout:
@@ -350,7 +348,7 @@ ScreenManager:
                                 text: 'BACK'
                                 size_hint: (0.5, 0.5)
                                 on_press:
-                                    root.current = 'main_menu'
+                                    root.current = 'mainmenu1'
                             Button:
                                 text: 'UPDATE REVIEWS'
                                 size_hint: (0.5, 0.5)
@@ -413,14 +411,14 @@ ScreenManager:
                             size_hint_max_y: 10
     Screen:
         name: 'loading_screen'
-        on_enter:
+        on_enter: Clock.schedule_once(self, 3)
         BoxLayout:
             orientation: 'vertical'
             BoxLayout:
                 orientation: 'horizontal'
                 size_hint_max_y: 80
                 Label:
-                    text: 'Loading Screen
+                    text: 'Loading Screen'
                     font_size: '25sp'
             BoxLayout:
                 orientation: 'vertical'
@@ -436,24 +434,9 @@ ScreenManager:
                             size_hint_max_y: 45
                             orientation: 'horizontal'
                             Label:
-                                text: 'Locations that need information validated'
+                                text: 'Loading...'
                         BoxLayout:
                             size_hint_max_y: 10
-                BoxLayout:
-                    Label:
-                        text: ''
-                        id: create_city_error
-                    BoxLayout:
-                        size_hint_max_x: 20
-                BoxLayout:
-                    orientation: 'horizontal'
-                    Button:
-                        text: 'Proceed'
-                        size_hint: (0.30, 0.30)
-                        pos_hint: {'x':.25, 'y':0}
-                        on_press:
-                            root.get_venues_to_validate()
-                            root.current = 'mainmenu1'
 <Screen>:
     canvas.before:
         Color:
