@@ -41,6 +41,7 @@ ScreenManager:
             lat.text = ''
             long.text = ''
             ege.text = ''
+            city_creation_message.text = ''
         BoxLayout:
             orientation: 'vertical'
             Label:
@@ -205,6 +206,8 @@ ScreenManager:
                         text: 'NEXT'
                         on_press:
                             app.duplicate_name_venue(venue_name.text, venue_name.text, associated_city.text, 'CREATE')
+                            root.transition.direction = 'left'
+                            root.current = 'choose_conditions'
     Screen:
         name: 'choose_conditions'
         BoxLayout:
@@ -260,7 +263,7 @@ ScreenManager:
             max_humidity.text = ''
             max_wind_speed.text = ''
             owc.text = ''
-            venue_creation_message.text = ''
+            venue_condition_error.text = ''
         BoxLayout:
             orientation: 'vertical'
             Label:
@@ -448,7 +451,6 @@ ScreenManager:
                     text: 'SAVE'
                     on_press:
                         app.update_venue_data(venue_edit_selection.text, new_venue_name.text, venue_edit_city.text, new_min_t.text, new_max_t.text, new_min_h.text, new_max_h.text, new_max_w.text, new_owc.text)
-                        app.update_spinner_names(venue_edit_selection.text, new_venue_name.text)
     Screen:
         name: 'venue_edit_success'
         BoxLayout:

@@ -123,8 +123,10 @@ class EntertainmentTrackerApp(App):
             return True
 
     def update_venue_data(self, name, new_name, city, new_min_t, new_max_t, new_min_h, new_max_h, new_max_w, new_owc):
-        venue_updated_successfully = self._update_venue_data(self, name, new_name, city, new_min_t, new_max_t, new_min_h, new_max_h, new_max_w, new_owc)
+        venue_updated_successfully = self._update_venue_data(name, new_name, city, new_min_t, new_max_t, new_min_h,
+                                                             new_max_h, new_max_w, new_owc)
         if venue_updated_successfully:
+            self.update_spinner_names(name, new_name)
             self.root.transition.direction = 'left'
             self.root.current = 'venue_edit_success'
 
@@ -137,7 +139,7 @@ class EntertainmentTrackerApp(App):
             self.root.ids.venue_edit_message.text = 'Venue conditions must be integers.'
             return False
         elif self.duplicate_name_venue(name, new_name, city, 'EDIT'):
-            self.root.ids.venue_edit_message.text = f'A venue under the name {new_name} already exists.'
+            self.root.ids.venue_edit_message.text = 'A venue under that name already exists.'
             return False
         else:
             # Check for empty strings
@@ -163,7 +165,7 @@ class EntertainmentTrackerApp(App):
             self.session.commit()
             return True
 
-    def update_spinner_values(self, name, new_name):
+    def update_spinner_names(self, name, new_name):
         old_venues = self.root.ids.venue_edit_selection.values
         new_venues = list()
         for venue in old_venues:
