@@ -54,14 +54,16 @@ class EntertainmentTrackerApp(App):
         elif query.count() > 0:
             self.root.ids.city_creation_message.text = f'A city with the name {name} already exists.'
         else:
-            city = City(city_name=name, latitude=lat, longitude=long, encompassing_geographic_entity=entity)
-            self.session.add(city)
+            self.commit_city_to_database(entity, lat, long, name)
             self.root.ids.city_creation_message.text = ''
-            self.session.commit()
             self.root.ids.associated_city.values.append(name)
-            self.session.commit()
             self.root.transition.direction = 'left'
             self.root.current = 'ask_add_venue'
+
+    def commit_city_to_database(self, entity, lat, long, name):
+        city = City(city_name=name, latitude=lat, longitude=long, encompassing_geographic_entity=entity)
+        self.session.add(city)
+        self.session.commit()
 
     def duplicate_name_city(self, candidate_name):
         query = self.session.query(City).filter(City.city_name == candidate_name)
@@ -79,22 +81,25 @@ class EntertainmentTrackerApp(App):
                 duplicate_name = True
         return duplicate_name
 
-    def add_venue(self, ven_name, ven_type, city, min_temp, max_temp, min_humidity, max_humidity, max_wind_speed, weather_condition_code):
-        city_query_id = self.session.query(City).filter(City.city_name == city).one().city_id
+    def add_venue(self, ven_name, ven_type, city_name, min_temp, max_temp, min_humidity, max_humidity, max_wind_speed, weather_condition_code):
+        self.root.ids.venue_edit_selection.values.append(ven_name)
+        self.commit_venue_to_database(city_name, max_humidity, max_temp, max_wind_speed, min_humidity, min_temp, ven_name,
+                                      ven_type, weather_condition_code)
+        self.add_condition(ven_name, min_temp, max_temp, min_humidity, max_humidity, max_wind_speed,
+                           weather_condition_code)
+
+    def commit_venue_to_database(self, city_name, ven_name, ven_type):
+        city_query_id = self.session.query(City).filter(City.city_name == city_name).one().city_id
         venue = Venue(venue_name=ven_name, venue_type=ven_type, city_id=city_query_id)
         self.session.add(venue)
         self.session.commit()
-        self.root.ids.venue_edit_selection.values.append(ven_name)
-        self.session.commit()
-        self.add_condition(ven_name, min_temp, max_temp, min_humidity, max_humidity, max_wind_speed, weather_condition_code)
-        self.session.commit()
 
-    def add_condition(self, name, min_t, max_t, min_h, max_h, max_ws, owc):
+    def add_condition(self, venue_name, min_t, max_t, min_h, max_h, max_ws, owc):
         data = [min_t, min_h, max_t, max_h, max_ws, owc]
         if bad_condition_entry(data):
             self.root.ids.venue_condition_error.text = 'All weather condition entries must be an integer.'
         else:
-            query = self.session.query(Venue).filter(Venue.venue_name == name).one()
+            query = self.session.query(Venue).filter(Venue.venue_name == venue_name).one()
             v_id = query.venue_id
             # If the user passed in an empty string, render it as None
             for element in data:
