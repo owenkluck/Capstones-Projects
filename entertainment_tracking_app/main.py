@@ -77,16 +77,21 @@ class EntertainmentTrackerApp(App):
         for venue in venues_to_check:
             if create_or_edit == 'CREATE' and venue.venue_name == candidate_name:
                 duplicate_name = True
+                self.root.ids.venue_name_error.text = message
             if create_or_edit == 'EDIT' and venue.venue_name == candidate_name and original_name != candidate_name:
                 duplicate_name = True
+                self.root.ids.venue_edit_message = message
         return duplicate_name
 
-    def add_venue(self, ven_name, ven_type, city_name, min_temp, max_temp, min_humidity, max_humidity, max_wind_speed, weather_condition_code):
+    def add_venue(self, ven_name, ven_type, city_name, min_temp, max_temp, min_humidity, max_humidity, max_wind_speed,
+                  weather_condition_code):
         self.root.ids.venue_edit_selection.values.append(ven_name)
-        self.commit_venue_to_database(city_name, max_humidity, max_temp, max_wind_speed, min_humidity, min_temp, ven_name,
-                                      ven_type, weather_condition_code)
-        self.add_condition(ven_name, min_temp, max_temp, min_humidity, max_humidity, max_wind_speed,
-                           weather_condition_code)
+        self.commit_venue_to_database(city_name, ven_name, ven_type)
+        condition_added = self.add_condition(ven_name, min_temp, max_temp, min_humidity, max_humidity, max_wind_speed,
+                                             weather_condition_code)
+        if condition_added:
+            self.root.transition.direction = 'left'
+            self.root.current = 'venue_creation_success'
 
     def commit_venue_to_database(self, city_name, ven_name, ven_type):
         city_query_id = self.session.query(City).filter(City.city_name == city_name).one().city_id
@@ -95,9 +100,10 @@ class EntertainmentTrackerApp(App):
         self.session.commit()
 
     def add_condition(self, venue_name, min_t, max_t, min_h, max_h, max_ws, owc):
-        data = [min_t, min_h, max_t, max_h, max_ws, owc]
+        data = [min_t, max_t, min_h, max_h, max_ws, owc]
         if bad_condition_entry(data):
             self.root.ids.venue_condition_error.text = 'All weather condition entries must be an integer.'
+            return False
         else:
             query = self.session.query(Venue).filter(Venue.venue_name == venue_name).one()
             v_id = query.venue_id
@@ -114,17 +120,27 @@ class EntertainmentTrackerApp(App):
             vc = VenueCondition(venue_id=v_id, condition_id=c_id)
             self.session.add(vc)
             self.session.commit()
-            self.root.transition.direction = 'left'
-            self.root.current = 'venue_creation_success'
+            return True
 
     def update_venue_data(self, name, new_name, city, new_min_t, new_max_t, new_min_h, new_max_h, new_max_w, new_owc):
+        venue_updated_successfully = self._update_venue_data(name, new_name, city, new_min_t, new_max_t, new_min_h,
+                                                             new_max_h, new_max_w, new_owc)
+        if venue_updated_successfully:
+            self.update_spinner_names(name, new_name)
+            self.root.transition.direction = 'left'
+            self.root.current = 'venue_edit_success'
+
+    def _update_venue_data(self, name, new_name, city, new_min_t, new_max_t, new_min_h, new_max_h, new_max_w, new_owc):
         data = [new_min_t, new_max_t, new_min_h, new_max_h, new_max_w, new_owc]
         if new_name == '':
             self.root.ids.venue_edit_message.text = "Venue name can't be an empty string."
+            return False
         elif bad_condition_entry(data):
             self.root.ids.venue_edit_message.text = 'Venue conditions must be integers.'
+            return False
         elif self.duplicate_name_venue(name, new_name, city, 'EDIT'):
-            self.root.ids.venue_edit_message.text = f'A venue under the name {new_name} already exists.'
+            self.root.ids.venue_edit_message.text = 'A venue under that name already exists.'
+            return False
         else:
             # Check for empty strings
             for element in data:
@@ -143,22 +159,22 @@ class EntertainmentTrackerApp(App):
             condition_data.min_humidity = new_min_h
             condition_data.max_humidity = new_max_h
             condition_data.max_wind_speed = new_max_w
-            condition_data.owc = new_owc
+            condition_data.open_weather_code = new_owc
             venue_data.venue_name = new_name
-            # Update Spinner for new venue name
-            old_venues = self.root.ids.venue_edit_selection.values
-            new_venues = list()
-            for venue in old_venues:
-                if venue == name:
-                    new_venues.append(new_name)
-                else:
-                    new_venues.append(venue)
-            self.root.ids.venue_edit_selection.values = tuple(new_venues)
-            self.root.ids.venue_edit_selection.text = new_name
             # Don't forget to save your changes! :)
             self.session.commit()
-            self.root.transition.direction = 'left'
-            self.root.current = 'venue_edit_success'
+            return True
+
+    def update_spinner_names(self, name, new_name):
+        old_venues = self.root.ids.venue_edit_selection.values
+        new_venues = list()
+        for venue in old_venues:
+            if venue == name:
+                new_venues.append(new_name)
+            else:
+                new_venues.append(venue)
+        self.root.ids.venue_edit_selection.values = tuple(new_venues)
+        self.root.ids.venue_edit_selection.text = new_name
 
     def update_venue_list(self, city):
         self.root.ids.venue_edit_selection.values.clear()

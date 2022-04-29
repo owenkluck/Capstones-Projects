@@ -160,10 +160,10 @@ ScreenManager:
                         size_hint: (0.30, 0.30)
                         pos_hint: {'x':.25, 'y':0}
                         on_press:
+                            app.connect_to_database(root.ids.authority.text, root.ids.port.text, root.ids.database.text, root.ids.username.text, root.ids.password.text)
                             app.connect_to_open_weather()
                             root.transition.direction = 'left'
                             root.current = 'loading_screen'
-
     Screen:
         name: 'mainmenu1'
         BoxLayout:
@@ -303,6 +303,7 @@ ScreenManager:
     Screen:
         name: 'update_ratings'
         on_enter:
+            app.populate_ratings_scroll_view()
         BoxLayout:
             orientation: 'vertical'
             BoxLayout:
@@ -329,10 +330,8 @@ ScreenManager:
                         BoxLayout:
                             size_hint_max_y: 10
                         BoxLayout:
-                        Label:
-                            id: venue_average_rating
-                            text: 'Current average Rating {average_welp}.score'
-                            values:
+                            id: venue_and_review_scroll
+                            orientation: 'horizontal'
                         BoxLayout:
                             size_hint_max_y: 10
                         BoxLayout:
@@ -362,6 +361,7 @@ ScreenManager:
                                 text: 'UPDATE REVIEWS'
                                 size_hint: (0.5, 0.5)
                                 on_press:
+                                    app.update_ratings()
     Screen:
         name: 'prepare_itienary'
         on_enter:
@@ -487,6 +487,19 @@ ScreenManager:
 <ValidateLocationsLabel>
     on_press: app.get_places_to_validate(self.text)
 
-<LoadingScreen>:
-    on_enter: Clock.schedule_once(self, 3)
+<ReviewScrollView>:
+    id: view
+    do_scroll_x: False
+    do_scroll_y: True
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+        BoxLayout:
+            orientation: 'horizontal'
+            BoxLayout:
+                orientation: 'vertical'
+                id: rating_label
+            BoxLayout:
+                orientation: 'vertical'
+                id: check_box
 
