@@ -29,6 +29,8 @@ class AirportApp(App):
         inspector.create_inspector(Window, self)
 
     def submit_data_airport(self, name, code, latitude, longitude):
+        print(f'{len(name)}, {len(code)}, {len(latitude)}, {len(longitude)}')
+        print(len(name) > 0 and len(code) > 0 and len(latitude) > 0 and len(longitude) > 0)
         if len(name) > 0 and len(code) > 0 and len(latitude) > 0 and len(longitude) > 0:
             try:
                 self.commit_airport_to_database(code, latitude, longitude, name)
@@ -39,7 +41,10 @@ class AirportApp(App):
                 self.root.ids.create_airport_error.text = 'Database could not be updated.' \
                                                           '\nThe information added may match an airport that' \
                                                           '\nis currently in the database'
-        self.root.ids.create_airport_error.text = 'Some information inputs were left blank, \nplease fill out all inputs'
+            except ValueError:
+                self.root.ids.create_airport_error.text = 'Invalid Input.\nPlease Try Again'
+        else:
+            self.root.ids.create_airport_error.text = 'Some information inputs were left blank, \nplease fill out all inputs'
 
     def commit_airport_to_database(self, code, latitude, longitude, name):
         airport = Airport(name=name, code=code, latitude=int(latitude), longitude=int(longitude))
@@ -57,7 +62,10 @@ class AirportApp(App):
                 self.root.ids.create_city_error.text = 'Database could not be updated.' \
                                                        '\nThe information added may match a city that' \
                                                        '\nis currently in the database.'
-        self.root.ids.create_city_error.text = 'Some information inputs were left blank, \nplease fill out all inputs'
+            except ValueError:
+                self.root.ids.create_city_error.text = 'Invalid Input\nPlease Try Again'
+        else:
+            self.root.ids.create_city_error.text = 'Some information inputs were left blank, \nplease fill out all inputs'
 
     def commit_city_to_database(self, geographic_entity, latitude, longitude, name):
         city = City(city_name=name, encompassing_geographic_entity=geographic_entity, latitude=int(latitude),
