@@ -3,11 +3,11 @@ from sys import stderr
 
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import timedelta
-from database import Database, City, Airport, Venue, Condition, Itinerary
+from database import Database, City, Airport, Venue, Condition, Itinerary, Review
 
 
 def add_starter_data(session):
-    day = Itinerary(airport='Omaha Airport', city='Omaha', date=date(2002, 1, 1))
+    day = Itinerary(airport='Omaha Airport', city='Omaha', date=date(2022, 4, 29))
     session.add(day)
     session.commit()
     san_fran = City(city_name='San Francisco', latitude=37.8, longitude=-122.4, encompassing_geographic_entity='California')
@@ -57,6 +57,24 @@ def add_starter_data(session):
     session.add(casa_bonita)
     session.commit()
 
+    chase_review_1 = Review(score=4, venue=chase)
+    chase_review_2 = Review(score=3, venue=chase)
+    alamo_review_1 = Review(score=4, venue=alamo)
+    alamo_review_2 = Review(score=1, venue=alamo)
+    melting_pot_review_1 = Review(score=2, venue=melting_pot)
+    melting_pot_review_2 = Review(score=4, venue=melting_pot)
+    mile_high_review_1 = Review(score=4, venue=mile_high)
+    mile_high_review_2 = Review(score=3, venue=mile_high)
+    session.add(chase_review_1)
+    session.add(chase_review_2)
+    session.add(alamo_review_1)
+    session.add(alamo_review_2)
+    session.add(melting_pot_review_1)
+    session.add(melting_pot_review_2)
+    session.add(mile_high_review_1)
+    session.add(mile_high_review_2)
+    session.commit()
+
     lincoln = City(city_name='Lincoln', encompassing_geographic_entity='Nebraska', latitude=92.01, longitude=95.2)
     omaha = City(city_name='Omaha', encompassing_geographic_entity='Nebraska', latitude=91, longitude=93.4)
     first_denver_airport_forecast = Condition(date=date(2002, 9, 21), max_temperature=90, max_humidity=20, max_wind_speed=13, rain=0, visibility=100)
@@ -74,11 +92,36 @@ def add_starter_data(session):
     session.add(first_omaha_airport_forecast)
     session.add(second_omaha_airport_forecast)
 
+    current_airport = Airport(name='Pacific Airport', latitude=90, longitude=90, code='AAAA')
+    go_to_airport = Airport(name='Center Airport', latitude=88, longitude=91, code='BBBB')
+    other_airport = Airport(name='Dodge Airport', latitude=86, longitude=94, code='CCCC')
+    current_city = City(city_name='Blondo', latitude=90, longitude=90.02, airports=[current_airport], encompassing_geographic_entity='US')
+    go_to_city = City(city_name='Maple', latitude=88, longitude=91.02, airports=[go_to_airport], encompassing_geographic_entity='US')
+    other_city = City(city_name='Fort', latitude=86, longitude=94.02, airports=[other_airport], encompassing_geographic_entity='US')
+    # 'Indoor Restaurant', 'Outdoor Restaurant', 'Indoor Theater', 'Outdoor Theater', 'Indoor Sports Arena', 'Outdoor Sports Arena'
+    blondo_venue = Venue(venue_name='Mcdonalds', venue_type='Outdoor Restaurant', city=current_city)
+    maple_venue_1 = Venue(venue_name='Burger King', venue_type='Outdoor Restaurant', city=go_to_city)
+    maple_venue_2 = Venue(venue_name='Baxter Arena', venue_type='Outdoor Sports Arena', city=go_to_city)
+    fort_venue_1 = Venue(venue_name='The Rose', venue_type='Outdoor Theater', city=other_city)
+    fort_venue_2 = Venue(venue_name='Freddies', venue_type='Outdoor Restaurant', city=other_city)
+    session.add(current_airport)
+    session.add(go_to_airport)
+    session.add(other_airport)
+    session.add(current_city)
+    session.add(go_to_city)
+    session.add(other_city)
+    session.add(blondo_venue)
+    session.add(maple_venue_2)
+    session.add(maple_venue_1)
+    session.add(fort_venue_2)
+    session.add(fort_venue_1)
+    session.commit()
+
 
 def main():
     try:
-        url = Database.construct_mysql_url('cse.unl.edu', 3306, 'kandrews', 'kandrews', 'qUc:6M')
-        #url = Database.construct_mysql_url('localhost', 33060, 'airports', 'root', 'cse1208')
+        #url = Database.construct_mysql_url('cse.unl.edu', 3306, 'kandrews', 'kandrews', 'qUc:6M')
+        url = Database.construct_mysql_url('localhost', 33060, 'airports', 'root', 'cse1208')
         database = Database(url)
         database.ensure_tables_exist()
         session = database.create_session()

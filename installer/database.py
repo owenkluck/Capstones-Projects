@@ -14,6 +14,7 @@ class City(Persisted):
     encompassing_geographic_entity = Column(String(256), nullable=False)
     validated = Column(Boolean, default=False)
     venues = relationship('Venue', uselist=True, back_populates='city')
+    conditions = relationship('Condition', uselist=True, back_populates='city')
     airports = relationship('Airport', uselist=True, secondary='airport_cities', back_populates='cities')
 
 
@@ -44,6 +45,8 @@ class Review(Persisted):
 class Condition(Persisted):
     __tablename__ = 'conditions'
     condition_id = Column(Integer, primary_key=True, autoincrement=True)
+    city_id = Column(Integer, ForeignKey('cities.city_id', ondelete='CASCADE'))
+    airport_id = Column(Integer, ForeignKey('airports.airport_id', ondelete='CASCADE'))
     min_temperature = Column(Integer)
     max_temperature = Column(Integer)
     min_humidity = Column(Integer)
@@ -55,6 +58,7 @@ class Condition(Persisted):
     date = Column(Date)
     venue = relationship('Venue', uselist=True, back_populates='condition', secondary='venue_conditions')
     airport = relationship('Airport', back_populates='conditions')
+    city = relationship('City', back_populates='conditions')
 
 
 class VenueCondition(Persisted):
@@ -66,7 +70,6 @@ class VenueCondition(Persisted):
 class Airport(Persisted):
     __tablename__ = 'airports'
     airport_id = Column(Integer, primary_key=True)
-    condition_id = Column(Integer, ForeignKey('conditions.condition_id', ondelete='CASCADE'))
     name = Column(String(256), nullable=False)
     code = Column(String(256))
     longitude = Column(Float)
