@@ -1,6 +1,7 @@
 from kivy.app import App
 from kivy.modules import inspector  # For inspection.
 from kivy.core.window import Window  # For inspection.
+
 from entertainment_installer import *
 
 
@@ -83,6 +84,23 @@ class EntertainmentTrackerApp(App):
                 self.root.ids.venue_edit_message = message
         return duplicate_name
 
+    def check_city_for_venues(self, city, edit_or_review):
+        message = 'No venues exist in this city.'
+        c_id = self.session.query(City).filter(City.city_name == city).one().city_id
+        venue_query = self.session.query(Venue).filter(Venue.city_id == c_id)
+        if venue_query.count() > 0:
+            self.update_venue_list(city)
+            self.root.transition.direction = 'left'
+            if edit_or_review == 'EDIT':
+                self.root.current = 'edit_venue'
+            else:
+                self.root.current = 'choose_venue_new_review'
+        else:
+            if edit_or_review == 'EDIT':
+                self.root.ids.no_venues_message.text = message
+            else:
+                self.root.ids.no_venues_to_review.text = message
+
     def add_venue(self, ven_name, ven_type, city_name, min_temp, max_temp, min_humidity, max_humidity, max_wind_speed,
                   weather_condition_code):
         self.root.ids.venue_edit_selection.values.append(ven_name)
@@ -123,8 +141,10 @@ class EntertainmentTrackerApp(App):
             return True
 
     def update_venue_data(self, name, new_name, city, new_min_t, new_max_t, new_min_h, new_max_h, new_max_w, new_owc):
-        venue_updated_successfully = self._update_venue_data(self, name, new_name, city, new_min_t, new_max_t, new_min_h, new_max_h, new_max_w, new_owc)
+        venue_updated_successfully = self._update_venue_data(name, new_name, city, new_min_t, new_max_t, new_min_h,
+                                                             new_max_h, new_max_w, new_owc)
         if venue_updated_successfully:
+            self.update_spinner_names(name, new_name)
             self.root.transition.direction = 'left'
             self.root.current = 'venue_edit_success'
 
@@ -137,7 +157,7 @@ class EntertainmentTrackerApp(App):
             self.root.ids.venue_edit_message.text = 'Venue conditions must be integers.'
             return False
         elif self.duplicate_name_venue(name, new_name, city, 'EDIT'):
-            self.root.ids.venue_edit_message.text = f'A venue under the name {new_name} already exists.'
+            self.root.ids.venue_edit_message.text = 'A venue under that name already exists.'
             return False
         else:
             # Check for empty strings
@@ -163,7 +183,7 @@ class EntertainmentTrackerApp(App):
             self.session.commit()
             return True
 
-    def update_spinner_values(self, name, new_name):
+    def update_spinner_names(self, name, new_name):
         old_venues = self.root.ids.venue_edit_selection.values
         new_venues = list()
         for venue in old_venues:

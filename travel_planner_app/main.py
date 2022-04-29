@@ -3,6 +3,11 @@ from kivy.app import App
 from kivy.modules import inspector
 from kivy.core.window import Window
 from datetime import timedelta, date, datetime
+
+from kivy.uix.checkbox import CheckBox
+from kivy.uix.label import Label
+from kivy.uix.scrollview import ScrollView
+
 from travel_planner_app.database import Database
 from travel_planner_app.rest import RESTConnection
 from api_key import API_KEY
@@ -15,6 +20,10 @@ from sqlalchemy.exc import SQLAlchemyError
 
 PRIME_MERIDIAN = [0, 0]
 OPPOSITE_PRIME_MERIDIAN = [0, 180]
+
+
+class ReviewScrollView(ScrollView):
+    pass
 
 
 class TravelPlannerApp(App):
@@ -42,6 +51,7 @@ class TravelPlannerApp(App):
         self.previous_destination = None
         self.destination = None
         self.final_destination = None
+        self.ratings_to_update = []
 
     def build(self):
         inspector.create_inspector(Window, self)
@@ -75,7 +85,7 @@ class TravelPlannerApp(App):
     def add_locations_spinner(self):
         spinner_airports = [airport.name for airport in self.session.query(Airport).all(Airport.validated is False)]
         spinner_city = [city.name for city in self.session.query(City).all(City.validated is False)]
-        self.root.ids.airports_spinner.values = spinner_airports
+        self.root.ids.airports_spinner1.values = spinner_airports
         self.root.ids.city_spinner.values = spinner_city
 
     def get_venues_to_validate(self):
@@ -133,6 +143,24 @@ class TravelPlannerApp(App):
     def on_records_not_loaded(self, _, error):
         Logger.error(f'{self.__class__.__name__}: {error}')
 
+    def populate_ratings_scroll_view(self):
+        ratings = self.get_new_ratings()
+        venues = []
+        for rating in ratings:
+            if rating.venue not in venues:
+                venues.append(rating.venue)
+        for venue in venues:
+            view = ReviewScrollView()
+            view.children[0].children[1].text = venue.venue_name
+            for rating in venue.reviews:
+                view.children[0].children[0].children[0].add_widget(CheckBox())
+                view.children[0].children[0].children[1].add_widget(Label(text=f'score: {rating.score} id: {rating.review_id}'))
+            self.root.ids.venue_and_review_scroll.add_widget(view)
+
+    def get_checkbox_states(self):
+        #self.root.ids.venue_and_review_scroll.children
+        pass
+
     def get_average_rating(self, venue_name):
         try:
             return self.session.query(Venue).filter(Venue.name == venue_name).one().average_welp.score
@@ -141,14 +169,14 @@ class TravelPlannerApp(App):
                   ' that or the name in the database doesn\'t exist')
 
     def get_new_ratings(self):
-        new_ratings = self.session.query(Review).filter(Review.validated is False)
+        new_ratings = self.session.query(Review).filter(Review.validated == False)
         return new_ratings
 
-    def update_rating(self, rating, venue_name, review_id):
+    def update_rating(self, venue_name, review_id):
         try:
             venue = self.session.query(Venue).filter(Venue.name == venue_name).one()
             review = self.session.query(Review).filter(Review.review_id == review_id).one()
-            new_average_score = (len(venue.reviews) * venue.average_welp_score + rating) / (len(venue.reviews + 1))
+            new_average_score = (len(venue.reviews) * venue.average_welp_score + review.score) / (len(venue.reviews + 1))
             venue.average_welp_score = new_average_score
             venue.welp_score_needs_update = False
             self.submit_data(venue)
@@ -545,7 +573,10 @@ class TravelPlannerApp(App):
 
     def loading_screen(self, **kwargs):
         super(TravelPlannerApp, self).__init__(**kwargs)
-        Clock.schedule_once(self, 3)
+        Clock.schedule_once(self.load, 3)
+
+    def load(self, app):
+        self.root.current = 'mainmenu1'
 
 
 def construct_mysql_url(authority, port, database, username, password):
@@ -586,8 +617,8 @@ def main():
     airport = app.session.query(Airport).filter(Airport.name == 'Omaha Airport').one()
     # app.create_closest_itinerary_day(PRIME_MERIDIAN, app.current_date, airport)
     # app.create_entertainment_itinerary(PRIME_MERIDIAN, app.current_date, airport)
-    itinerary = app.session.query(Itinerary).all()[0]
-    app.update_existing_itinerary(itinerary)
+    # itinerary = app.session.query(Itinerary).all()[0]
+    # app.update_existing_itinerary(itinerary)
     app.run()
 
 
@@ -596,7 +627,7 @@ if __name__ == '__main__':
 
 # Put Error handling around all one() statements
 # Make method to create conditions for a place of None exist.
-# Start writing unit tests for intinerary functions.
+# Start writing unit tests for itinerary functions.
 # Make sure algorithm implements all necessary requirements.
 # Make sure main is complete and functional.
 # change all date query comparisons
