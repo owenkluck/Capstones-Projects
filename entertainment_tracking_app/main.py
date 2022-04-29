@@ -56,7 +56,6 @@ class EntertainmentTrackerApp(App):
         else:
             city = City(city_name=name, latitude=lat, longitude=long, encompassing_geographic_entity=entity)
             self.session.add(city)
-            self.root.ids.city_creation_message.text = ''
             self.session.commit()
             self.root.ids.associated_city.values.append(name)
             self.session.commit()
@@ -75,18 +74,25 @@ class EntertainmentTrackerApp(App):
         for venue in venues_to_check:
             if create_or_edit == 'CREATE' and venue.venue_name == candidate_name:
                 duplicate_name = True
+                self.root.ids.venue_name_error.text = message
             if create_or_edit == 'EDIT' and venue.venue_name == candidate_name and original_name != candidate_name:
                 duplicate_name = True
+                self.root.ids.venue_edit_message.text = message
+        if create_or_edit == 'CREATE' and not duplicate_name:
+            self.root.transition.direction = 'left'
+            self.root.current = 'choose_conditions'
         return duplicate_name
 
-    def add_venue(self, ven_name, ven_type, city, min_temp, max_temp, min_humidity, max_humidity, max_wind_speed, weather_condition_code):
+    def add_venue(self, ven_name, ven_type, city, min_temp, max_temp, min_humidity, max_humidity, max_wind_speed,
+                  weather_condition_code):
         city_query_id = self.session.query(City).filter(City.city_name == city).one().city_id
         venue = Venue(venue_name=ven_name, venue_type=ven_type, city_id=city_query_id)
         self.session.add(venue)
         self.session.commit()
         self.root.ids.venue_edit_selection.values.append(ven_name)
         self.session.commit()
-        self.add_condition(ven_name, min_temp, max_temp, min_humidity, max_humidity, max_wind_speed, weather_condition_code)
+        self.add_condition(ven_name, min_temp, max_temp, min_humidity, max_humidity, max_wind_speed,
+                           weather_condition_code)
         self.session.commit()
 
     def add_condition(self, name, min_t, max_t, min_h, max_h, max_ws, owc):
@@ -149,7 +155,6 @@ class EntertainmentTrackerApp(App):
                 else:
                     new_venues.append(venue)
             self.root.ids.venue_edit_selection.values = tuple(new_venues)
-            self.root.ids.venue_edit_selection.text = new_name
             # Don't forget to save your changes! :)
             self.session.commit()
             self.root.transition.direction = 'left'
