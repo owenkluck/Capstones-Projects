@@ -194,6 +194,9 @@ ScreenManager:
                         id: venue_type
                         text: 'Indoor Restaurant'
                         values: ('Indoor Restaurant', 'Outdoor Restaurant', 'Indoor Theater', 'Outdoor Theater', 'Indoor Sports Arena', 'Outdoor Sports Arena')
+                Label:
+                    id: venue_name_error
+                    font_size: sp(20)
                 BoxLayout:
                     orientation: 'horizontal'
                     Button:
@@ -204,8 +207,7 @@ ScreenManager:
                     Button:
                         text: 'NEXT'
                         on_press:
-                            root.transition.direction = 'left'
-                            root.current = 'choose_conditions'
+                            app.duplicate_name_venue(venue_name.text, venue_name.text, associated_city.text, 'CREATE')
     Screen:
         name: 'choose_conditions'
         BoxLayout:
@@ -308,7 +310,7 @@ ScreenManager:
                 BoxLayout:
                     orientation: 'vertical'
                     Label:
-                        id: venue_creation_message
+                        id: venue_condition_error
                         text: ''
             BoxLayout:
                 orientation: 'horizontal'
@@ -522,6 +524,9 @@ ScreenManager:
                         root.current = 'new_venue_score'
     Screen:
         name: 'new_venue_score'
+        on_pre_enter:
+            welp_score.text = ''
+            invalid_welp_score.text = ''
         BoxLayout:
             orientation: 'vertical'
             Label:
