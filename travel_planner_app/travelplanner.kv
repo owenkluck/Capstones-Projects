@@ -154,11 +154,11 @@ ScreenManager:
                             text: 'Discard\nChanges'
                             font_size: '15sp'
                             on_press:
-                                root.ids.authority.text = ''
-                                root.ids.port.text = ''
-                                root.ids.database.text = ''
-                                root.ids.username.text = ''
-                                root.ids.password.text = ''
+                                self.ids.database_authority.text = ''
+                                self.ids.database_portnumber.text = ''
+                                self.ids.database_name.text = ''
+                                self.ids.database_username.text = ''
+                                self.ids.database_password.text = ''
                 BoxLayout:
                     orientation: 'horizontal'
                     Button:
@@ -166,10 +166,10 @@ ScreenManager:
                         size_hint: (0.30, 0.30)
                         pos_hint: {'x':.25, 'y':0}
                         on_press:
-                            app.connect_to_database(root.ids.authority.text, root.ids.port.text, root.ids.database.text, root.ids.username.text, root.ids.password.text)
+                            app.connect_to_database(root.ids.database_authority.text, root.ids.database_portnumber.text, root.ids.database_name.text, root.ids.database_username.text, root.ids.database_password.text)
                             app.connect_to_open_weather()
                             root.transition.direction = 'left'
-                            root.current = 'loading_screen'
+                            root.current = 'update_ratings'
     Screen:
         name: 'mainmenu1'
         BoxLayout:
@@ -329,17 +329,17 @@ ScreenManager:
                         BoxLayout:
                             size_hint_max_y: 10
                         BoxLayout:
-                            size_hint_max_y: 45
+                            size_hint_max_y: 20
                             orientation: 'horizontal'
                             Label:
                                 id: location_review
                         BoxLayout:
-                            size_hint_max_y: 10
+                            size_hint_max_y: 8
                         BoxLayout:
                             id: venue_and_review_scroll
                             orientation: 'horizontal'
                         BoxLayout:
-                            size_hint_max_y: 10
+                            size_hint_max_y: 8
                         BoxLayout:
                         Label:
                             id: review_text
@@ -368,34 +368,6 @@ ScreenManager:
                                 size_hint: (0.5, 0.5)
                                 on_press:
                                     app.update_ratings()
-    Screen:
-        name: 'prepare_itienary'
-        on_enter:
-        BoxLayout:
-            orientation: 'vertical'
-            BoxLayout:
-                orientation: 'horizontal'
-                size_hint_max_y: 80
-                Label:
-                    text: 'Prepare Itienary'
-                    font_size: '25sp'
-            BoxLayout:
-                orientation: 'vertical'
-                BoxLayout:
-                    orientation: 'horizontal'
-                    BoxLayout:
-                        size_hint_max_x: 20
-                    BoxLayout:
-                        orientation: 'vertical'
-                        BoxLayout:
-                            size_hint_max_y: 10
-                        BoxLayout:
-                            size_hint_max_y: 45
-                            orientation: 'horizontal'
-                            Label:
-                                text:
-                        BoxLayout:
-                            size_hint_max_y: 10
     Screen:
         name: 'prepare_itienary'
         on_enter:
