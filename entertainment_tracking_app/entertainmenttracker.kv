@@ -344,7 +344,9 @@ ScreenManager:
             Spinner:
                 id: venue_edit_city
                 values: associated_city.values
-            Widget:
+            Label:
+                id: no_venues_message
+                font_size: sp(20)
             BoxLayout:
                 orientation: 'horizontal'
                 Button:
@@ -356,9 +358,7 @@ ScreenManager:
                 Button:
                     text: 'Choose Venue'
                     on_press:
-                        root.transition.direction = 'left'
-                        root.current = 'edit_venue'
-                        app.update_venue_list(venue_edit_city.text)
+                        app.check_city_for_venues(venue_edit_city.text, 'EDIT')
     Screen:
         name: 'edit_venue'
         BoxLayout:
@@ -477,6 +477,9 @@ ScreenManager:
             Spinner:
                 id: welp_city
                 values: associated_city.values
+            Label:
+                id: no_venues_to_review
+                font_size: sp(20)
             BoxLayout:
                 orientation: 'horizontal'
                 Button:
@@ -488,9 +491,7 @@ ScreenManager:
                 Button:
                     text: 'NEXT'
                     on_press:
-                        root.transition.direction = 'left'
-                        root.current = 'choose_venue_new_review'
-                        app.update_venue_list(welp_city.text)
+                        app.check_city_for_venues(welp_city.text, 'REVIEW')
     Screen:
         name: 'choose_venue_new_review'
         BoxLayout:
@@ -534,7 +535,6 @@ ScreenManager:
                 id: welp_score
             Label:
                 id: invalid_welp_score
-                text: ''
                 font_size: sp(20)
             BoxLayout:
                 orientation: 'horizontal'

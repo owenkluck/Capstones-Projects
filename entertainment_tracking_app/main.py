@@ -1,6 +1,7 @@
 from kivy.app import App
 from kivy.modules import inspector  # For inspection.
 from kivy.core.window import Window  # For inspection.
+
 from entertainment_installer import *
 
 
@@ -82,6 +83,23 @@ class EntertainmentTrackerApp(App):
                 duplicate_name = True
                 self.root.ids.venue_edit_message = message
         return duplicate_name
+
+    def check_city_for_venues(self, city, edit_or_review):
+        message = 'No venues exist in this city.'
+        c_id = self.session.query(City).filter(City.city_name == city).one().city_id
+        venue_query = self.session.query(Venue).filter(Venue.city_id == c_id)
+        if venue_query.count() > 0:
+            self.update_venue_list(city)
+            self.root.transition.direction = 'left'
+            if edit_or_review == 'EDIT':
+                self.root.current = 'edit_venue'
+            else:
+                self.root.current = 'choose_venue_new_review'
+        else:
+            if edit_or_review == 'EDIT':
+                self.root.ids.no_venues_message.text = message
+            else:
+                self.root.ids.no_venues_to_review.text = message
 
     def add_venue(self, ven_name, ven_type, city_name, min_temp, max_temp, min_humidity, max_humidity, max_wind_speed,
                   weather_condition_code):
