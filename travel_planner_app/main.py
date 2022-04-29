@@ -185,7 +185,8 @@ class TravelPlannerApp(App):
         best_airport = self.can_meridian_be_passed(current_airport, in_range_airports)
         if best_airport is None:
             best_score = 0
-            best_city = None
+            best_airport = in_range_airports[0]
+            best_city = in_range_airports[0].cities[0]
             for airport in in_range_airports:
                 city = self.determine_best_city(airport, current_date)
                 score = self.get_city_score(city, current_date)
@@ -193,8 +194,10 @@ class TravelPlannerApp(App):
                     best_score = score
                     best_city = city
                     best_airport = airport
+            print(f'{best_city}, from end of algorithm')
         else:
             best_city = self.determine_best_city(best_airport, current_date)
+            print('else in find best entertainment airport/city')
         return best_airport, best_city
 
     def find_closest_airport_to_destination(self, in_range_airports, destination, current_airport):
@@ -246,6 +249,7 @@ class TravelPlannerApp(App):
 
     def determine_best_city(self, airport, current_date):
         best_city = airport.cities[0]
+        print(best_city)
         city_score = 0
         for city in airport.cities:
             if self.get_city_score(city, current_date) > city_score:
@@ -390,7 +394,7 @@ class TravelPlannerApp(App):
             Condition.date == current_date and Condition.city_id == city.city_id).one()
         venues_to_visit = self.get_open_venues_list(city, city_forecast)
         venues = self.determine_venues(venues_to_visit)
-        itinerary = Itinerary(airport=airport.name, city=city.name, venues=venues, date=current_date)
+        itinerary = Itinerary(airport=airport.name, city=city.city_name, venues=venues, date=current_date)
         self.submit_data(itinerary)
         print('Success')
 
@@ -418,6 +422,14 @@ class TravelPlannerApp(App):
             max_date += timedelta(days=1)
             self.create_closest_itinerary_day(self.destination, max_date, current_airport)
             self.create_entertainment_itinerary(self.destination, max_date, current_airport)
+            next_itinerary = self.session.query(Itinerary).filter(Itinerary.date == max_date)
+            this_itinerary = None
+            for itinerary in next_itinerary:
+                if itinerary.date == max_date:
+                    this_itinerary = itinerary
+            if this_itinerary is None:
+                return
+            current_airport = self.session.query(Airport).filter(Airport.name == this_itinerary.airport).one()
 
     def update_existing_itinerary(self, itinerary):
         airport = self.session.query(Airport).filter(Airport.name == itinerary.airport).one()
@@ -555,7 +567,8 @@ def main():
     # app.session.add(airport)
     # app.session.commit()
     airport = app.session.query(Airport).filter(Airport.name == 'Omaha Airport').one()
-    app.create_closest_itinerary_day(PRIME_MERIDIAN, app.current_date, airport)
+    #app.create_closest_itinerary_day(PRIME_MERIDIAN, app.current_date, airport)
+    #app.create_entertainment_itinerary(PRIME_MERIDIAN, app.current_date, airport)
     app.run()
 
 
