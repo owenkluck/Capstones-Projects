@@ -448,6 +448,7 @@ ScreenManager:
                     text: 'SAVE'
                     on_press:
                         app.update_venue_data(venue_edit_selection.text, new_venue_name.text, venue_edit_city.text, new_min_t.text, new_max_t.text, new_min_h.text, new_max_h.text, new_max_w.text, new_owc.text)
+                        app.update_spinner_names(venue_edit_selection.text, new_venue_name.text)
     Screen:
         name: 'venue_edit_success'
         BoxLayout:
