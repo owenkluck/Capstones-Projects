@@ -75,7 +75,7 @@ class TravelPlannerApp(App):
     def add_locations_spinner(self):
         spinner_airports = [airport.name for airport in self.session.query(Airport).all(Airport.validated is False)]
         spinner_city = [city.name for city in self.session.query(City).all(City.validated is False)]
-        self.root.ids.airports_spinner.values = spinner_airports
+        self.root.ids.airports_spinner1.values = spinner_airports
         self.root.ids.city_spinner.values = spinner_city
 
     def get_venues_to_validate(self):
@@ -545,7 +545,10 @@ class TravelPlannerApp(App):
 
     def loading_screen(self, **kwargs):
         super(TravelPlannerApp, self).__init__(**kwargs)
-        Clock.schedule_once(self, 3)
+        Clock.schedule_once(self.load, 3)
+
+    def load(self, app):
+        self.root.current = 'mainmenu1'
 
 
 def construct_mysql_url(authority, port, database, username, password):
