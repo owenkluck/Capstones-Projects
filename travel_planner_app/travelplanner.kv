@@ -33,7 +33,7 @@ ScreenManager:
                                 text: 'Authority'
                             TextInput:
                                 text: 'cse.unl.edu'
-                                id: +
+                                id: database_authority
                                 multiline: False
                         BoxLayout:
                             size_hint_max_y: 10
@@ -43,7 +43,7 @@ ScreenManager:
                             Label:
                                 text: 'Port Number'
                             TextInput:
-                                id: +
+                                id: database_portnumber
                                 text: '3306'
                                 multiline: False
                         BoxLayout:
@@ -54,7 +54,7 @@ ScreenManager:
                             Label:
                                 text: 'Database Name'
                             TextInput:
-                                id: +
+                                id: database_name
                                 text: 'kandrews'
                                 multiline: False
                         BoxLayout:
@@ -65,7 +65,7 @@ ScreenManager:
                             Label:
                                 text: 'Username'
                             TextInput:
-                                id: +
+                                id: database_username
                                 text: 'kandrews'
                                 multiline: False
                         BoxLayout:
@@ -77,7 +77,7 @@ ScreenManager:
                                 text: 'Password'
                                 foreground_color: 'red'
                             TextInput:
-                                id: +
+                                id: database_password
                                 multiline: False
                         BoxLayout:
                             size_hint_max_y: 10
@@ -101,7 +101,7 @@ ScreenManager:
                             Label:
                                 text: 'Authority'
                             TextInput:
-                                id: +
+                                id: api_authority
                                 text: 'api.openweathermap.org'
                                 multiline: False
                         BoxLayout:
@@ -113,7 +113,7 @@ ScreenManager:
                                 text: 'Port Number'
                                 foreground_color: 'red'
                             TextInput:
-                                id: +
+                                id: api_portnumber
                                 text: '443'
                                 multiline: False
                         BoxLayout:
@@ -124,7 +124,7 @@ ScreenManager:
                             Label:
                                 text: 'API Key'
                             TextInput:
-                                id: +
+                                id: api_key
                                 multiline: False
                         BoxLayout:
                             size_hint_max_y: 40
@@ -137,6 +137,11 @@ ScreenManager:
                             text: 'Discard\nChanges'
                             font_size: '15sp'
                             on_press:
+                                root.ids.authority.text = ''
+                                root.ids.port.text = ''
+                                root.ids.database.text = ''
+                                root.ids.username.text = ''
+                                root.ids.password.text = ''
                 BoxLayout:
                     orientation: 'horizontal'
                     Button:
@@ -144,8 +149,10 @@ ScreenManager:
                         size_hint: (0.30, 0.30)
                         pos_hint: {'x':.25, 'y':0}
                         on_press:
+                            root.connect_to_open_weather()
                             root.transition.direction = 'left'
-                            root.current = 'mainmenu1'
+                            root.current = 'loading_screen'
+
     Screen:
         name: 'mainmenu1'
         BoxLayout:
@@ -207,6 +214,7 @@ ScreenManager:
                         text: 'Click this to advance calendar by one day.'
                         font_size: '20sp'
                         on_press:
+
                     BoxLayout:
                         size_hint_max_y: 20
                     BoxLayout:
@@ -263,7 +271,7 @@ ScreenManager:
                                 text: 'Select Airport or City to Validate'
                                 values:
                                     unvalidated_airport.values
-                                    unvalidated_city.values
+                                    unvalidated_airport.values
                         BoxLayout:
                             Label:
                                 text: ''
@@ -277,12 +285,12 @@ ScreenManager:
                                 size_hint: (0.5, 0.5)
                                 on_press:
                                     root.current = 'main_menu'
-                                    root.ids.forecast_date.text = ''
                             Button:
                                 text: 'VALIDATE LOCATION'
                                 size_hint: (0.5, 0.5)
                                 on_press:
-                                    root.current = 'create_forecast'
+                                    root.validate_city()
+                                    root.validate_location()
     Screen:
         name: 'update_ratings'
         on_enter:
@@ -308,20 +316,21 @@ ScreenManager:
                             size_hint_max_y: 45
                             orientation: 'horizontal'
                             Label:
-                                id:
-                                text: f"New Review for {}.text"
+                                id: location_review
                         BoxLayout:
                             size_hint_max_y: 10
                         BoxLayout:
                         Label:
-                            id:
-                            text: 'Current average Rating {}.text'
+                            id: venue_average_rating
+                            text: 'Current average Rating {average_welp}.score'
+                            values:
+                                unvalidated_airport.values
+                                unvalidated_airport.values
                         BoxLayout:
                             size_hint_max_y: 10
                         BoxLayout:
                         Label:
                             id: review_text
-                            text: 'New Review: {}.text'
                         BoxLayout:
                             Label:
                                 text: ''
@@ -430,24 +439,21 @@ ScreenManager:
                                 text: 'Locations that need information validated'
                         BoxLayout:
                             size_hint_max_y: 10
-                        BoxLayout:
-                            Label:
-                                id: unvalidated_locations
-                                text: root.unvalidated_airports
-                                text: root.unvalidated_cities
-                        BoxLayout:
-                            size_hint_max_y: 10
-                        BoxLayout:
-                            size_hint_max_y: 45
-                            orientation: 'horizontal'
-                            Label:
-                                text: 'Operators and Venues that need venue ratings updated.'
-                        BoxLayout:
-                            size_hint_max_y: 10
-                        BoxLayout:
-                            Label:
-                                id: update_venues_and_operators
-                                text: root.unvalidated_venues
+                BoxLayout:
+                    Label:
+                        text: ''
+                        id: create_city_error
+                    BoxLayout:
+                        size_hint_max_x: 20
+                BoxLayout:
+                    orientation: 'horizontal'
+                    Button:
+                        text: 'Proceed'
+                        size_hint: (0.30, 0.30)
+                        pos_hint: {'x':.25, 'y':0}
+                        on_press:
+                            root.get_venues_to_validate()
+                            root.current = 'mainmenu1'
 <Screen>:
     canvas.before:
         Color:
