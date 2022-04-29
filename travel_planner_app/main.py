@@ -67,8 +67,8 @@ class TravelPlannerApp(App):
         #     unvalidated_airports[airport] = unvalidated_airports[airport].name
         # for city in range(len(unvalidated_cities)):
         #     unvalidated_airports[city] = unvalidated_airports[city].name
-        #self.root.ids.unvalidated_airport.values = unvalidated_airports
-        #self.root.ids.unvalidated_city.values = unvalidated_cities
+        # self.root.ids.unvalidated_airport.values = unvalidated_airports
+        # self.root.ids.unvalidated_city.values = unvalidated_cities
         return unvalidated_airports, unvalidated_cities
 
     def get_venues_to_validate(self):
@@ -263,7 +263,7 @@ class TravelPlannerApp(App):
         forecasts_at_city = self.session.query(Condition).filter(Condition.city_id == city.city_id).count()
         if forecasts_at_city > 0:
             forecasts = self.session.query(Condition).filter(
-                    Condition.city_id == city.city_id and Condition.date == current_date)
+                Condition.city_id == city.city_id and Condition.date == current_date)
             forecasts_on_date = []
             for forecast in forecasts:
                 if forecast.date == current_date:
@@ -278,7 +278,8 @@ class TravelPlannerApp(App):
                     Condition.city_id == city.city_id and Condition.date == current_date)[0].condition_id
                 for condition in forecast:
                     if condition.condition_id > max_id:
-                        condition_to_delete = self.session.query(Condition).filter(Condition.condition_id == max_id).one()
+                        condition_to_delete = self.session.query(Condition).filter(
+                            Condition.condition_id == max_id).one()
                         max_id = condition.condition_id
                         self.delete_row(condition_to_delete)
                     elif condition.condition_id < max_id:
@@ -374,7 +375,8 @@ class TravelPlannerApp(App):
             Condition.date == current_date and Condition.city_id == city.city_id).count()
         print(city_forecast_length)
         if city_forecast_length == 0:
-            self.request_onecall_for_place(airport.latitude, airport.longitude, current_date, None, None, city, 'create')
+            self.request_onecall_for_place(airport.latitude, airport.longitude, current_date, None, None, city,
+                                           'create')
             self.create_closest_itinerary_day(destination, current_date, current_airport)
         elif city_forecast_length > 1:
             print('multiple forecasts on a single date, associated with one city')
@@ -438,8 +440,12 @@ class TravelPlannerApp(App):
             if condition.date >= self.current_date:
                 future_forecasts.append(condition)
         if len(future_forecasts) > 0:
-            outdated_forecast = self.session.query(Condition).filter(Condition.airport_id == airport.airport_id and
-                                                                     Condition.date == itinerary.date).one()
+            outdated_forecasts = self.session.query(Condition).filter(Condition.airport_id == airport.airport_id and
+                                                                      Condition.date == itinerary.date)
+            outdated_forecast = outdated_forecasts[0]
+            for forecast in outdated_forecasts:
+                if forecast.date == itinerary.date:
+                    outdated_forecast = forecast
             self.request_onecall_for_place(airport.latitude, airport.longitude, itinerary.date, outdated_forecast,
                                            airport, None, 'update')
         else:
@@ -483,7 +489,7 @@ class TravelPlannerApp(App):
             print('No forecast matched the date of the itinerary')
 
     def update_forecast(self, _, response):
-        #print(dumps(response, indent=4, sort_keys=True))
+        # print(dumps(response, indent=4, sort_keys=True))
         self.updated_forecast = response
 
     def create_new_forecasts(self, airport, city):
@@ -567,8 +573,10 @@ def main():
     # app.session.add(airport)
     # app.session.commit()
     airport = app.session.query(Airport).filter(Airport.name == 'Omaha Airport').one()
-    #app.create_closest_itinerary_day(PRIME_MERIDIAN, app.current_date, airport)
-    #app.create_entertainment_itinerary(PRIME_MERIDIAN, app.current_date, airport)
+    # app.create_closest_itinerary_day(PRIME_MERIDIAN, app.current_date, airport)
+    # app.create_entertainment_itinerary(PRIME_MERIDIAN, app.current_date, airport)
+    itinerary = app.session.query(Itinerary).all()[0]
+    app.update_existing_itinerary(itinerary)
     app.run()
 
 
@@ -580,3 +588,4 @@ if __name__ == '__main__':
 # Start writing unit tests for intinerary functions.
 # Make sure algorithm implements all necessary requirements.
 # Make sure main is complete and functional.
+# change all date query comparisons
