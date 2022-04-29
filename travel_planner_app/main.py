@@ -14,6 +14,7 @@ from api_key import API_KEY
 from database import Airport, City, Venue, Condition, Itinerary, Review
 from kivy.logger import Logger
 from json import dumps
+from kivy.clock import Clock
 import csv
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -79,6 +80,12 @@ class TravelPlannerApp(App):
         # self.root.ids.unvalidated_airport.values = unvalidated_airports
         # self.root.ids.unvalidated_city.values = unvalidated_cities
         return unvalidated_airports, unvalidated_cities
+
+    def add_locations_spinner(self):
+        spinner_airports = [airport.name for airport in self.session.query(Airport).all(Airport.validated is False)]
+        spinner_city = [city.name for city in self.session.query(City).all(City.validated is False)]
+        self.root.ids.airports_spinner.values = spinner_airports
+        self.root.ids.city_spinner.values = spinner_city
 
     def get_venues_to_validate(self):
         venue_ids = set()
@@ -558,6 +565,10 @@ class TravelPlannerApp(App):
     def delete_buttons(self):
         self.root.ids.scroll_box_1.clear_widgets()
         self.root.ids.scroll_box_2.clear_widgets()
+
+    def loading_screen(self, **kwargs):
+        super(TravelPlannerApp, self).__init__(**kwargs)
+        Clock.schedule_once(self, 3)
 
 
 def construct_mysql_url(authority, port, database, username, password):

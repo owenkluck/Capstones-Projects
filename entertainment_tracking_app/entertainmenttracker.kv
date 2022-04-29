@@ -80,7 +80,6 @@ ScreenManager:
                     orientation: 'horizontal'
                     Label:
                         id: city_creation_message
-                        text: ''
                         font_size: sp(20)
                     Button:
                         id: ok_button
@@ -184,7 +183,6 @@ ScreenManager:
                         font_size: sp(20)
                     Spinner:
                         id: associated_city
-                        text: 'Choose A City'
                 BoxLayout:
                     orientation: 'horizontal'
                     Label:
@@ -192,7 +190,6 @@ ScreenManager:
                         font_size: sp(20)
                     Spinner:
                         id: venue_type
-                        text: 'Indoor Restaurant'
                         values: ('Indoor Restaurant', 'Outdoor Restaurant', 'Indoor Theater', 'Outdoor Theater', 'Indoor Sports Arena', 'Outdoor Sports Arena')
                 Label:
                     id: venue_name_error
@@ -311,7 +308,6 @@ ScreenManager:
                     orientation: 'vertical'
                     Label:
                         id: venue_condition_error
-                        text: ''
             BoxLayout:
                 orientation: 'horizontal'
                 Button:
@@ -344,7 +340,6 @@ ScreenManager:
                 text: 'Choose City To Edit Venues Of'
             Spinner:
                 id: venue_edit_city
-                text: 'Choose a City'
                 values: associated_city.values
             Widget:
             BoxLayout:
@@ -376,7 +371,6 @@ ScreenManager:
                         font_size: sp(20)
                     Spinner:
                         id: venue_edit_selection
-                        text: 'Choose a Venue'
             BoxLayout:
                 orientation: 'horizontal'
                 Button:
@@ -454,6 +448,7 @@ ScreenManager:
                     text: 'SAVE'
                     on_press:
                         app.update_venue_data(venue_edit_selection.text, new_venue_name.text, venue_edit_city.text, new_min_t.text, new_max_t.text, new_min_h.text, new_max_h.text, new_max_w.text, new_owc.text)
+                        app.update_spinner_names(venue_edit_selection.text, new_venue_name.text)
     Screen:
         name: 'venue_edit_success'
         BoxLayout:
@@ -479,7 +474,6 @@ ScreenManager:
                 font_size: sp(25)
             Spinner:
                 id: welp_city
-                text: 'Select a City'
                 values: associated_city.values
             BoxLayout:
                 orientation: 'horizontal'
@@ -507,7 +501,6 @@ ScreenManager:
                 font_size: sp(25)
             Spinner:
                 id: welp_venue
-                text: 'Choose a Venue'
                 values: venue_edit_selection.values
             BoxLayout:
                 orientation: 'horizontal'
@@ -577,6 +570,9 @@ ScreenManager:
 <Label>:
     color: (0.0, 0.0, 0.75, 1.0)
     halign: 'center'
+
+<Spinner>:
+    text_autoupdate: True
 
 <Button>:
     color: (1, 1, 1, 1)
