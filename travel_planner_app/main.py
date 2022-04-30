@@ -18,6 +18,8 @@ from json import dumps
 from kivy.clock import Clock
 import csv
 from sqlalchemy.exc import SQLAlchemyError
+from kivy.properties import StringProperty
+
 
 PRIME_MERIDIAN = [0, 0]
 OPPOSITE_PRIME_MERIDIAN = [0, 180]
@@ -95,6 +97,10 @@ class TravelPlannerApp(App):
         #     unvalidated_airports[city] = unvalidated_airports[city].name
         # self.root.ids.unvalidated_airport.values = unvalidated_airports
         # self.root.ids.unvalidated_city.values = unvalidated_cities
+        amount_unvalidated_cities = StringProperty(len(unvalidated_airports))
+        amount_unvalidated_airports = StringProperty(len(unvalidated_cities))
+        self.root.ids.amount_unvalidated_airports.text = f'{amount_unvalidated_airports} airports need to be validated.'
+        self.root.ids.amount_unvalidated_cities.text = f'{amount_unvalidated_cities} cities need to be validated.'
         return unvalidated_airports, unvalidated_cities
 
     def add_locations_spinner(self):
