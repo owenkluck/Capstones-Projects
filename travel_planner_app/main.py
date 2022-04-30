@@ -2,8 +2,9 @@ import math
 from kivy.app import App
 from kivy.modules import inspector
 from kivy.core.window import Window
-from datetime import timedelta, date, datetime
+from datetime import timedelta, date
 
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
@@ -26,6 +27,18 @@ class ReviewScrollView(ScrollView):
     pass
 
 
+class ItineraryView(BoxLayout):
+    pass
+
+
+class BlackLineX(BoxLayout):
+    pass
+
+
+class BlackLineY(BoxLayout):
+    pass
+
+
 class TravelPlannerApp(App):
     def __init__(self, authority='localhost', port=33060, database='airports', username='root', password='cse1208',
                  api_key=API_KEY, **kwargs):
@@ -40,13 +53,13 @@ class TravelPlannerApp(App):
         self.session = None
         self.weather_connection = None
         self.geo_connection = None
-        self.api_key = api_key
+        self.api_key = API_KEY
         self.validate_city_records = None
         self.current_location = None
         self.outdoor_sporting_events = 0
         self.outdoor_plays = 0
         self.outdoor_restaurants = 0
-        self.current_date = date(2022, 4, 29)
+        self.current_date = date.today()
         self.updated_forecast = None
         self.previous_destination = None
         self.destination = None
@@ -339,7 +352,7 @@ class TravelPlannerApp(App):
             score += venues_open
             return score
         else:
-            self.request_onecall_for_place(city.latitude, city.longitude, current_date, None, None, city, 'create')
+            self.request_onecall_for_place(city.latitude, city.longitude, current_date, None, None, city, 'create', self.api_key)
             score = self.get_city_score(city, current_date)
             return score
 
@@ -424,7 +437,7 @@ class TravelPlannerApp(App):
         print(city_forecast_length)
         if city_forecast_length == 0:
             self.request_onecall_for_place(airport.latitude, airport.longitude, current_date, None, None, city,
-                                           'create')
+                                           'create', self.api_key)
             self.create_closest_itinerary_day(destination, current_date, current_airport)
         elif city_forecast_length > 1:
             print('multiple forecasts on a single date, associated with one city')
@@ -495,19 +508,49 @@ class TravelPlannerApp(App):
                 if forecast.date == itinerary.date:
                     outdated_forecast = forecast
             self.request_onecall_for_place(airport.latitude, airport.longitude, itinerary.date, outdated_forecast,
-                                           airport, None, 'update')
+                                           airport, None, 'update', self.api_key)
         else:
             self.request_onecall_for_place(airport.latitude, airport.longitude, itinerary.date,
-                                           None, airport, None, 'create')
+                                           None, airport, None, 'create', self.api_key)
+
+    def populate_itinerary_view(self):
+        itineraries = self.session.query(Itinerary).all()
+        closest_current_itineraries = []
+        entertainment_current_itineraries = []
+        for itinerary in itineraries:
+            if itinerary.date >= self.current_date and itinerary.itinerary_type == 'Close':
+                closest_current_itineraries.append(itinerary)
+            if itinerary.date >= self.current_date and itinerary.itinerary_type == 'Entertain':
+                entertainment_current_itineraries.append(itinerary)
+        root_1 = self.root.ids.entertainment_itinerary
+        root_2 = self.root.ids.closest_itinerary
+        for itinerary in entertainment_current_itineraries:
+            itinerary_view = ItineraryView()
+            itinerary_view.children[1].children[0].text = f'Entertainment: {1}'
+            itinerary_view.children[1].children[1].text = f'Eat at: {1}'
+            itinerary_view.children[1].children[2].text = f'Go to: {itinerary.city}'
+            itinerary_view.children[1].children[3].text = f'Arrive At: {itinerary.airport}'
+            itinerary_view.children[1].children[4].text = f'Airport Leave:'
+            itinerary_view.children[1].children[5].text = f'Date {itinerary.date}'
+            root_1.add_widget(itinerary_view)
+        for itinerary in closest_current_itineraries:
+            itinerary_view = ItineraryView()
+            itinerary_view.children[1].children[0].text = f'Entertainment: {1}'
+            itinerary_view.children[1].children[1].text = f'Eat at: {1}'
+            itinerary_view.children[1].children[2].text = f'Go to: {itinerary.city}'
+            itinerary_view.children[1].children[3].text = f'Arrive At: {itinerary.airport}'
+            itinerary_view.children[1].children[4].text = f'Airport Leave:'
+            itinerary_view.children[1].children[5].text = f'Date {itinerary.date}'
+            root_2.add_widget(itinerary_view)
 
     def request_onecall_for_place(self, latitude, longitude, itinerary_date, outdated_forecast, airport, city,
-                                  update_or_create):
+                                  update_or_create, api_key):
         self.weather_connection.send_request(
             'onecall',
             {
                 'lat': latitude,
                 'lon': longitude,
-                'appid': API_KEY
+                'appid': api_key
             },
             None,
             self.update_forecast,

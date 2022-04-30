@@ -169,7 +169,7 @@ ScreenManager:
 #                            app.connect_to_database(root.ids.database_authority.text, root.ids.database_portnumber.text, root.ids.database_name.text, root.ids.database_username.text, root.ids.database_password.text)
 #                            app.connect_to_open_weather()
                             root.transition.direction = 'left'
-                            root.current = 'update_ratings'
+                            root.current = 'prepare_itinerary'
     Screen:
         name: 'mainmenu1'
         BoxLayout:
@@ -370,33 +370,28 @@ ScreenManager:
                                     app.check_state_of_checkboxes()
                                     root.ids.venue_and_review_scroll.clear_widgets()
     Screen:
-        name: 'prepare_itienary'
+        name: 'prepare_itinerary'
         on_enter:
+            app.populate_itinerary_view()
         BoxLayout:
             orientation: 'vertical'
             BoxLayout:
                 orientation: 'horizontal'
                 size_hint_max_y: 80
                 Label:
-                    text: 'Prepare Itienary'
+                    text: 'Prepare Itinerary'
                     font_size: '25sp'
             BoxLayout:
                 orientation: 'vertical'
+                BlackLineX:
                 BoxLayout:
+                    id: entertainment_itinerary
                     orientation: 'horizontal'
-                    BoxLayout:
-                        size_hint_max_x: 20
-                    BoxLayout:
-                        orientation: 'vertical'
-                        BoxLayout:
-                            size_hint_max_y: 10
-                        BoxLayout:
-                            size_hint_max_y: 45
-                            orientation: 'horizontal'
-                            Label:
-                                text:
-                        BoxLayout:
-                            size_hint_max_y: 10
+                BlackLineX:
+                BoxLayout:
+                    id: closest_itinerary
+                    orientation: 'horizontal'
+                BlackLineX:
     Screen:
         name: 'loading_screen'
         on_enter: Clock.schedule_once(app.load, 3)
@@ -482,3 +477,39 @@ ScreenManager:
                 orientation: 'vertical'
                 id: check_box
 
+<ItineraryView>
+    orientation: 'horizontal'
+    BlackLineY:
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: 'Date'
+        Label:
+            text: 'Leave From'
+        Label:
+            text: 'Arrive At'
+        Label:
+            text: 'Go to'
+        Label:
+            text: 'Eat At'
+        Label:
+            text: 'Watch At'
+    BlackLineY:
+
+<BlackLineX>:
+    size_hint_max_y: 5
+    canvas:
+        Color:
+            rgba: (0, 0, 0, 1.0)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<BlackLineY>:
+    size_hint_max_x: 5
+    canvas:
+        Color:
+            rgba: (0, 0, 0, 1.0)
+        Rectangle:
+            pos: self.pos
+            size: self.size
