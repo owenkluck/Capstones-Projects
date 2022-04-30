@@ -169,7 +169,7 @@ ScreenManager:
 #                            app.connect_to_database(root.ids.database_authority.text, root.ids.database_portnumber.text, root.ids.database_name.text, root.ids.database_username.text, root.ids.database_password.text)
 #                            app.connect_to_open_weather()
                             root.transition.direction = 'left'
-                            root.current = 'prepare_itinerary'
+                            root.current = 'mainmenu1'
     Screen:
         name: 'mainmenu1'
         BoxLayout:
@@ -393,12 +393,22 @@ ScreenManager:
                         orientation: 'horizontal'
                         Button:
                             text: 'Create Itinerary'
+                            on_press:
+                                app.submit_data(app.queued_entertainment_itineraries)
+                                app.queued_closest_itineraries = []
+                                app.queued_entertainment_itineraries = []
+                                root.current = 'mainmenu1'
                     BlackLineX:
                     BoxLayout:
                         id: closest_itinerary
                         orientation: 'horizontal'
                         Button:
                             text: 'Create Itinerary'
+                            on_press:
+                                app.submit_data(app.queued_closest_itineraries)
+                                app.queued_closest_itineraries = []
+                                app.queued_entertainment_itineraries = []
+                                root.current = 'mainmenu1'
                     BlackLineX:
     Screen:
         name: 'loading_screen'

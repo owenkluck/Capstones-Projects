@@ -9,8 +9,8 @@ from kivy.uix.checkbox import CheckBox
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 
-from travel_planner_app.database import Database
-from travel_planner_app.rest import RESTConnection
+from database import Database
+from rest import RESTConnection
 from api_key import API_KEY
 from database import Airport, City, Venue, Condition, Itinerary, Review
 from kivy.logger import Logger
@@ -65,8 +65,8 @@ class TravelPlannerApp(App):
         self.destination = None
         self.final_destination = None
         self.ratings_to_update = []
-        self.queued_entertainment_itinerary = []
-        self.queued_closest_itinerary = []
+        self.queued_entertainment_itineraries = []
+        self.queued_closest_itineraries = []
 
     def build(self):
         inspector.create_inspector(Window, self)
@@ -449,7 +449,7 @@ class TravelPlannerApp(App):
             venues_to_visit = self.get_open_venues_list(city, city_forecast)
             venues = self.determine_venues(venues_to_visit)
             itinerary = Itinerary(airport=airport.name, city=city.city_name, venues=venues, date=current_date)
-            self.queued_closest_itinerary.append(itinerary)
+            self.queued_closest_itineraries.append(itinerary)
             print('Success')
 
     def create_entertainment_itinerary(self, destination, current_date, current_airport):
@@ -460,7 +460,7 @@ class TravelPlannerApp(App):
         venues_to_visit = self.get_open_venues_list(city, city_forecast)
         venues = self.determine_venues(venues_to_visit)
         itinerary = Itinerary(airport=airport.name, city=city.city_name, venues=venues, date=current_date)
-        self.queued_entertainment_itinerary.append(itinerary)
+        self.queued_entertainment_itineraries.append(itinerary)
         print('Success')
 
     def get_previous_itinerary(self):
@@ -524,10 +524,10 @@ class TravelPlannerApp(App):
         #         closest_current_itineraries.append(itinerary)
         #     if itinerary.date >= self.current_date and itinerary.itinerary_type == 'Entertain':
         #         entertainment_current_itineraries.append(itinerary)
-        self.root.ids.itinerary_scroll.size_hint_min_x = 300 * ((len(self.queued_closest_itinerary) + len(self.queued_entertainment_itinerary))/2)
+        self.root.ids.itinerary_scroll.size_hint_min_x = 300 * ((len(self.queued_closest_itineraries) + len(self.queued_entertainment_itineraries)) / 2)
         root_1 = self.root.ids.entertainment_itinerary
         root_2 = self.root.ids.closest_itinerary
-        for itinerary in self.queued_entertainment_itinerary:
+        for itinerary in self.queued_entertainment_itineraries:
             itinerary_view = ItineraryView()
             itinerary_view.children[1].children[0].text = f'Entertainment: {1}'
             itinerary_view.children[1].children[1].text = f'Eat at: {1}'
@@ -536,7 +536,7 @@ class TravelPlannerApp(App):
             itinerary_view.children[1].children[4].text = f'Airport Leave:'
             itinerary_view.children[1].children[5].text = f'Date {itinerary.date}'
             root_1.add_widget(itinerary_view)
-        for itinerary in self.queued_closest_itinerary:
+        for itinerary in self.queued_closest_itineraries:
             itinerary_view = ItineraryView()
             itinerary_view.children[1].children[0].text = f'Entertainment: {1}'
             itinerary_view.children[1].children[1].text = f'Eat at: {1}'
@@ -625,9 +625,9 @@ class TravelPlannerApp(App):
         self.root.ids.airport_spinner.values = values
 
     def add_airports_city_spinner(self):
-        values = [airport.name for airport in self.session.query(Airport).all()] and [city.name for city in
+        values = [airport.name for airport in self.session.query(Airport).all()] and [city.city_name for city in
                                                                                       self.session.query(City).all()]
-        self.root.ids.airports_city_spinner.values = values
+        self.root.ids.airports_city_spinner1.values = values
 
     def delete_buttons(self):
         self.root.ids.scroll_box_1.clear_widgets()
