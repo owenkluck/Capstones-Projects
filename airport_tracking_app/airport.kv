@@ -116,7 +116,8 @@ ScreenManager:
                             on_press:
                                 root.ids.airport_name.text = ''
                                 root.ids.airport_code.text = ''
-                                root.ids.airport_location.text = ''
+                                root.ids.airport_latitude.text = ''
+                                root.ids.airport_longitude.text = ''
                 BoxLayout:
                     Label:
                         text: ''
@@ -141,7 +142,6 @@ ScreenManager:
                         pos_hint: {'x':.25, 'y':0}
                         on_press:
                             app.submit_data_airport(root.ids.airport_name.text, root.ids.airport_code.text, root.ids.airport_latitude.text, root.ids.airport_longitude.text)
-                            root.current = 'success_airport'
                             root.ids.airport_name.text = ''
                             root.ids.airport_code.text = ''
                             root.ids.airport_latitude.text = ''

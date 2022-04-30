@@ -1,0 +1,155 @@
+# BurnPlanEvaluationApp System Test NOT_RECOMMENDED_OTHER
+
+## System Test: Determining whether the burn conditions are recommended or not based on the weather and other factors
+
+### Preconditions
+
+- Repository exists on <git.unl.edu>.
+- The repository has been cloned on the local file system.
+- The local copy of the repository is up-to-date with the remote repository.
+- The tester has access to the repository and has an SSH public key associated
+  with their account on <git.unl.edu>.
+- You have applied openweather connector to your project build path
+
+### Test
+
+1.  If you click the run button on the BurnPlanEvaluationApp, it will prompt you to enter the year, month, day, hour, and minute
+
+2.  Put the year as 2021. Put the month as 11. Put the day as 12. Put the minute as 0.
+
+3.  It will then prompt you to enter the latitude and longitude. Put each as 0.
+
+4.  Next, it will prompt you for land fuel type. Type "heavy".
+
+5.  Next, it will prompt you for acres to be burned. Type "40".
+
+6.  Next, you will be prompted for the type of fire. Type "blackline".
+
+7.  Next, it will prompt you for supplies. Type "done"
+
+8.  Then, it will promt you for the boolean of whether or not there will be a cold front. Type false.
+
+9.  Next, it will prompt you for the boolean on if there will be a ban on burning. Type false.
+
+10.  After that it will print several lines.
+
+The correct output should be the current date on one line, then the variables the user entered. 
+Then it will have the weather statistics from the latitude and longitude the user entered. Next,
+it should have a burn determiniation of NOT_RECOMMENDED_OTHER since there were no supplies entered.
+
+
+
+# BurnPlanEvaluationApp System Test Invalid Number Inputs
+
+## System Test: Determining if system reprompts user after invalid input for number values
+
+### Preconditions
+
+- Repository exists on <git.unl.edu>.
+- The repository has been cloned on the local file system.
+- The local copy of the repository is up-to-date with the remote repository.
+- The tester has access to the repository and has an SSH public key associated
+  with their account on <git.unl.edu>.
+- You have applied openweather connector to your project build path
+
+### Test
+
+1.  If you click the run button on the BurnPlanEvaluationApp, it will prompt you to enter the year, month, day, hour, and minute
+
+2.  After the prompt, type "random string". 
+
+The system should output "Invalid Input" and reprompt you for data.
+
+3.  Type 0, when it reprompts for data.
+
+4.  When you are prompted for the next value, repeat steps 2-3 until it prompts your for supplies to see that all these values
+    will reprompt after an invalid input
+   
+   
+
+
+# BurnPlanEvaluationApp System Test Lincoln, Nebraska Temperature
+
+## System Test: Determining if system properly takes the longitude and latitude and gets the weather of that location.
+
+### Preconditions
+
+- Repository exists on <git.unl.edu>.
+- The repository has been cloned on the local file system.
+- The local copy of the repository is up-to-date with the remote repository.
+- The tester has access to the repository and has an SSH public key associated
+  with their account on <git.unl.edu>.
+- You have applied openweather connector to your project build path
+
+### Test
+
+1.   If you click the run button on the BurnPlanEvaluationApp, it will prompt you to enter the year, month, day, hour, and minute
+
+2.   Type the current year, when prompted for year. Type the current month when prompted for month. Take the day of the month for today and add three, type this number when prompted for day. 
+     Type 12 when prompted for hour. Type 0 when prompted for minute.
+
+3.   It will then prompt you to enter the latitude and longitude. Type "40.8136" when prompted for latitude. Type "-96.7026" when prompted for longitude.
+
+4.   Then, you will be prompted for a land fuel type type. Type "heavy"
+
+5.   Then, you will be prompted for acres to be burned. Type 40.
+
+6.   Next, you will be prompted for the type of fire. Type "blackline".
+
+7.   Next, you will be prompted for supplies. Type "done".
+
+8.   Next, you will be prompted to determine a boolean for a cold front. Type "false".
+
+9.   Next, you will be prompted to determine a boolean for a ban on burning. Type "false".
+
+10.   After that, it will print out several lines.
+
+11.   Verify that the program outputs 40.8316 for latitude and -96.7026 for longitude.
+
+12.  Open up a browser and type search up Lincoln, Nebraska weather, or some other method of finding a forecast. Make note of the temperature on threes days from in Lincoln, Nebraska.
+
+13.  Verify that this number is about the same as the temperature in the console, accounting for small differences in sources.
+
+
+
+# BurnPlanEvaluationApp System Test DESIRABLE besides weather
+
+## System Test: Determining if system takes in user input correctly and takes
+
+### Preconditions
+
+- Repository exists on <git.unl.edu>.
+- The repository has been cloned on the local file system.
+- The local copy of the repository is up-to-date with the remote repository.
+- The tester has access to the repository and has an SSH public key associated
+  with their account on <git.unl.edu>.
+- You have applied openweather connector to your project build path
+
+### Test
+
+1.   If you click the run button on the BurnPlanEvaluationApp, it will prompt you to enter the year, month, day, hour, and minute
+
+2.   Type the current year, when prompted for year. Type the current month when prompted for month. Take the day of the month for today and add three, type this number when prompted for day. 
+     Type 12 when prompted for hour. Type 0 when prompted for minute.
+
+3.   It will then prompt you to enter the latitude and longitude. Type "48.8566" when prompted for latitude. Type "2.3522" when prompted for longitude.
+
+4.   Then, you will be prompted for a land fuel type type. Type "light"
+
+5.   Then, you will be prompted for acres to be burned. Type 40.
+
+6.   Next, you will be prompted for the type of fire. Type "headfire".
+
+7.   Next, you will be prompted to determine a boolean for a cold front. Type "false".
+
+8.   Next, you will be prompted to determine a boolean for a ban on burning. Type "false".
+
+9.   Next you will be prompted for supplies. Type all the desired supplies based on 40 acres. Refer to https://www.nrcs.usda.gov/Internet/FSE_DOCUMENTS/nrcs141p2_016354.pdf for specific
+     information on required supplies.
+
+10.  After that, it will print out several lines.
+
+11.  Make note of the burn plan determination. It should not be NOT_RECOMMENDED_OTHER or RED_FLAG_CONDITIONS. Verify that the burn plan determination is correct by looking at the values for weather 
+     and checking if they fall in the correct range. These ranges can be found in the file https://www.nrcs.usda.gov/Internet/FSE_DOCUMENTS/nrcs141p2_016354.pdf. Make note that if any of the
+     conditions are not in the desirable range, it cannot be determinined to be desirable. This is the same for the acceptable ranges.
+
