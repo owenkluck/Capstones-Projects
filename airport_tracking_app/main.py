@@ -7,7 +7,6 @@ from kivy.core.window import Window
 from kivy.uix.button import Button
 from sqlalchemy.exc import SQLAlchemyError
 from database import Airport, City, Condition, Database
-from travel_planner_app.main import TravelPlannerApp
 from travel_planner_app.api_key import API_KEY
 from travel_planner_app.rest import RESTConnection
 
