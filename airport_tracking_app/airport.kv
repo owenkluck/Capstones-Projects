@@ -116,7 +116,8 @@ ScreenManager:
                             on_press:
                                 root.ids.airport_name.text = ''
                                 root.ids.airport_code.text = ''
-                                root.ids.airport_location.text = ''
+                                root.ids.airport_latitude.text = ''
+                                root.ids.airport_longitude.text = ''
                 BoxLayout:
                     Label:
                         text: ''
@@ -141,7 +142,6 @@ ScreenManager:
                         pos_hint: {'x':.25, 'y':0}
                         on_press:
                             app.submit_data_airport(root.ids.airport_name.text, root.ids.airport_code.text, root.ids.airport_latitude.text, root.ids.airport_longitude.text)
-                            root.current = 'success_airport'
                             root.ids.airport_name.text = ''
                             root.ids.airport_code.text = ''
                             root.ids.airport_latitude.text = ''
@@ -343,6 +343,7 @@ ScreenManager:
                     text: 'CHECK FORECAST'
                     size_hint: (0.5, 0.5)
                     on_press:
+                        app.add_forecast(root.ids.forecast_spinner.text, root.ids.forecast_date.text)
                         root.current = 'create_forecast'
     Screen:
         name: 'create_forecast'

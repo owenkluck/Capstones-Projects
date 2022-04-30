@@ -307,8 +307,7 @@ ScreenManager:
                                 text: 'VALIDATE LOCATION'
                                 size_hint: (0.5, 0.5)
                                 on_press:
-                                    root.validate_city()
-                                    root.validate_location()
+                                    app.validate_city(root.ids.airports_city_spinner1.text)
     Screen:
         name: 'update_ratings'
         on_enter:
@@ -370,35 +369,50 @@ ScreenManager:
                                 text: 'UPDATE REVIEWS'
                                 size_hint: (0.5, 0.5)
                                 on_press:
-                                    app.update_ratings()
+                                    app.check_state_of_checkboxes()
+                                    root.ids.venue_and_review_scroll.clear_widgets()
     Screen:
-        name: 'prepare_itienary'
+        name: 'prepare_itinerary'
         on_enter:
+            app.prepare_itineraries()
+            app.populate_itinerary_view()
         BoxLayout:
             orientation: 'vertical'
             BoxLayout:
                 orientation: 'horizontal'
                 size_hint_max_y: 80
                 Label:
-                    text: 'Prepare Itienary'
+                    text: 'Prepare Itinerary'
                     font_size: '25sp'
-            BoxLayout:
-                orientation: 'vertical'
+            ScrollView:
+                do_scroll_x: True
+                do_scroll_y: False
+                id: itinerary_scroll
                 BoxLayout:
-                    orientation: 'horizontal'
+                    orientation: 'vertical'
+                    BlackLineX:
                     BoxLayout:
-                        size_hint_max_x: 20
+                        id: entertainment_itinerary
+                        orientation: 'horizontal'
+                        Button:
+                            text: 'Create Itinerary'
+                            on_press:
+                                app.submit_data(app.queued_entertainment_itineraries)
+                                app.queued_closest_itineraries = []
+                                app.queued_entertainment_itineraries = []
+                                root.current = 'mainmenu1'
+                    BlackLineX:
                     BoxLayout:
-                        orientation: 'vertical'
-                        BoxLayout:
-                            size_hint_max_y: 10
-                        BoxLayout:
-                            size_hint_max_y: 45
-                            orientation: 'horizontal'
-                            Label:
-                                text:
-                        BoxLayout:
-                            size_hint_max_y: 10
+                        id: closest_itinerary
+                        orientation: 'horizontal'
+                        Button:
+                            text: 'Create Itinerary'
+                            on_press:
+                                app.submit_data(app.queued_closest_itineraries)
+                                app.queued_closest_itineraries = []
+                                app.queued_entertainment_itineraries = []
+                                root.current = 'mainmenu1'
+                    BlackLineX:
     Screen:
         name: 'loading_screen'
         on_enter: Clock.schedule_once(app.load, 3)
@@ -484,3 +498,40 @@ ScreenManager:
                 orientation: 'vertical'
                 id: check_box
 
+<ItineraryView>
+    orientation: 'horizontal'
+    size_hint_min_x: 300
+    BlackLineY:
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: 'Date'
+        Label:
+            text: 'Leave From'
+        Label:
+            text: 'Arrive At'
+        Label:
+            text: 'Go to'
+        Label:
+            text: 'Eat At'
+        Label:
+            text: 'Watch At'
+    BlackLineY:
+
+<BlackLineX>:
+    size_hint_max_y: 5
+    canvas:
+        Color:
+            rgba: (0, 0, 0, 1.0)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<BlackLineY>:
+    size_hint_max_x: 5
+    canvas:
+        Color:
+            rgba: (0, 0, 0, 1.0)
+        Rectangle:
+            pos: self.pos
+            size: self.size

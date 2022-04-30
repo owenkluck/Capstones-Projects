@@ -1,0 +1,84 @@
+# Airport App System Test Non-Database Buttons
+
+## System Test: Determining whether the buttons not associated with the database work correctly.
+
+### Preconditions
+
+- Repository exists on <git.unl.edu>.
+- The repository has been cloned on the local file system.
+- The local copy of the repository is up-to-date with the remote repository.
+- The tester has access to the repository and has an SSH public key associated
+  with their account on <git.unl.edu>.
+- You have applied openweather connector to your project build path
+- The installer has been run.
+- No changes to the database have been made.
+
+### Test
+
+1.  If you click the run button on the left on line 1 in main.py of AirportApp, the app should appear on your screen.
+
+2.  Click the button labeled "Create Airport". A new screen should appear with the label "Create Airport" at the top.
+
+3.  Put several characters into each of the textboxes.
+
+4.  Next, click the button on the right labeled "Discard Changes". Verify that all the textboxes are now empty.
+
+5.  Click the button labeled "BACK" and verify that you are taken back to the main screen.
+
+6.  Click the button labeled "Create City". A new screen should appear with the label "Create City"
+
+7.  Repeat steps 4 and 5.
+
+8.  Click the button labeled "Check Forecast"
+
+9.  Repeat step 5.
+
+10. Click the button in the bottom right labeled "Quit". The application should close.
+
+If the program as outlined in the instructions, then the application is working correctly.
+
+
+
+# Airport App System Test Creating Airport and City
+
+## System Test: Determining whether the application can successfully add airports and cities to the database.
+
+### Preconditions
+
+- Repository exists on <git.unl.edu>.
+- The repository has been cloned on the local file system.
+- The local copy of the repository is up-to-date with the remote repository.
+- The tester has access to the repository and has an SSH public key associated
+  with their account on <git.unl.edu>.
+- The installer has been run.
+- No changes have been made to the database.
+
+### Test
+
+1.  If you click the run button on the left on line 1 in main.py of AirportApp, the app should appear on your screen.
+
+2.  Click the button labeled "Create Airport". A new screen should appear with the label "Create Airport" at the top.
+
+3.  In the "Name" textbox, type "Blando Airport". In the "ICAO Code" textbox, type "CODE". In the "Longitude" textbox, type "90". In the latitude textbox,   	type "90".
+
+4.  Click on the bottom right button labeled "CREATE AIRPORT". Verify that a success screen shows up.
+
+5.  At the bottom of the screen, you are prompted to add a city that is serviced by the airport. Click on "Blando". Verify that no error message has been 	shown.
+
+6.  Click the buttom at the top right labeled "X". Verify that you are taken back to the main screen.
+
+7.  Click the button labeled "Create City". A new screen should appear with the label "Create City" at the top.
+
+8.  In the "Name" textbox, type "New York City". In the "Geographic Entity" textbox, type "New York". In the "Longitude" textbox, type "41". In the         	"Latitude" texbox type "-74".
+
+9.  Next, click the button on the bottom right labeled "CREATE CITY". Verify that a success screen shows up.
+
+10. Open up a terminal window and run the command "mysql -h cse.unl.edu -u kandrews -p". You should be prompted for a password, type "qUc:6M".
+
+11. Run the command "use database kandrews;"
+
+12. Run the command "select * from airports;". Verify that there is a row with an airport_id of 6 with the name being "Blando Airport", the longitude being 	"90", the latitude being "90", and the code being "CODE".
+
+13. Run the command "select * from cities;". Verify that there is a row with a city_id of 8, a name of "New York City", an encompassing_geographic_entity of 	"New York", a latitude of "41", and a longitude of "-74".
+
+14. Run the command "select * from airport_cities;". Verify that there is a row with an airport_id of 6, and a city_id of 5.

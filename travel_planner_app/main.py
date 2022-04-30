@@ -2,14 +2,15 @@ import math
 from kivy.app import App
 from kivy.modules import inspector
 from kivy.core.window import Window
-from datetime import timedelta, date, datetime
+from datetime import timedelta, date
 
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 
-from travel_planner_app.database import Database
-from travel_planner_app.rest import RESTConnection
+from database import Database
+from rest import RESTConnection
 from api_key import API_KEY
 from database import Airport, City, Venue, Condition, Itinerary, Review
 from kivy.logger import Logger
@@ -28,6 +29,18 @@ class ReviewScrollView(ScrollView):
     pass
 
 
+class ItineraryView(BoxLayout):
+    pass
+
+
+class BlackLineX(BoxLayout):
+    pass
+
+
+class BlackLineY(BoxLayout):
+    pass
+
+
 class TravelPlannerApp(App):
     def __init__(self, authority='localhost', port=33060, database='airports', username='root', password='cse1208',
                  api_key=API_KEY, **kwargs):
@@ -42,18 +55,20 @@ class TravelPlannerApp(App):
         self.session = None
         self.weather_connection = None
         self.geo_connection = None
-        self.api_key = api_key
+        self.api_key = API_KEY
         self.validate_city_records = None
         self.current_location = None
         self.outdoor_sporting_events = 0
         self.outdoor_plays = 0
         self.outdoor_restaurants = 0
-        self.current_date = date(2022, 4, 29)
+        self.current_date = date.today()
         self.updated_forecast = None
         self.previous_destination = None
         self.destination = None
         self.final_destination = None
         self.ratings_to_update = []
+        self.queued_entertainment_itineraries = []
+        self.queued_closest_itineraries = []
 
     def build(self):
         inspector.create_inspector(Window, self)
@@ -90,7 +105,7 @@ class TravelPlannerApp(App):
 
     def add_locations_spinner(self):
         spinner_airports = [airport.name for airport in self.session.query(Airport).all(Airport.validated is False)]
-        spinner_city = [city.name for city in self.session.query(City).all(City.validated is False)]
+        spinner_city = [city.city_name for city in self.session.query(City).all(City.validated is False)]
         self.root.ids.airports_spinner1.values = spinner_airports
         self.root.ids.city_spinner.values = spinner_city
 
@@ -116,7 +131,7 @@ class TravelPlannerApp(App):
             return False
 
     def validate_city(self, city_name):
-        city = self.session.query(City).filter(City.name == city_name).one()
+        city = self.session.query(City).filter(City.city_name == city_name).one()
         self.geo_connection.send_request(
             'direct',
             {
@@ -131,12 +146,12 @@ class TravelPlannerApp(App):
         if (self.validate_city_records['lat'] - .009) <= city.latitude <= (self.validate_city_records['lat'] + .009) \
                 and (self.validate_city_records['lon'] - .009) <= city.longitude <= (
                 self.validate_city_records['lon'] + .009) \
-                and city.name == self.validate_city_records['name']:
+                and city.city_name == self.validate_city_records['name']:
             city.validated = True
             self.submit_data(city)
             return True
         else:
-            if city.name == self.validate_city_records['name']:
+            if city.city_name == self.validate_city_records['name']:
                 print('lat and lon incorrect')
             else:
                 print('incorrect')
@@ -144,7 +159,7 @@ class TravelPlannerApp(App):
 
     def on_records_loaded(self, _, response):
         print(dumps(response, indent=4, sort_keys=True))
-        self.validate_city_records = response
+        self.validate_city_records = response[0]
 
     def on_records_not_loaded(self, _, error):
         Logger.error(f'{self.__class__.__name__}: {error}')
@@ -163,9 +178,19 @@ class TravelPlannerApp(App):
                 view.children[0].children[0].children[1].add_widget(Label(text=f'score: {rating.score} id: {rating.review_id}'))
             self.root.ids.venue_and_review_scroll.add_widget(view)
 
-    def get_checkbox_states(self):
-        #self.root.ids.venue_and_review_scroll.children
-        pass
+    def check_state_of_checkboxes(self):
+        root = self.root.ids.venue_and_review_scroll
+        venues = root.children
+        for x in range(len(venues)):
+            venue = root.children[x].children[0].children[1].text
+            checkboxes = root.children[x].children[0].children[0].children[0].children
+            labels = root.children[x].children[0].children[0].children[1].children
+            for i in range(len(checkboxes)):
+                if checkboxes[i].active:
+                    text = labels[i].text.split()
+                    review_id = text[3]
+                    print(venue, review_id)
+                    self.update_rating(venue, review_id)
 
     def get_average_rating(self, venue_name):
         try:
@@ -180,9 +205,12 @@ class TravelPlannerApp(App):
 
     def update_rating(self, venue_name, review_id):
         try:
-            venue = self.session.query(Venue).filter(Venue.name == venue_name).one()
+            venue = self.session.query(Venue).filter(Venue.venue_name == venue_name).one()
             review = self.session.query(Review).filter(Review.review_id == review_id).one()
-            new_average_score = (len(venue.reviews) * venue.average_welp_score + review.score) / (len(venue.reviews + 1))
+            if venue.average_welp_score is None:
+                new_average_score = review.score
+            else:
+                new_average_score = (len(venue.reviews) * venue.average_welp_score + review.score) / (len(venue.reviews) + 1)
             venue.average_welp_score = new_average_score
             venue.welp_score_needs_update = False
             self.submit_data(venue)
@@ -332,7 +360,7 @@ class TravelPlannerApp(App):
             score += venues_open
             return score
         else:
-            self.request_onecall_for_place(city.latitude, city.longitude, current_date, None, None, city, 'create')
+            self.request_onecall_for_place(city.latitude, city.longitude, current_date, None, None, city, 'create', self.api_key)
             score = self.get_city_score(city, current_date)
             return score
 
@@ -417,7 +445,7 @@ class TravelPlannerApp(App):
         print(city_forecast_length)
         if city_forecast_length == 0:
             self.request_onecall_for_place(airport.latitude, airport.longitude, current_date, None, None, city,
-                                           'create')
+                                           'create', self.api_key)
             self.create_closest_itinerary_day(destination, current_date, current_airport)
         elif city_forecast_length > 1:
             print('multiple forecasts on a single date, associated with one city')
@@ -427,7 +455,7 @@ class TravelPlannerApp(App):
             venues_to_visit = self.get_open_venues_list(city, city_forecast)
             venues = self.determine_venues(venues_to_visit)
             itinerary = Itinerary(airport=airport.name, city=city.city_name, venues=venues, date=current_date)
-            self.submit_data(itinerary)
+            self.queued_closest_itineraries.append(itinerary)
             print('Success')
 
     def create_entertainment_itinerary(self, destination, current_date, current_airport):
@@ -438,7 +466,7 @@ class TravelPlannerApp(App):
         venues_to_visit = self.get_open_venues_list(city, city_forecast)
         venues = self.determine_venues(venues_to_visit)
         itinerary = Itinerary(airport=airport.name, city=city.city_name, venues=venues, date=current_date)
-        self.submit_data(itinerary)
+        self.queued_entertainment_itineraries.append(itinerary)
         print('Success')
 
     def get_previous_itinerary(self):
@@ -450,8 +478,15 @@ class TravelPlannerApp(App):
         airport = self.session.query(Airport).filter(Airport.name == itinerary.airport).one()
         return airport.latitude, airport.longitude
 
-    def prepare_itinerary(self):
-        current_itineraries = self.session.query(Itinerary).filter(Itinerary.date >= self.current_date)
+    def prepare_itineraries(self):
+        # takes all itineraries and finds which ones are ahead of the current day.
+        itineraries = self.session.query(Itinerary).all()
+        current_itineraries = []
+        for itinerary in itineraries:
+            if itinerary.date >= self.current_date:
+                current_itineraries.append(itinerary)
+        print(current_itineraries)
+        # updates itineraries and then gets amount of new itineraries to be made.
         max_date = self.current_date
         current_airport = None
         for itinerary in current_itineraries:
@@ -461,6 +496,7 @@ class TravelPlannerApp(App):
             if itinerary.date == self.current_date:
                 current_airport = self.session.query(Airport).filter(Airport.name == itinerary.airport).one()
         new_itineraries = (7 - (max_date - self.current_date).days)
+        # creates new itineraries.
         for i in range(new_itineraries):
             max_date += timedelta(days=1)
             self.create_closest_itinerary_day(self.destination, max_date, current_airport)
@@ -488,19 +524,50 @@ class TravelPlannerApp(App):
                 if forecast.date == itinerary.date:
                     outdated_forecast = forecast
             self.request_onecall_for_place(airport.latitude, airport.longitude, itinerary.date, outdated_forecast,
-                                           airport, None, 'update')
+                                           airport, None, 'update', self.api_key)
         else:
             self.request_onecall_for_place(airport.latitude, airport.longitude, itinerary.date,
-                                           None, airport, None, 'create')
+                                           None, airport, None, 'create', self.api_key)
+
+    def populate_itinerary_view(self):
+        # itineraries = self.session.query(Itinerary).all()
+        # closest_current_itineraries = []
+        # entertainment_current_itineraries = []
+        # for itinerary in itineraries:
+        #     if itinerary.date >= self.current_date and itinerary.itinerary_type == 'Close':
+        #         closest_current_itineraries.append(itinerary)
+        #     if itinerary.date >= self.current_date and itinerary.itinerary_type == 'Entertain':
+        #         entertainment_current_itineraries.append(itinerary)
+        self.root.ids.itinerary_scroll.size_hint_min_x = 300 * ((len(self.queued_closest_itineraries) + len(self.queued_entertainment_itineraries)) / 2)
+        root_1 = self.root.ids.entertainment_itinerary
+        root_2 = self.root.ids.closest_itinerary
+        for itinerary in self.queued_entertainment_itineraries:
+            itinerary_view = ItineraryView()
+            itinerary_view.children[1].children[0].text = f'Entertainment: {1}'
+            itinerary_view.children[1].children[1].text = f'Eat at: {1}'
+            itinerary_view.children[1].children[2].text = f'Go to: {itinerary.city}'
+            itinerary_view.children[1].children[3].text = f'Arrive At: {itinerary.airport}'
+            itinerary_view.children[1].children[4].text = f'Airport Leave:'
+            itinerary_view.children[1].children[5].text = f'Date {itinerary.date}'
+            root_1.add_widget(itinerary_view)
+        for itinerary in self.queued_closest_itineraries:
+            itinerary_view = ItineraryView()
+            itinerary_view.children[1].children[0].text = f'Entertainment: {1}'
+            itinerary_view.children[1].children[1].text = f'Eat at: {1}'
+            itinerary_view.children[1].children[2].text = f'Go to: {itinerary.city}'
+            itinerary_view.children[1].children[3].text = f'Arrive At: {itinerary.airport}'
+            itinerary_view.children[1].children[4].text = f'Airport Leave:'
+            itinerary_view.children[1].children[5].text = f'Date {itinerary.date}'
+            root_2.add_widget(itinerary_view)
 
     def request_onecall_for_place(self, latitude, longitude, itinerary_date, outdated_forecast, airport, city,
-                                  update_or_create):
+                                  update_or_create, api_key):
         self.weather_connection.send_request(
             'onecall',
             {
                 'lat': latitude,
                 'lon': longitude,
-                'appid': API_KEY
+                'appid': api_key
             },
             None,
             self.update_forecast,
@@ -553,7 +620,11 @@ class TravelPlannerApp(App):
 
     def submit_data(self, data):
         try:
-            self.session.add(data)
+            if type(data) is list:
+                for item in data:
+                    self.session.add(item)
+            else:
+                self.session.add(data)
             self.session.commit()
         except SQLAlchemyError:
             print('could not submit data')
@@ -562,16 +633,15 @@ class TravelPlannerApp(App):
         print(f'{item}, deleted')
         self.session.delete(item)
         self.session.commit()
-        pass
 
     def add_airports_spinner(self):
         values = [airport.name for airport in self.session.query(Airport).all()]
         self.root.ids.airport_spinner.values = values
 
     def add_airports_city_spinner(self):
-        values = [airport.name for airport in self.session.query(Airport).all()] and [city.name for city in
+        values = [airport.name for airport in self.session.query(Airport).all()] and [city.city_name for city in
                                                                                       self.session.query(City).all()]
-        self.root.ids.airports_city_spinner.values = values
+        self.root.ids.airports_city_spinner1.values = values
 
     def delete_buttons(self):
         self.root.ids.scroll_box_1.clear_widgets()
@@ -617,6 +687,7 @@ def main():
     app.connect_to_database('localhost', 33060, 'airports', 'root', 'cse1208')
     app.connect_to_open_weather()
     app.destination = PRIME_MERIDIAN
+    print(app.session.query(Itinerary).filter(Itinerary.date >= app.current_date))
     # airport = Airport(name='Strawberry Airport', latitude=90, longitude=91, code='EEEE')
     # app.session.add(airport)
     # app.session.commit()
