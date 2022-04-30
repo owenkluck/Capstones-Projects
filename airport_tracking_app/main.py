@@ -214,7 +214,6 @@ class AirportApp(App):
 
 def main():
     app = AirportApp()
-    #app.add_forecast('Omaha Airport', '32/4/2022')
     app.run()
 
 
