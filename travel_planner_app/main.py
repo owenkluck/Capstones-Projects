@@ -65,6 +65,8 @@ class TravelPlannerApp(App):
         self.destination = None
         self.final_destination = None
         self.ratings_to_update = []
+        self.queued_entertainment_itinerary = []
+        self.queued_closest_itinerary = []
 
     def build(self):
         inspector.create_inspector(Window, self)
@@ -447,7 +449,7 @@ class TravelPlannerApp(App):
             venues_to_visit = self.get_open_venues_list(city, city_forecast)
             venues = self.determine_venues(venues_to_visit)
             itinerary = Itinerary(airport=airport.name, city=city.city_name, venues=venues, date=current_date)
-            self.submit_data(itinerary)
+            self.queued_closest_itinerary.append(itinerary)
             print('Success')
 
     def create_entertainment_itinerary(self, destination, current_date, current_airport):
@@ -458,7 +460,7 @@ class TravelPlannerApp(App):
         venues_to_visit = self.get_open_venues_list(city, city_forecast)
         venues = self.determine_venues(venues_to_visit)
         itinerary = Itinerary(airport=airport.name, city=city.city_name, venues=venues, date=current_date)
-        self.submit_data(itinerary)
+        self.queued_entertainment_itinerary.append(itinerary)
         print('Success')
 
     def get_previous_itinerary(self):
@@ -514,18 +516,18 @@ class TravelPlannerApp(App):
                                            None, airport, None, 'create', self.api_key)
 
     def populate_itinerary_view(self):
-        itineraries = self.session.query(Itinerary).all()
-        closest_current_itineraries = []
-        entertainment_current_itineraries = []
-        for itinerary in itineraries:
-            if itinerary.date >= self.current_date and itinerary.itinerary_type == 'Close':
-                closest_current_itineraries.append(itinerary)
-            if itinerary.date >= self.current_date and itinerary.itinerary_type == 'Entertain':
-                entertainment_current_itineraries.append(itinerary)
-        self.root.ids.itinerary_scroll.size_hint_min_x = 300 * ((len(closest_current_itineraries) + len(entertainment_current_itineraries))/2)
+        # itineraries = self.session.query(Itinerary).all()
+        # closest_current_itineraries = []
+        # entertainment_current_itineraries = []
+        # for itinerary in itineraries:
+        #     if itinerary.date >= self.current_date and itinerary.itinerary_type == 'Close':
+        #         closest_current_itineraries.append(itinerary)
+        #     if itinerary.date >= self.current_date and itinerary.itinerary_type == 'Entertain':
+        #         entertainment_current_itineraries.append(itinerary)
+        self.root.ids.itinerary_scroll.size_hint_min_x = 300 * ((len(self.queued_closest_itinerary) + len(self.queued_entertainment_itinerary))/2)
         root_1 = self.root.ids.entertainment_itinerary
         root_2 = self.root.ids.closest_itinerary
-        for itinerary in entertainment_current_itineraries:
+        for itinerary in self.queued_entertainment_itinerary:
             itinerary_view = ItineraryView()
             itinerary_view.children[1].children[0].text = f'Entertainment: {1}'
             itinerary_view.children[1].children[1].text = f'Eat at: {1}'
@@ -534,7 +536,7 @@ class TravelPlannerApp(App):
             itinerary_view.children[1].children[4].text = f'Airport Leave:'
             itinerary_view.children[1].children[5].text = f'Date {itinerary.date}'
             root_1.add_widget(itinerary_view)
-        for itinerary in closest_current_itineraries:
+        for itinerary in self.queued_closest_itinerary:
             itinerary_view = ItineraryView()
             itinerary_view.children[1].children[0].text = f'Entertainment: {1}'
             itinerary_view.children[1].children[1].text = f'Eat at: {1}'
@@ -604,7 +606,11 @@ class TravelPlannerApp(App):
 
     def submit_data(self, data):
         try:
-            self.session.add(data)
+            if type(data) is list:
+                for item in data:
+                    self.session.add(item)
+            else:
+                self.session.add(data)
             self.session.commit()
         except SQLAlchemyError:
             print('could not submit data')
@@ -613,7 +619,6 @@ class TravelPlannerApp(App):
         print(f'{item}, deleted')
         self.session.delete(item)
         self.session.commit()
-        pass
 
     def add_airports_spinner(self):
         values = [airport.name for airport in self.session.query(Airport).all()]
