@@ -472,8 +472,15 @@ class TravelPlannerApp(App):
         airport = self.session.query(Airport).filter(Airport.name == itinerary.airport).one()
         return airport.latitude, airport.longitude
 
-    def prepare_itinerary(self):
-        current_itineraries = self.session.query(Itinerary).filter(Itinerary.date >= self.current_date)
+    def prepare_itineraries(self):
+        # takes all itineraries and finds which ones are ahead of the current day.
+        itineraries = self.session.query(Itinerary).all()
+        current_itineraries = []
+        for itinerary in itineraries:
+            if itinerary.date >= self.current_date:
+                current_itineraries.append(itinerary)
+        print(current_itineraries)
+        # updates itineraries and then gets amount of new itineraries to be made.
         max_date = self.current_date
         current_airport = None
         for itinerary in current_itineraries:
@@ -483,6 +490,7 @@ class TravelPlannerApp(App):
             if itinerary.date == self.current_date:
                 current_airport = self.session.query(Airport).filter(Airport.name == itinerary.airport).one()
         new_itineraries = (7 - (max_date - self.current_date).days)
+        # creates new itineraries.
         for i in range(new_itineraries):
             max_date += timedelta(days=1)
             self.create_closest_itinerary_day(self.destination, max_date, current_airport)
@@ -673,6 +681,7 @@ def main():
     app.connect_to_database('localhost', 33060, 'airports', 'root', 'cse1208')
     app.connect_to_open_weather()
     app.destination = PRIME_MERIDIAN
+    print(app.session.query(Itinerary).filter(Itinerary.date >= app.current_date))
     # airport = Airport(name='Strawberry Airport', latitude=90, longitude=91, code='EEEE')
     # app.session.add(airport)
     # app.session.commit()

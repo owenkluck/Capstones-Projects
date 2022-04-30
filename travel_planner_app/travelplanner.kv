@@ -371,6 +371,7 @@ ScreenManager:
     Screen:
         name: 'prepare_itinerary'
         on_enter:
+            app.prepare_itineraries()
             app.populate_itinerary_view()
         BoxLayout:
             orientation: 'vertical'
