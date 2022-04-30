@@ -522,6 +522,7 @@ class TravelPlannerApp(App):
                 closest_current_itineraries.append(itinerary)
             if itinerary.date >= self.current_date and itinerary.itinerary_type == 'Entertain':
                 entertainment_current_itineraries.append(itinerary)
+        self.root.ids.itinerary_scroll.size_hint_min_x = 300 * ((len(closest_current_itineraries) + len(entertainment_current_itineraries))/2)
         root_1 = self.root.ids.entertainment_itinerary
         root_2 = self.root.ids.closest_itinerary
         for itinerary in entertainment_current_itineraries:

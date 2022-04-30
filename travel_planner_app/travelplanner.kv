@@ -381,17 +381,25 @@ ScreenManager:
                 Label:
                     text: 'Prepare Itinerary'
                     font_size: '25sp'
-            BoxLayout:
-                orientation: 'vertical'
-                BlackLineX:
+            ScrollView:
+                do_scroll_x: True
+                do_scroll_y: False
+                id: itinerary_scroll
                 BoxLayout:
-                    id: entertainment_itinerary
-                    orientation: 'horizontal'
-                BlackLineX:
-                BoxLayout:
-                    id: closest_itinerary
-                    orientation: 'horizontal'
-                BlackLineX:
+                    orientation: 'vertical'
+                    BlackLineX:
+                    BoxLayout:
+                        id: entertainment_itinerary
+                        orientation: 'horizontal'
+                        Button:
+                            text: 'Create Itinerary'
+                    BlackLineX:
+                    BoxLayout:
+                        id: closest_itinerary
+                        orientation: 'horizontal'
+                        Button:
+                            text: 'Create Itinerary'
+                    BlackLineX:
     Screen:
         name: 'loading_screen'
         on_enter: Clock.schedule_once(app.load, 3)
@@ -479,6 +487,7 @@ ScreenManager:
 
 <ItineraryView>
     orientation: 'horizontal'
+    size_hint_min_x: 300
     BlackLineY:
     BoxLayout:
         orientation: 'vertical'
