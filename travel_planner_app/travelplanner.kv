@@ -166,12 +166,14 @@ ScreenManager:
                         size_hint: (0.30, 0.30)
                         pos_hint: {'x':.25, 'y':0}
                         on_press:
-                            app.connect_to_database(root.ids.database_authority.text, root.ids.database_portnumber.text, root.ids.database_name.text, root.ids.database_username.text, root.ids.database_password.text)
-                            app.connect_to_open_weather()
+#                           app.connect_to_database(root.ids.database_authority.text, root.ids.database_portnumber.text, root.ids.database_name.text, root.ids.database_username.text, root.ids.database_password.text)
+#                           app.connect_to_open_weather()
                             root.transition.direction = 'left'
-                            root.current = 'update_ratings'
+                            root.current = 'mainmenu1'
     Screen:
         name: 'mainmenu1'
+        on_enter:
+            app.get_places_to_validate
         BoxLayout:
             orientation: 'vertical'
             BoxLayout:
@@ -188,7 +190,8 @@ ScreenManager:
                     BoxLayout:
                         orientation: 'horizontal'
                         Label:
-                            text: 'Cities need to be validated.'
+                            id: amount_unvalidated_cities
+                            text: ''
                     BoxLayout:
                         orientation: 'horizontal'
                         Label:
