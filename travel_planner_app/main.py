@@ -99,7 +99,7 @@ class TravelPlannerApp(App):
 
     def add_locations_spinner(self):
         spinner_airports = [airport.name for airport in self.session.query(Airport).all(Airport.validated is False)]
-        spinner_city = [city.name for city in self.session.query(City).all(City.validated is False)]
+        spinner_city = [city.city_name for city in self.session.query(City).all(City.validated is False)]
         self.root.ids.airports_spinner1.values = spinner_airports
         self.root.ids.city_spinner.values = spinner_city
 
@@ -125,7 +125,7 @@ class TravelPlannerApp(App):
             return False
 
     def validate_city(self, city_name):
-        city = self.session.query(City).filter(City.name == city_name).one()
+        city = self.session.query(City).filter(City.city_name == city_name).one()
         self.geo_connection.send_request(
             'direct',
             {
@@ -140,12 +140,12 @@ class TravelPlannerApp(App):
         if (self.validate_city_records['lat'] - .009) <= city.latitude <= (self.validate_city_records['lat'] + .009) \
                 and (self.validate_city_records['lon'] - .009) <= city.longitude <= (
                 self.validate_city_records['lon'] + .009) \
-                and city.name == self.validate_city_records['name']:
+                and city.city_name == self.validate_city_records['name']:
             city.validated = True
             self.submit_data(city)
             return True
         else:
-            if city.name == self.validate_city_records['name']:
+            if city.city_name == self.validate_city_records['name']:
                 print('lat and lon incorrect')
             else:
                 print('incorrect')
@@ -153,7 +153,7 @@ class TravelPlannerApp(App):
 
     def on_records_loaded(self, _, response):
         print(dumps(response, indent=4, sort_keys=True))
-        self.validate_city_records = response
+        self.validate_city_records = response[0]
 
     def on_records_not_loaded(self, _, error):
         Logger.error(f'{self.__class__.__name__}: {error}')

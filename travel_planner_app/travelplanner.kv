@@ -304,8 +304,7 @@ ScreenManager:
                                 text: 'VALIDATE LOCATION'
                                 size_hint: (0.5, 0.5)
                                 on_press:
-                                    root.validate_city()
-                                    root.validate_location()
+                                    app.validate_city(root.ids.airports_city_spinner1.text)
     Screen:
         name: 'update_ratings'
         on_enter:
