@@ -160,8 +160,8 @@ ScreenManager:
                         size_hint: (0.30, 0.30)
                         pos_hint: {'x':.25, 'y':0}
                         on_press:
-                            app.connect_to_database(root.ids.database_authority.text, root.ids.database_portnumber.text, root.ids.database_name.text, root.ids.database_username.text, root.ids.database_password.text)
-                            app.connect_to_open_weather()
+#                            app.connect_to_database(root.ids.database_authority.text, root.ids.database_portnumber.text, root.ids.database_name.text, root.ids.database_username.text, root.ids.database_password.text)
+#                            app.connect_to_open_weather()
                             root.transition.direction = 'left'
                             root.current = 'update_ratings'
     Screen:
@@ -361,7 +361,8 @@ ScreenManager:
                                 text: 'UPDATE REVIEWS'
                                 size_hint: (0.5, 0.5)
                                 on_press:
-                                    app.update_ratings()
+                                    app.check_state_of_checkboxes()
+                                    root.ids.venue_and_review_scroll.clear_widgets()
     Screen:
         name: 'prepare_itienary'
         on_enter:

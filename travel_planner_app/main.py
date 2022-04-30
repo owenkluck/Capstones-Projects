@@ -157,9 +157,19 @@ class TravelPlannerApp(App):
                 view.children[0].children[0].children[1].add_widget(Label(text=f'score: {rating.score} id: {rating.review_id}'))
             self.root.ids.venue_and_review_scroll.add_widget(view)
 
-    def get_checkbox_states(self):
-        #self.root.ids.venue_and_review_scroll.children
-        pass
+    def check_state_of_checkboxes(self):
+        root = self.root.ids.venue_and_review_scroll
+        venues = root.children
+        for x in range(len(venues)):
+            venue = root.children[x].children[0].children[1].text
+            checkboxes = root.children[x].children[0].children[0].children[0].children
+            labels = root.children[x].children[0].children[0].children[1].children
+            for i in range(len(checkboxes)):
+                if checkboxes[i].active:
+                    text = labels[i].text.split()
+                    review_id = text[3]
+                    print(venue, review_id)
+                    self.update_rating(venue, review_id)
 
     def get_average_rating(self, venue_name):
         try:
@@ -174,9 +184,12 @@ class TravelPlannerApp(App):
 
     def update_rating(self, venue_name, review_id):
         try:
-            venue = self.session.query(Venue).filter(Venue.name == venue_name).one()
+            venue = self.session.query(Venue).filter(Venue.venue_name == venue_name).one()
             review = self.session.query(Review).filter(Review.review_id == review_id).one()
-            new_average_score = (len(venue.reviews) * venue.average_welp_score + review.score) / (len(venue.reviews + 1))
+            if venue.average_welp_score is None:
+                new_average_score = review.score
+            else:
+                new_average_score = (len(venue.reviews) * venue.average_welp_score + review.score) / (len(venue.reviews) + 1)
             venue.average_welp_score = new_average_score
             venue.welp_score_needs_update = False
             self.submit_data(venue)
