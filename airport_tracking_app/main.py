@@ -1,10 +1,15 @@
 from datetime import date
+
+from kivy import Logger
 from kivy.app import App
 from kivy.modules import inspector
 from kivy.core.window import Window
 from kivy.uix.button import Button
 from sqlalchemy.exc import SQLAlchemyError
 from database import Airport, City, Condition, Database
+from travel_planner_app.main import TravelPlannerApp
+from travel_planner_app.api_key import API_KEY
+from travel_planner_app.rest import RESTConnection
 
 
 class AirportButtons(Button):
@@ -24,6 +29,10 @@ class AirportApp(App):
         self.airport_database.ensure_tables_exist()
         self.current_airport = None
         self.current_city = None
+        self.api_key = API_KEY
+        self.updated_forecast = None
+        self.weather_connection = None
+        self.connect_to_open_weather(port_api=443)
 
     def build(self):
         inspector.create_inspector(Window, self)
@@ -78,24 +87,75 @@ class AirportApp(App):
         self.root.ids.forecast_spinner.values = values
 
     def add_forecast(self, airport_name, date_1):
-        airport_id = -1
         try:
-            airport_id = self.session.query(Airport).filter(Airport.name == airport_name)[0].airport_id
-        except IndexError:
+            airport = self.session.query(Airport).filter(Airport.name == airport_name).one()
+            airport_id = airport.airport_id
+            date_values = date_1.split('/')
+            print('hi_1')
+            try:
+                forecasts = self.session.query(Condition).filter(Condition.date == date(int(date_values[2]), int(date_values[1]), int(date_values[0])) and Condition.airport_id == airport_id)
+                self.root.ids.forecast.text = f'On {forecasts[0].date}, the weather will be:\n' \
+                                              f'temperature: {forecasts[0].max_temperature}\n' \
+                                              f'wind_speed: {forecasts[0].max_wind_speed}\n' \
+                                              f'humidity: {forecasts[0].max_humidity}\n' \
+                                              f'rain: {forecasts[0].rain}\n' \
+                                              f'visibility: {forecasts[0].visibility}'
+            except (IndexError, SQLAlchemyError, ValueError):
+                for value in date_values:
+                    try:
+                        int(value)
+                    except ValueError:
+                        self.root.ids.check_forecast_error.text = 'The date input was incorrect,\n please type date in form DY/MN/YEAR.\n Ex: 1/7/2005'
+                        return
+                if int(date_values[0]) < 32 and int(date_values[1]) < 13 and 2000 < int(date_values[2]) < 3000:
+                    print('hi')
+                    self.request_onecall_for_place(airport.latitude, airport.longitude, date(int(date_values[2]), int(date_values[1]), int(date_values[0])), self.api_key)
+                    self.root.current = 'check_forecast'
+                    self.root.ids.check_forecast_error.text = 'Creating new forecasts for this airport. Please wait.'
+                else:
+                    self.root.ids.check_forecast_error.text = 'A value for day, month, or year is out of range or not accurate.'
+        except SQLAlchemyError:
             self.root.current = 'check_forecast'
             self.root.ids.check_forecast_error.text = 'No airport was selected'
-        try:
-            date_values = date_1.split('/')
-            forecasts = self.session.query(Condition).filter(Condition.date == date(int(date_values[2]), int(date_values[1]), int(date_values[0])) and Condition.airport_id == airport_id)
-            self.root.ids.forecast.text = f'On {forecasts[0].date}, the weather will be:\n' \
-                                          f'temperature: {forecasts[0].max_temperature}\n' \
-                                          f'wind_speed: {forecasts[0].wind_speed}\n' \
-                                          f'humidity: {forecasts[0].max_humidity}\n' \
-                                          f'rain: {forecasts[0].rain}\n' \
-                                          f'visibility: {forecasts[0].visibility}'
-        except (IndexError, SQLAlchemyError, ValueError):
-            self.root.current = 'check_forecast'
-            self.root.ids.check_forecast_error.text = 'The date input was incorrect,\n please type date in form DY/MN/YEAR.\n Ex: 1/7/2005'
+
+    def connect_to_open_weather(self, port_api=443):
+        self.weather_connection = RESTConnection('api.openweathermap.org', port_api, '/data/2.5')
+
+    def request_onecall_for_place(self, latitude, longitude, itinerary_date, api_key):
+        self.weather_connection.send_request(
+            'onecall',
+            {
+                'lat': latitude,
+                'lon': longitude,
+                'appid': api_key
+            },
+            None,
+            self.update_forecast,
+            self.on_records_not_loaded,
+            self.on_records_not_loaded,
+        )
+        self.create_new_forecasts()
+
+    def on_records_not_loaded(self, _, error):
+        Logger.error(f'{self.__class__.__name__}: {error}')
+
+    def update_forecast(self, _, response):
+        # print(dumps(response, indent=4, sort_keys=True))
+        self.updated_forecast = response
+
+    def create_new_forecasts(self):
+        for day in self.updated_forecast['daily']:
+            max_temperature = int(day['temp']['max'])
+            min_temperature = int(day['temp']['min'])
+            humidity = int(day['humidity'])
+            wind_speed = int(day['wind_speed'])
+            visibility = 10
+            rain = int(day['pop'])
+            forecast = Condition(date=date.fromtimestamp(int(day['dt'])), max_temperature=max_temperature,
+                                 min_temperature=min_temperature, max_humidity=humidity, max_wind_speed=wind_speed,
+                                 visibility=visibility, rain=rain)
+            self.session.add(forecast)
+            self.session.commit()
 
     def add_buttons(self):
         airports = self.session.query(Airport).all()
@@ -154,6 +214,7 @@ class AirportApp(App):
 
 def main():
     app = AirportApp()
+    #app.add_forecast('Omaha Airport', '32/4/2022')
     app.run()
 
 

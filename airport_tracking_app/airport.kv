@@ -343,6 +343,7 @@ ScreenManager:
                     text: 'CHECK FORECAST'
                     size_hint: (0.5, 0.5)
                     on_press:
+                        app.add_forecast(root.ids.forecast_spinner.text, root.ids.forecast_date.text)
                         root.current = 'create_forecast'
     Screen:
         name: 'create_forecast'
