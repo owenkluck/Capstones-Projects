@@ -15,7 +15,7 @@
 
 ### Test
 
-1.  If you click the run button on the left on line 1 in main.py of AirportApp, the app should appear on your screen.
+1.  If you click the run button on the left on line 1 in main.py of airport_tracking_app, the app should appear on your screen.
 
 2.  Click the button labeled "Create Airport". A new screen should appear with the label "Create Airport" at the top.
 
@@ -35,7 +35,7 @@
 
 10. Click the button in the bottom right labeled "Quit". The application should close.
 
-If the program as outlined in the instructions, then the application is working correctly.
+If the program runs as outlined in the instructions, then the application is working correctly.
 
 
 
@@ -55,7 +55,7 @@ If the program as outlined in the instructions, then the application is working 
 
 ### Test
 
-1.  If you click the run button on the left on line 1 in main.py of AirportApp, the app should appear on your screen.
+1.  If you click the run button on the left on line 1 in main.py of airport_tracking_app, the app should appear on your screen.
 
 2.  Click the button labeled "Create Airport". A new screen should appear with the label "Create Airport" at the top.
 
@@ -82,3 +82,136 @@ If the program as outlined in the instructions, then the application is working 
 13. Run the command "select * from cities;". Verify that there is a row with a city_id of 8, a name of "New York City", an encompassing_geographic_entity of 	"New York", a latitude of "41", and a longitude of "-74".
 
 14. Run the command "select * from airport_cities;". Verify that there is a row with an airport_id of 6, and a city_id of 5.
+
+If the program runs as outlined in the instructions and the database is updated in the correct way, then the application is working correctly.
+
+
+
+# Airport App System Test Creating Airport and City
+
+## System Test: Determining whether the application can successfully add airports and cities to the database.
+
+### Preconditions
+
+- Repository exists on <git.unl.edu>.
+- The repository has been cloned on the local file system.
+- The local copy of the repository is up-to-date with the remote repository.
+- The tester has access to the repository and has an SSH public key associated
+  with their account on <git.unl.edu>.
+- The installer has been run.
+- No changes have been made to the database.
+
+### Test
+
+1.  If you click the run button on the left on line 1 in main.py of airport_tracking_app, the app should appear on your screen.
+
+2.  Click the button labeled "Create Airport". A new screen should appear with the label "Create Airport" at the top.
+
+3.  Click the buttom in the bottom right labeled "CREATE AIRPORT". Verify that the error message "Some information inputs were left blank, please fill 		out all inputs" shows up.
+
+4.  In the "Name" textbox, type "Airport". In the "ICAO code" textbox, type "AAAA". In the "Longitude" textbox, type "One". In the "Latitude" textbox, type 	"Two".
+
+5.  Click the buttom labeled "CREATE AIRPORT". Verify that the error message "Invalid Input-Please Try Again" shows up and that all the textboxes are       	cleared.
+
+6.  Click the button labeled "BACK".
+
+7.  Click the button labeled "CREATE CITY". A new screen should appear with the label "Create City" at the top.
+
+8.  Click the buttom in the bottom right labeled "CREATE CITY". Verify that the error message "Some information inputs were left blank, please fill 		out all inputs" shows up.
+
+9.  In the "Name" textbox, type "City". In the "Geographic Entity" textbox, type "State". In the "Longitude" textbox, type "One". In the "Latitude"  		textbox, type "Two".
+
+10. Click the buttom labeled "CREATE CITY". Verify that the error message "Invalid Input-Please Try Again" shows up and that all the textboxes are       		cleared.
+
+11. Click the button labeled "BACK". Then click the button labeled "Check Forecasts".
+
+12. In the textbox at the top of the screen, type "June 12, 2022".
+
+13. Click the button labeled "Check Forecasts".
+
+14. Verify that an error message shows up saying that the date you inputted is in the wrong format.
+
+If the program ran as outlined in the instructions the application behaved correctly.
+
+
+
+# Airport App System Test Check Forecast
+
+## System Test: Determining whether the application can successfully check forecasts
+
+### Preconditions
+
+- Repository exists on <git.unl.edu>.
+- The repository has been cloned on the local file system.
+- The local copy of the repository is up-to-date with the remote repository.
+- The tester has access to the repository and has an SSH public key associated
+  with their account on <git.unl.edu>.
+- The installer has been run.
+- No changes have been made to the database.
+
+### Test
+
+1.  If you click the run button on the left on line 1 in main.py of airport_tracking_app, the app should appear on your screen.
+
+2.  Click the button labeled "Check Forecast". A new screen should appear with the label "Check Forecast" at the top.
+#unfinished test
+
+
+
+# Entertainment App System Test Non-Database Buttons
+
+## System Test: Determining whether the buttons not associated with the database work correctly.
+
+### Preconditions
+
+- Repository exists on <git.unl.edu>.
+- The repository has been cloned on the local file system.
+- The local copy of the repository is up-to-date with the remote repository.
+- The tester has access to the repository and has an SSH public key associated
+  with their account on <git.unl.edu>.
+- The installer has been run.
+- No changes have been made to the database.
+
+### Test
+
+1.  If you click the run button on the left on line 1 in main.py of entertainment_tracking_app, the app should appear on your screen.
+
+2.  Click the button labelled "Create City". A new screen should appear with the label "Create City" at the top.
+
+3.  In the "City Name" textbox, type "Chicago". In the "Latitude" textbox, type "5". In the "Longitude" textbox, type "10". In the "Encompassing Geographic 	Entity" textbox, type "Illinois".
+
+4.  Click the button "CREATE CITY". You should be taken to a new screen with a success message at the top.
+
+5.  At the bottom of this screen, you are asked if you want to create a new venue to your city. Click the "YES" option. You will be taken to a new screen   	with "CREATE NEW VENUE" at the top of the screen.
+
+6.  In the "Venue Name" textbox, type "United Center". Click on the dropdown next to the label "Associated City", then scroll down and select "Chicago".    	Click on the dropdown next to the label "Venue Type" and select "Indoor Sports Arena".
+
+7.  Click on the button labeled "NEXT".
+#unfinished test  
+
+
+
+# Tracking App System Test Create Itinerary
+
+## System Test: Determining whether the app can successfully 
+
+### Preconditions
+
+- Repository exists on <git.unl.edu>.
+- The repository has been cloned on the local file system.
+- The local copy of the repository is up-to-date with the remote repository.
+- The tester has access to the repository and has an SSH public key associated
+  with their account on <git.unl.edu>.
+- The installer has been run.
+- No changes have been made to the database.
+
+### Test
+
+1.  If you click the run button on the left on line 1 in main.py of travel_planner_app, the app should appear on your screen.
+
+2.  You should see several textboxes, with most already containing text. In the empty textbox labelled "Password", type "qUc:6M". In the empty textbox      	labelled "API Key", copy and paste "bc3c6684b2b24478afe3626faf49baa5".
+
+3.  Click the button labelled "SUBMIT" and you should see a new screen with a label "Main Menu" at the top.
+#unfinished test
+
+

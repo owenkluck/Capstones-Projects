@@ -33,6 +33,12 @@ ScreenManager:
                         font_size: '20sp'
                         on_press: root.current = 'check_forecast'
                     BoxLayout:
+                        size_hint_max_y: 10
+                    Button:
+                        text: 'Review Itinerary'
+                        font_size: '20sp'
+                        on_press: root.current = 'review_itinerary'
+                    BoxLayout:
                         size_hint_max_y: 20
                     BoxLayout:
                         size_hint_max_y: 60
@@ -287,6 +293,7 @@ ScreenManager:
                     do_scroll_x: False
                     do_scroll_y: True
                     BoxLayout:
+                        size_hint_y: 3
                         orientation: 'vertical'
                         id: scroll_box_1
             BoxLayout:
@@ -406,7 +413,7 @@ ScreenManager:
                     do_scroll_x: False
                     do_scroll_y: True
                     BoxLayout:
-                        size_hint_y: 1000
+                        size_hint_y: 3
                         orientation: 'vertical'
                         id: scroll_box_2
             BoxLayout:
@@ -417,6 +424,65 @@ ScreenManager:
                     text: 'Create New Airport'
                     on_press: root.current = 'create_airport'
                 BoxLayout:
+    Screen:
+        name: 'review_itinerary'
+        on_enter: app.add_itineraries(None)
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout:
+                size_hint_max_y: 80
+                TestLabel:
+                    text: 'Review Itinerary'
+                    font_size: '25sp'
+            BoxLayout:
+                orientation: 'horizontal'
+                BoxLayout:
+                    size_hint_max_x: 40
+                BoxLayout:
+                    orientation: 'vertical'
+                    Label:
+                        text: 'Past Travel'
+                    ScrollView:
+                        do_scroll_x: False
+                        do_scroll_y: True
+                        bar_width: 4
+                        BoxLayout:
+                            size_hint_y: 2
+                            orientation: 'vertical'
+                            id: past_itineraries
+                    Label:
+                        text: 'Current Status'
+                    Label:
+                        id: current_status
+                        font_size: '20sp'
+                    BoxLayout:
+                        size_hint_max_y: 10
+                    Label:
+                        text: 'Proposed Itineraries'
+                    BoxLayout:
+                        size_hint_max_y: 10
+                    ScrollView:
+                        do_scroll_x: False
+                        do_scroll_y: True
+                        bar_width: 4
+                        BoxLayout:
+                            size_hint_y: 2
+                            orientation: 'vertical'
+                            id: proposed_itineraries
+                    Label:
+                        id: itinerary_error_message
+                    BoxLayout:
+                        size_hint_max_y: 60
+                        orientation: 'horizontal'
+                        BoxLayout:
+                            size_hint_min_x: 600
+                        Button:
+                            text: 'Quit'
+                            on_press: app.stop()
+                    BoxLayout:
+                        size_hint_max_y: 20
+                BoxLayout:
+                    size_hint_max_x: 40
 
 <Screen>:
     canvas.before:
@@ -454,6 +520,9 @@ ScreenManager:
 
 <CityButtons>
     on_press: app.add_city(self.text)
+
+<ItineraryButtons>
+    on_press: app.add_itineraries(self.text)
 
 
 

@@ -4,12 +4,12 @@ from kivy import Logger
 from kivy.app import App
 from kivy.modules import inspector
 from kivy.core.window import Window
-from kivy.uix.button import Button
-from sqlalchemy.exc import SQLAlchemyError
-from database import Airport, City, Condition, Database
-from travel_planner_app.main import TravelPlannerApp
+from kivy.uix.button import Button, Label
+from sqlalchemy.exc import SQLAlchemyError, MultipleResultsFound
+from database import Airport, City, Condition, Database, Itinerary
 from travel_planner_app.api_key import API_KEY
 from travel_planner_app.rest import RESTConnection
+from datetime import date
 
 
 class AirportButtons(Button):
@@ -17,6 +17,14 @@ class AirportButtons(Button):
 
 
 class CityButtons(Button):
+    pass
+
+
+class ItineraryButtons(Button):
+    pass
+
+
+class ItineraryLabel(Label):
     pass
 
 
@@ -165,6 +173,48 @@ class AirportApp(App):
         for city in cities:
             self.root.ids.scroll_box_1.add_widget(CityButtons(text=city.city_name))
 
+    def add_itineraries(self, selected_itinerary_text):
+        try:
+            self.root.ids.past_itineraries.clear_widgets()
+            self.root.ids.proposed_itineraries.clear_widgets()
+            selected_itinerary = None
+            next_city = 'Undetermined'
+            if selected_itinerary_text is not None:
+                _, _, city_name = selected_itinerary_text.partition('City: ')
+                city_name, _, _ = city_name.partition('\n')
+                selected_itinerary = self.session.query(Itinerary).filter(Itinerary.city == city_name).one()
+                next_city = city_name
+                # Needs to be unit tested due to commit
+                selected_itinerary.itinerary_type = 'Entertainment'
+                self.session.add(selected_itinerary)
+                self.session.commit()
+            itineraries = self.session.query(Itinerary).order_by(Itinerary.date)
+            today_date = date.today()
+            itinerary_text = ''
+            day_count = 1
+            current_city = None
+            for itinerary in itineraries:
+                itinerary_text = f'{itinerary.date}\nCity: {itinerary.city}\nVenues: '
+                for venue in itinerary.venues:
+                    itinerary_text += f'{venue.venue_name}, '
+                if selected_itinerary is not None and itinerary.date == selected_itinerary.date and itinerary != selected_itinerary:
+                    itinerary.itinerary_type = 'Close'
+                    self.session.add(itinerary)
+                    self.session.commit()
+                #if itinerary.date < today_date or itinerary == selected_itinerary:
+                if itinerary.itinerary_type == 'Entertainment':
+                    self.root.ids.past_itineraries.add_widget(ItineraryLabel(text=f'Day #{day_count}: ' + itinerary_text))
+                    if itinerary != selected_itinerary:
+                        current_city = itinerary.city
+                        day_count += 1
+                    if itinerary.date == today_date:
+                        next_city = itinerary.city
+                else:
+                    self.root.ids.proposed_itineraries.add_widget(ItineraryButtons(text=itinerary_text))
+            self.root.ids.current_status.text = f'Day #{day_count}\nCurrent City:{current_city}\nNext City: {next_city}'
+        except MultipleResultsFound:
+            self.root.ids.itinerary_error_message.text = 'There seems to be multiple of the same values in the database'
+
     def add_city(self, city):
         try:
             place = self.session.query(City).filter(City.city_name == city)[0]
@@ -214,7 +264,6 @@ class AirportApp(App):
 
 def main():
     app = AirportApp()
-    #app.add_forecast('Omaha Airport', '32/4/2022')
     app.run()
 
 
