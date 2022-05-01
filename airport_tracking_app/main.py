@@ -184,25 +184,34 @@ class AirportApp(App):
                 city_name, _, _ = city_name.partition('\n')
                 selected_itinerary = self.session.query(Itinerary).filter(Itinerary.city == city_name).one()
                 next_city = city_name
+                # Needs to be unit tested due to commit
+                selected_itinerary.itinerary_type = 'Entertainment'
+                self.session.add(selected_itinerary)
+                self.session.commit()
             itineraries = self.session.query(Itinerary).order_by(Itinerary.date)
             today_date = date.today()
-            itinerary_text = 'Itinerary'
+            itinerary_text = ''
             day_count = 1
             current_city = None
             for itinerary in itineraries:
                 itinerary_text = f'{itinerary.date}\nCity: {itinerary.city}\nVenues: '
                 for venue in itinerary.venues:
                     itinerary_text += f'{venue.venue_name}, '
-                    # commented out, so it doesn't mess up calling the function with text
-                if itinerary.date < today_date or itinerary == selected_itinerary:
-                    # change to venues for text displayed instead of city
+                if selected_itinerary is not None and itinerary.date == selected_itinerary.date and itinerary != selected_itinerary:
+                    itinerary.itinerary_type = 'Close'
+                    self.session.add(itinerary)
+                    self.session.commit()
+                #if itinerary.date < today_date or itinerary == selected_itinerary:
+                if itinerary.itinerary_type == 'Entertainment':
                     self.root.ids.past_itineraries.add_widget(ItineraryLabel(text=f'Day #{day_count}: ' + itinerary_text))
                     if itinerary != selected_itinerary:
                         current_city = itinerary.city
                         day_count += 1
+                    if itinerary.date == today_date:
+                        next_city = itinerary.city
                 else:
                     self.root.ids.proposed_itineraries.add_widget(ItineraryButtons(text=itinerary_text))
-            self.root.ids.current_status.text = f'Day #{day_count}\nCity:{current_city}\nNext City: {next_city}'
+            self.root.ids.current_status.text = f'Day #{day_count}\nCurrent City:{current_city}\nNext City: {next_city}'
         except MultipleResultsFound:
             self.root.ids.itinerary_error_message.text = 'There seems to be multiple of the same values in the database'
 
