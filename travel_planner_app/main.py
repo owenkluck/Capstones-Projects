@@ -370,7 +370,9 @@ class TravelPlannerApp(App):
         return False
 
     def does_weather_meet_venues_conditions(self, venue, forecast):
-        if len(venue.condition) != 0:
+        print(venue.venue_name)
+        print(venue.condition)
+        if venue.condition:
             condition = venue.condition[0]
             if condition.min_temperature <= forecast.max_temperature <= condition.max_temperature and \
                     condition.min_humidity <= forecast.max_humidity <= condition.max_humidity and \
@@ -651,6 +653,7 @@ class TravelPlannerApp(App):
             else:
                 self.session.add(data)
             self.session.commit()
+            print(0)
         except SQLAlchemyError:
             print('could not submit data')
 
@@ -697,9 +700,12 @@ def construct_in_memory_url():
 def main():
     app = TravelPlannerApp()
     app.connect_to_database('localhost', 33060, 'airports', 'root', 'cse1208')
+    #app.connect_to_database('cse.unl.edu', 3306, 'kandrews', 'kandrews', 'qUc:6M')
     app.connect_to_open_weather()
     app.destination = PRIME_MERIDIAN
     app.final_destination = app.session.query(Airport).filter(Airport.name == 'Lincoln Airport').one()
+    for city in app.session.query(City).all():
+        print(city.venues)
     app.run()
 
 

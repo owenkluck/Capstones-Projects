@@ -376,6 +376,10 @@ ScreenManager:
         on_enter:
             app.prepare_itineraries()
             app.populate_itinerary_view()
+            app.submit_data(app.queued_entertainment_itineraries)
+            app.submit_data(app.queued_closest_itineraries)
+            app.queued_closest_itineraries = []
+            app.queued_entertainment_itineraries = []
         BoxLayout:
             orientation: 'vertical'
             BoxLayout:
@@ -384,6 +388,12 @@ ScreenManager:
                 Label:
                     text: 'Prepare Itinerary'
                     font_size: '25sp'
+                Button:
+                    text: 'Back'
+                    on_press:
+                        root.current = 'mainmenu1'
+                        root.ids.entertainment_itinerary.clear_widgets()
+                        root.ids.closest_itinerary.clear_widgets()
             ScrollView:
                 do_scroll_x: True
                 do_scroll_y: False
@@ -394,26 +404,10 @@ ScreenManager:
                     BoxLayout:
                         id: entertainment_itinerary
                         orientation: 'horizontal'
-                        Button:
-                            text: 'Create Closest Itinerary'
-                            on_press:
-                                app.submit_data(app.queued_closest_itineraries)
-                                #app.delete_row(app.queued_entertainment_itineraries)
-                                app.queued_closest_itineraries = []
-                                app.queued_entertainment_itineraries = []
-                                root.current = 'mainmenu1'
                     BlackLineX:
                     BoxLayout:
                         id: closest_itinerary
                         orientation: 'horizontal'
-                        Button:
-                            text: 'Create Entertainment Itinerary'
-                            on_press:
-                                app.submit_data(app.queued_entertainment_itineraries)
-                                #app.delete_row(app.queued_closest_itineraries)
-                                app.queued_closest_itineraries = []
-                                app.queued_entertainment_itineraries = []
-                                root.current = 'mainmenu1'
                     BlackLineX:
     Screen:
         name: 'loading_screen'
