@@ -398,7 +398,7 @@ ScreenManager:
                             text: 'Create Closest Itinerary'
                             on_press:
                                 app.submit_data(app.queued_closest_itineraries)
-                                app.delete_row(app.queued_entertainment_itineraries)
+                                #app.delete_row(app.queued_entertainment_itineraries)
                                 app.queued_closest_itineraries = []
                                 app.queued_entertainment_itineraries = []
                                 root.current = 'mainmenu1'
@@ -410,7 +410,7 @@ ScreenManager:
                             text: 'Create Entertainment Itinerary'
                             on_press:
                                 app.submit_data(app.queued_entertainment_itineraries)
-                                app.delete_row(app.queued_closest_itineraries)
+                                #app.delete_row(app.queued_closest_itineraries)
                                 app.queued_closest_itineraries = []
                                 app.queued_entertainment_itineraries = []
                                 root.current = 'mainmenu1'
