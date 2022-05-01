@@ -25,9 +25,10 @@ def bad_lat_long(lat, long):
 class EntertainmentTrackerApp(App):
     def __init__(self, **kwargs):
         super(EntertainmentTrackerApp, self).__init__(**kwargs)
-        url = Database.construct_mysql_url('localhost', 3306, 'entertainment', 'root', 'cse1208')
+        url = Database.construct_mysql_url('localhost', 33060, 'entertainment', 'root', 'cse1208')
         self.entertainment_database = Database(url)
         self.session = self.entertainment_database.create_session()
+        print('success')
 
     def build(self):
         inspector.create_inspector(Window, self)  # For inspection (press control-e to toggle).
@@ -73,8 +74,9 @@ class EntertainmentTrackerApp(App):
     def duplicate_name_venue(self, original_name, candidate_name, city_selection, create_or_edit):
         message = f'A venue under the name {candidate_name} already exists in the chosen city.'
         duplicate_name = False
-        c_id = self.session.query(City).filter(City.city_name == city_selection).one().city_id
-        venues_to_check = self.session.query(Venue).filter(Venue.city_id == c_id)
+        city = self.session.query(City).filter(City.city_name == city_selection).one()
+        # venues_to_check = self.session.query(Venue).filter(Venue.city_id == c_id)
+        venues_to_check = city.venues
         for venue in venues_to_check:
             if create_or_edit == 'CREATE' and venue.venue_name == candidate_name:
                 duplicate_name = True
@@ -86,9 +88,10 @@ class EntertainmentTrackerApp(App):
 
     def check_city_for_venues(self, city, edit_or_review):
         message = 'No venues exist in this city.'
-        c_id = self.session.query(City).filter(City.city_name == city).one().city_id
-        venue_query = self.session.query(Venue).filter(Venue.city_id == c_id)
-        if venue_query.count() > 0:
+        city = self.session.query(City).filter(City.city_name == city).one()
+        # venue_query = self.session.query(Venue).filter(Venue.city_id == c_id)
+        venue_query = city.venues
+        if len(venue_query) > 0:
             self.update_venue_list(city)
             self.root.transition.direction = 'left'
             if edit_or_review == 'EDIT':
@@ -112,8 +115,8 @@ class EntertainmentTrackerApp(App):
             self.root.current = 'venue_creation_success'
 
     def commit_venue_to_database(self, city_name, ven_name, ven_type):
-        city_query_id = self.session.query(City).filter(City.city_name == city_name).one().city_id
-        venue = Venue(venue_name=ven_name, venue_type=ven_type, city_id=city_query_id)
+        city_query = self.session.query(City).filter(City.city_name == city_name).one()
+        venue = Venue(venue_name=ven_name, venue_type=ven_type, cities=[city_query])
         self.session.add(venue)
         self.session.commit()
 
@@ -196,11 +199,11 @@ class EntertainmentTrackerApp(App):
 
     def update_venue_list(self, city):
         self.root.ids.venue_edit_selection.values.clear()
-        c_id = self.session.query(City).filter(City.city_name == city).one().city_id
+        # city = self.session.query(City).filter(City.city_name == city).one()
         venue_count = self.session.query(Venue).count()
         for i in range(1, venue_count + 1):
             current_venue = self.session.get(Venue, i)
-            if current_venue.city_id == c_id:
+            if current_venue in city.venues:
                 self.root.ids.venue_edit_selection.values.append(current_venue.venue_name)
 
     def adjust_opacity(self, t_cb, h_cb, w_cb, wwc_cb):
@@ -221,11 +224,10 @@ class EntertainmentTrackerApp(App):
         else:
             self.root.ids.open_weather_conditions.opacity = 1
 
-    def add_welp_score(self, review_score, city, venue_being_reviewed):
+    def add_welp_score(self, review_score, venue_being_reviewed):
         if valid_welp_score(review_score):
-            c_id = self.session.query(City).filter(City.city_name == city).one().city_id
-            venue = self.session.query(Venue).filter(Venue.venue_name == venue_being_reviewed,
-                                                     Venue.city_id == c_id).one()
+            # city = self.session.query(City).filter(City.city_name == city).one()
+            venue = self.session.query(Venue).filter(Venue.venue_name == venue_being_reviewed).one()
             if venue.average_welp_score is None:
                 venue.average_welp_score = review_score
             else:

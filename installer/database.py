@@ -13,7 +13,7 @@ class City(Persisted):
     longitude = Column(Float, nullable=False)
     encompassing_geographic_entity = Column(String(256), nullable=False)
     validated = Column(Boolean, default=False)
-    venues = relationship('Venue', uselist=True, back_populates='city')
+    venues = relationship('Venue', uselist=True, secondary='city_venues', back_populates='cities')
     conditions = relationship('Condition', uselist=True, back_populates='city')
     airports = relationship('Airport', uselist=True, secondary='airport_cities', back_populates='cities')
 
@@ -21,16 +21,22 @@ class City(Persisted):
 class Venue(Persisted):
     __tablename__ = 'venues'
     venue_id = Column(Integer, primary_key=True, autoincrement=True)
-    city_id = Column(Integer, ForeignKey('cities.city_id', ondelete='cascade'))
+    # city_id = Column(Integer, ForeignKey('cities.city_id', ondelete='cascade'))
     itinerary_id = Column(Integer, ForeignKey('itineraries.itinerary_id', ondelete='CASCADE'))
     venue_name = Column(String(256), nullable=False)
     venue_type = Column(String(256), nullable=False)
     average_welp_score = Column(Float)
     welp_score_needs_update = Column(Boolean, default=False)
     condition = relationship('Condition', back_populates='venue', secondary='venue_conditions')
-    city = relationship('City', back_populates='venues')
+    cities = relationship('City', uselist=True, secondary='city_venues', back_populates='venues')
     reviews = relationship('Review', back_populates='venue')
     itinerary = relationship('Itinerary', back_populates='venues')
+
+
+class CityVenue(Persisted):
+    __tablename__ = 'city_venues'
+    venue_id = Column(Integer, ForeignKey('venues.venue_id', ondelete='CASCADE'), primary_key=True)
+    city_id = Column(Integer, ForeignKey('cities.city_id', ondelete='CASCADE'), primary_key=True)
 
 
 class Review(Persisted):
