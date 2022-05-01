@@ -25,7 +25,7 @@ def bad_lat_long(lat, long):
 class EntertainmentTrackerApp(App):
     def __init__(self, **kwargs):
         super(EntertainmentTrackerApp, self).__init__(**kwargs)
-        url = Database.construct_mysql_url('localhost', 33060, 'entertainment', 'root', 'cse1208')
+        url = Database.construct_mysql_url('localhost', 3306, 'entertainment', 'root', 'cse1208')
         self.entertainment_database = Database(url)
         self.session = self.entertainment_database.create_session()
         print('success')
