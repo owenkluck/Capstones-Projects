@@ -536,6 +536,21 @@ class TravelPlannerApp(App):
                 if itinerary.date == max_date:
                     airport = self.session.query(Airport).filter(Airport.name == itinerary.airport).one()
                     entertainment_airport = airport
+        self.set_next_itineraries(self.queued_closest_itineraries)
+        self.set_next_itineraries(self.queued_entertainment_itineraries)
+
+    def set_next_itineraries(self, itineraries):
+        try:
+            for i in range(len(itineraries)):
+                itineraries[i].next_itinerary = itineraries[i + 1].city
+        except IndexError:
+            last_itinerary = None
+            last_date = itineraries[0].date + timedelta(days=-1)
+            for itinerary in self.session.query(Itinerary).all():
+                if itinerary.date == last_date:
+                    last_itinerary = itinerary
+            if last_itinerary is not None:
+                last_itinerary.next_itinerary = itineraries[0].city
 
     def update_existing_itinerary(self, itinerary):
         airport = self.session.query(Airport).filter(Airport.name == itinerary.airport).one()

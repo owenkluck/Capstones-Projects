@@ -98,7 +98,7 @@ class Itinerary(Persisted):
     city = Column(String(256))
     date = Column(Date)
     itinerary_type = Column(String(256))
-    next_itinerary = Column(Integer, ForeignKey('itineraries.itinerary_id'))
+    next_itinerary = Column(String(256))
     venues = relationship('Venue', uselist=True, back_populates='itinerary')
 
 
