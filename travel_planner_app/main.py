@@ -435,6 +435,7 @@ class TravelPlannerApp(App):
         return event
 
     def create_closest_itinerary_day(self, destination, current_date, current_airport):
+        print(current_airport)
         airport = self.find_closest_airport_to_destination(self.get_airports_in_range(current_airport, current_date),
                                                            destination, current_airport)
         if airport == current_airport:
@@ -512,7 +513,6 @@ class TravelPlannerApp(App):
                 self.update_existing_itinerary(itinerary)
                 if itinerary.date > max_date:
                     max_date = itinerary.date
-                if itinerary.date == self.current_date:
                     current_airport = self.session.query(Airport).filter(Airport.name == itinerary.airport).one()
         else:
             max_date = self.current_date
@@ -561,8 +561,12 @@ class TravelPlannerApp(App):
         for itinerary in self.queued_entertainment_itineraries:
             print(f'Venues: {itinerary.venues}')
             itinerary_view = ItineraryView()
-            itinerary_view.children[1].children[0].text = f'Entertainment: {1}'
-            itinerary_view.children[1].children[1].text = f'Eat at: {1}'
+            if len(itinerary.venues) == 2:
+                itinerary_view.children[1].children[0].text = f'Entertainment: {itinerary.venues[1].venue_name}'
+                itinerary_view.children[1].children[1].text = f'Eat at: {itinerary.venues[1].venue_name}'
+            elif len(itinerary.venues) == 1:
+                itinerary_view.children[1].children[0].text = 'Entertainment: None'
+                itinerary_view.children[1].children[1].text = f'Eat at: {itinerary.venues[0].venue_name}'
             itinerary_view.children[1].children[2].text = f'Go to: {itinerary.city}'
             itinerary_view.children[1].children[3].text = f'Arrive At: {itinerary.airport}'
             itinerary_view.children[1].children[4].text = f'Airport Leave:'
@@ -570,8 +574,12 @@ class TravelPlannerApp(App):
             root_1.add_widget(itinerary_view)
         for itinerary in self.queued_closest_itineraries:
             itinerary_view = ItineraryView()
-            itinerary_view.children[1].children[0].text = f'Entertainment: {1}'
-            itinerary_view.children[1].children[1].text = f'Eat at: {1}'
+            if len(itinerary.venues) == 2:
+                itinerary_view.children[1].children[0].text = f'Entertainment: {itinerary.venues[1].venue_name}'
+                itinerary_view.children[1].children[1].text = f'Eat at: {itinerary.venues[1].venue_name}'
+            elif len(itinerary.venues) == 1:
+                itinerary_view.children[1].children[0].text = 'Entertainment: None'
+                itinerary_view.children[1].children[1].text = f'Eat at: {itinerary.venues[0].venue_name}'
             itinerary_view.children[1].children[2].text = f'Go to: {itinerary.city}'
             itinerary_view.children[1].children[3].text = f'Arrive At: {itinerary.airport}'
             itinerary_view.children[1].children[4].text = f'Airport Leave:'
@@ -642,7 +650,6 @@ class TravelPlannerApp(App):
                     self.session.add(item)
             else:
                 self.session.add(data)
-                print(data)
             self.session.commit()
         except SQLAlchemyError:
             print('could not submit data')
@@ -693,12 +700,6 @@ def main():
     app.connect_to_open_weather()
     app.destination = PRIME_MERIDIAN
     app.final_destination = app.session.query(Airport).filter(Airport.name == 'Lincoln Airport').one()
-    for city in app.session.query(City).all():
-        print(city.venues)
-    # app.create_closest_itinerary_day(PRIME_MERIDIAN, app.current_date, airport)
-    # app.create_entertainment_itinerary(PRIME_MERIDIAN, app.current_date, airport)
-    # itinerary = app.session.query(Itinerary).all()[0]
-    # app.update_existing_itinerary(itinerary)
     app.run()
 
 
@@ -707,4 +708,4 @@ if __name__ == '__main__':
 
 # Make sure algorithm implements all necessary requirements.
 # algorithm doesn't check weather for airport correctly
-# itinerary page doesn't show venue.name
+# method to delete itinerary widgets once left the screen.
