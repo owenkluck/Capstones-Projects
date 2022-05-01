@@ -733,20 +733,24 @@ class TravelPlannerApp(App):
         self.session.commit()
 
     def calender_day_changed(self):
-        next_itinerary = None
+        next_itineraries = []
         for itinerary in self.session.query(Itinerary).all():
             if itinerary.date == self.current_date:
-                next_itinerary = itinerary
-        airport_arrive = self.session.query(Airport).filter(Airport.name == next_itinerary.airport)
-        airport_leave = self.session.query(Airport).filter(Airport.name == next_itinerary.airport_left_from)
-        if airport_leave == airport_arrive:
-            lift_off = self.check_lift_off_acceptable(airport_arrive, next_itinerary.date)
-        else:
-            lift_off_1 = self.check_lift_off_acceptable(airport_arrive, next_itinerary.date)
-            lift_off_2 = self.check_lift_off_acceptable(airport_leave, next_itinerary.date)
-            lift_off = True
-            if not lift_off_2 or not lift_off_1:
-                lift_off = False
+                next_itineraries.append(itinerary)
+        lift_off = True
+        for itinerary in next_itineraries:
+            airport_arrive = self.session.query(Airport).filter(Airport.name == itinerary.airport)
+            airport_leave = self.session.query(Airport).filter(Airport.name == itinerary.airport_left_from)
+            if airport_leave == airport_arrive:
+                lift_off = self.check_lift_off_acceptable(airport_arrive, itinerary.date)
+            else:
+                lift_off_1 = self.check_lift_off_acceptable(airport_arrive, itinerary.date)
+                lift_off_2 = self.check_lift_off_acceptable(airport_leave, itinerary.date)
+                lift_off = True
+                if not lift_off_2 or not lift_off_1:
+                    lift_off = False
+        if not lift_off:
+            pass
 
     def check_lift_off_acceptable(self, airport, current_date):
         self.request_onecall_for_place(airport.latitude, airport.longitude, None, None, None, None, 'Lift Off', self.api_key)
@@ -755,8 +759,10 @@ class TravelPlannerApp(App):
         lift_off = True
         for hour in forecast['hourly']:
             if date.fromtimestamp(int(hour['dt'])) == current_date:
-                if hour['visibility'] < 5:
+                if hour['visibility'] < 5000:
                     lift_off = False
+        if 'alerts' in forecast:
+            lift_off = False
         return lift_off
 
     def add_airports_spinner(self):
@@ -800,7 +806,7 @@ def main():
     airport = app.session.query(Airport).filter(Airport.name == 'Lincoln Airport').one()
     date_1 = date(2022, 5, 2)
     app.check_lift_off_acceptable(airport, date_1)
-    app.run()
+    #app.run()
 
 
 if __name__ == '__main__':
