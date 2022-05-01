@@ -167,13 +167,14 @@ ScreenManager:
                         pos_hint: {'x':.25, 'y':0}
                         on_press:
 #                           app.connect_to_database(root.ids.database_authority.text, root.ids.database_portnumber.text, root.ids.database_name.text, root.ids.database_username.text, root.ids.database_password.text)
-#                           app.connect_to_open_weather()
+                            app.connect_to_open_weather()
                             root.transition.direction = 'left'
                             root.current = 'mainmenu1'
     Screen:
         name: 'mainmenu1'
         on_enter:
-            app.get_places_to_validate
+            app.amount_of_needed_update_reviews()
+            app.get_places_to_validate()
         BoxLayout:
             orientation: 'vertical'
             BoxLayout:
@@ -190,8 +191,8 @@ ScreenManager:
                     BoxLayout:
                         orientation: 'horizontal'
                         Label:
-                            id: amount_unvalidated_cities
-                            text: ''
+                            id: amount_cities_unvalidated
+                            values: app.amount_cities_unvalidated
                     BoxLayout:
                         orientation: 'horizontal'
                         Label:
@@ -230,11 +231,22 @@ ScreenManager:
                             root.current = 'prepare_itinerary'
                     BoxLayout:
                         size_hint_max_y: 10
-                    Button:
-                        text: 'Click this to advance calendar by one day.'
-                        font_size: '20sp'
-                        on_press:
-
+                    BoxLayout:
+                        orientation:'horizontal'
+                        Button:
+                            id:increase_date
+                            text: 'Add one day'
+                            font_size:30
+                            on_press: app.add_one_day()
+                            markup: True
+                        Button:
+                            Label:
+                                text: root.counter_text
+                        Button:
+                            id:decrease_date
+                            text: 'Subtract one day'
+                            font_size:30
+                            markup: True
                     BoxLayout:
                         size_hint_max_y: 20
                     BoxLayout:
@@ -481,6 +493,9 @@ ScreenManager:
 
 <ValidateLocationsLabel>
     on_press: app.get_places_to_validate(self.text)
+
+<TravelPlannerApp>
+    text:
 
 <ReviewScrollView>:
     id: view
