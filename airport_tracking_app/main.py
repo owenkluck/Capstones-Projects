@@ -190,9 +190,8 @@ class AirportApp(App):
                 self.session.commit()
             itineraries = self.session.query(Itinerary).order_by(Itinerary.date)
             today_date = date.today()
-            itinerary_text = ''
             day_count = 1
-            current_city = None
+            current_location = None
             for itinerary in itineraries:
                 itinerary_text = f'{itinerary.date}\nCity: {itinerary.city}\nVenues: '
                 for venue in itinerary.venues:
@@ -201,17 +200,16 @@ class AirportApp(App):
                     itinerary.itinerary_type = 'Close'
                     self.session.add(itinerary)
                     self.session.commit()
-                #if itinerary.date < today_date or itinerary == selected_itinerary:
                 if itinerary.itinerary_type == 'Entertainment':
                     self.root.ids.past_itineraries.add_widget(ItineraryLabel(text=f'Day #{day_count}: ' + itinerary_text))
-                    if itinerary != selected_itinerary:
-                        current_city = itinerary.city
+                    if itinerary != selected_itinerary and itinerary.date != today_date:
+                        current_location = itinerary.city
                         day_count += 1
                     if itinerary.date == today_date:
                         next_city = itinerary.city
-                else:
+                else: # itinerary.itinerary_type == 'Close':
                     self.root.ids.proposed_itineraries.add_widget(ItineraryButtons(text=itinerary_text))
-            self.root.ids.current_status.text = f'Day #{day_count}\nCurrent City:{current_city}\nNext City: {next_city}'
+            self.root.ids.current_status.text = f'Day #{day_count}\nCurrent City: {current_location}\nNext City: {next_city}'
         except MultipleResultsFound:
             self.root.ids.itinerary_error_message.text = 'There seems to be multiple of the same values in the database'
 
