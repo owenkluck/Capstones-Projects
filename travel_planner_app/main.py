@@ -8,6 +8,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
+from sqlalchemy import func
 
 from database import Database
 from rest import RESTConnection
@@ -68,6 +69,14 @@ class TravelPlannerApp(App):
         self.ratings_to_update = []
         self.queued_entertainment_itineraries = []
         self.queued_closest_itineraries = []
+        self.airports = StringProperty('')
+        self.cities = StringProperty('')
+        self.amount_airports_unvalidated = 0
+        self.amount_cities_unvalidated = 0
+        self.welp = StringProperty('')
+        self.amount_venues_welp = 0
+        self.increase_date = 0
+        self.counter_text = StringProperty('')
 
     def build(self):
         inspector.create_inspector(Window, self)
@@ -88,18 +97,23 @@ class TravelPlannerApp(App):
         self.geo_connection = RESTConnection('api.openweathermap.org', 443, '/geo/1.0')
 
     def get_places_to_validate(self):
-        unvalidated_airports = self.session.query(Airport).filter(Airport.validated is False)
-        unvalidated_cities = self.session.query(City).filter(City.validated is False)
-        # for airport in range(len(unvalidated_airports)):
-        #     unvalidated_airports[airport] = unvalidated_airports[airport].name
-        # for city in range(len(unvalidated_cities)):
-        #     unvalidated_airports[city] = unvalidated_airports[city].name
+        unvalidated_airports = []
+        unvalidated_cities = []
+        airports = self.session.query(Airport).all()
+        cities = self.session.query(City).all()
+        for airport in airports:
+            if not airport.validated:
+                unvalidated_airports.append(airports)
+        for city in cities:
+            if not city.validated:
+                unvalidated_cities.append(cities)
+        amount_airports_unvalidated = str(len(unvalidated_airports))
+        amount_cities_unvalidated = str(len(unvalidated_cities))
         # self.root.ids.unvalidated_airport.values = unvalidated_airports
         # self.root.ids.unvalidated_city.values = unvalidated_cities
-        amount_unvalidated_cities = StringProperty(len(unvalidated_airports))
-        amount_unvalidated_airports = StringProperty(len(unvalidated_cities))
-        self.root.ids.amount_unvalidated_airports.text = f'{amount_unvalidated_airports} airports need to be validated.'
-        self.root.ids.amount_unvalidated_cities.text = f'{amount_unvalidated_cities} cities need to be validated.'
+#        self.root.ids.amount_airports_unvalidated1.text = f'{amount_airports_unvalidated} airports need to be validated.'
+#        self.root.ids.amount_cities_unvalidated1.text = f'{amount_cities_unvalidated} cities need to be validated.'
+        print(amount_airports_unvalidated)
         return unvalidated_airports, unvalidated_cities
 
     def add_locations_spinner(self):
@@ -198,6 +212,15 @@ class TravelPlannerApp(App):
         except SQLAlchemyError:
             print('There seems to be two venues with the same name in the database,'
                   ' that or the name in the database doesn\'t exist')
+
+    def amount_of_needed_update_reviews(self):
+        welp_venues = []
+        welp = self.session.query(Venue).all()
+        for venue in welp:
+            if venue.welp_score_needs_update is True:
+                welp_venues.append(welp)
+        amount_venues_welp = str(len(welp_venues))
+        return amount_venues_welp
 
     def get_new_ratings(self):
         new_ratings = self.session.query(Review).filter(Review.validated == False)
@@ -418,6 +441,12 @@ class TravelPlannerApp(App):
             venues.append(restaurant)
         return venues
 
+    def add_one_day(self, current_date):
+        self.increase_date = ''
+        self.counter_text = 0
+        self.increase_date += timedelta(days=1)
+        self.counter_text = str(self.increase_date)
+
     def search_for_indoor_events(self, event, venues_to_visit):
         for venue in venues_to_visit:
             if venue.venue_type == 'Indoor Theater' or venue.venue_type == 'Indoor Sports Arena':
@@ -458,8 +487,17 @@ class TravelPlannerApp(App):
                 forecast = city_forecast[0]
                 venues_to_visit = self.get_open_venues_list(city, forecast)
                 venues = self.determine_venues(venues_to_visit)
-                itinerary = Itinerary(airport=airport.name, city=city.city_name, venues=venues, date=current_date,
-                                      itinerary_type='Close')
+                leave_from_airport = None
+                if len(city.airports) > 1:
+                    for airport_2 in city.airports:
+                        if airport_2 != airport:
+                            leave_from_airport = airport_2
+                if leave_from_airport is not None:
+                    itinerary = Itinerary(airport=airport.name, city=city.city_name, venues=venues, date=current_date,
+                                          itinerary_type='Close', airport_left_from=leave_from_airport.name)
+                else:
+                    itinerary = Itinerary(airport=airport.name, city=city.city_name, venues=venues, date=current_date,
+                                          itinerary_type='Close', airport_left_from=airport.name)
                 self.queued_closest_itineraries.append(itinerary)
                 print('Success')
             elif len(city_forecast) == 0:
@@ -485,8 +523,17 @@ class TravelPlannerApp(App):
         venues_to_visit = self.get_open_venues_list(city, city_forecast[0])
         print(f'Venues to visit {venues_to_visit}')
         venues = self.determine_venues(venues_to_visit)
-        itinerary = Itinerary(airport=airport.name, city=city.city_name, venues=venues, date=current_date,
-                              itinerary_type='Entertain')
+        leave_from_airport = None
+        if len(city.airports) > 1:
+            for airport_2 in city.airports:
+                if airport_2 != airport:
+                    leave_from_airport = airport_2
+        if leave_from_airport is not None:
+            itinerary = Itinerary(airport=airport.name, city=city.city_name, venues=venues, date=current_date,
+                                  itinerary_type='Entertain', airport_left_from=leave_from_airport.name)
+        else:
+            itinerary = Itinerary(airport=airport.name, city=city.city_name, venues=venues, date=current_date,
+                                  itinerary_type='Entertain', airport_left_from=airport.name)
         self.queued_entertainment_itineraries.append(itinerary)
         print('Success')
         return airport
@@ -619,8 +666,10 @@ class TravelPlannerApp(App):
         )
         if update_or_create == 'update':
             self.update_old_forecast(itinerary_date, outdated_forecast)
-        else:
+        elif update_or_create == 'create':
             self.create_new_forecasts(airport, city)
+        else:
+            pass
 
     def update_old_forecast(self, itinerary_date, outdated_forecast):
         forecast = None
@@ -683,6 +732,33 @@ class TravelPlannerApp(App):
             print(f'{item}, deleted')
         self.session.commit()
 
+    def calender_day_changed(self):
+        next_itinerary = None
+        for itinerary in self.session.query(Itinerary).all():
+            if itinerary.date == self.current_date:
+                next_itinerary = itinerary
+        airport_arrive = self.session.query(Airport).filter(Airport.name == next_itinerary.airport)
+        airport_leave = self.session.query(Airport).filter(Airport.name == next_itinerary.airport_left_from)
+        if airport_leave == airport_arrive:
+            lift_off = self.check_lift_off_acceptable(airport_arrive, next_itinerary.date)
+        else:
+            lift_off_1 = self.check_lift_off_acceptable(airport_arrive, next_itinerary.date)
+            lift_off_2 = self.check_lift_off_acceptable(airport_leave, next_itinerary.date)
+            lift_off = True
+            if not lift_off_2 or not lift_off_1:
+                lift_off = False
+
+    def check_lift_off_acceptable(self, airport, current_date):
+        self.request_onecall_for_place(airport.latitude, airport.longitude, None, None, None, None, 'Lift Off', self.api_key)
+        forecast = self.updated_forecast
+        print(forecast)
+        lift_off = True
+        for hour in forecast['hourly']:
+            if date.fromtimestamp(int(hour['dt'])) == current_date:
+                if hour['visibility'] < 5:
+                    lift_off = False
+        return lift_off
+
     def add_airports_spinner(self):
         values = [airport.name for airport in self.session.query(Airport).all()]
         self.root.ids.airport_spinner.values = values
@@ -721,6 +797,9 @@ def main():
     app.final_destination = app.session.query(Airport).filter(Airport.name == 'Lincoln Airport').one()
     for city in app.session.query(City).all():
         print(city.venues)
+    airport = app.session.query(Airport).filter(Airport.name == 'Lincoln Airport').one()
+    date_1 = date(2022, 5, 2)
+    app.check_lift_off_acceptable(airport, date_1)
     app.run()
 
 
