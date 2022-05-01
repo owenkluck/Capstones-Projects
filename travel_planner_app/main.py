@@ -458,8 +458,17 @@ class TravelPlannerApp(App):
                 forecast = city_forecast[0]
                 venues_to_visit = self.get_open_venues_list(city, forecast)
                 venues = self.determine_venues(venues_to_visit)
-                itinerary = Itinerary(airport=airport.name, city=city.city_name, venues=venues, date=current_date,
-                                      itinerary_type='Close')
+                leave_from_airport = None
+                if len(city.airports) > 1:
+                    for airport_2 in city.airports:
+                        if airport_2 != airport:
+                            leave_from_airport = airport_2
+                if leave_from_airport is not None:
+                    itinerary = Itinerary(airport=airport.name, city=city.city_name, venues=venues, date=current_date,
+                                          itinerary_type='Close', airport_left_from=leave_from_airport.name)
+                else:
+                    itinerary = Itinerary(airport=airport.name, city=city.city_name, venues=venues, date=current_date,
+                                          itinerary_type='Close', airport_left_from=airport.name)
                 self.queued_closest_itineraries.append(itinerary)
                 print('Success')
             elif len(city_forecast) == 0:
@@ -485,8 +494,17 @@ class TravelPlannerApp(App):
         venues_to_visit = self.get_open_venues_list(city, city_forecast[0])
         print(f'Venues to visit {venues_to_visit}')
         venues = self.determine_venues(venues_to_visit)
-        itinerary = Itinerary(airport=airport.name, city=city.city_name, venues=venues, date=current_date,
-                              itinerary_type='Entertain')
+        leave_from_airport = None
+        if len(city.airports) > 1:
+            for airport_2 in city.airports:
+                if airport_2 != airport:
+                    leave_from_airport = airport_2
+        if leave_from_airport is not None:
+            itinerary = Itinerary(airport=airport.name, city=city.city_name, venues=venues, date=current_date,
+                                  itinerary_type='Entertain', airport_left_from=leave_from_airport.name)
+        else:
+            itinerary = Itinerary(airport=airport.name, city=city.city_name, venues=venues, date=current_date,
+                                  itinerary_type='Entertain', airport_left_from=airport.name)
         self.queued_entertainment_itineraries.append(itinerary)
         print('Success')
         return airport
@@ -682,6 +700,15 @@ class TravelPlannerApp(App):
             self.session.delete(item)
             print(f'{item}, deleted')
         self.session.commit()
+
+    def calender_day_changed(self):
+        next_itinerary = None
+        for itinerary in self.session.query(Itinerary).all():
+            if itinerary.date == self.current_date:
+                next_itinerary = itinerary
+        airport_arrive = None
+        airport_leave = None
+        pass
 
     def add_airports_spinner(self):
         values = [airport.name for airport in self.session.query(Airport).all()]
