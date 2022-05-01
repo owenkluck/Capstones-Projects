@@ -8,6 +8,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
+from sqlalchemy import func
 
 from database import Database
 from rest import RESTConnection
@@ -68,6 +69,14 @@ class TravelPlannerApp(App):
         self.ratings_to_update = []
         self.queued_entertainment_itineraries = []
         self.queued_closest_itineraries = []
+        self.airports = StringProperty('')
+        self.cities = StringProperty('')
+        self.amount_airports_unvalidated = 0
+        self.amount_cities_unvalidated = 0
+        self.welp = StringProperty('')
+        self.amount_venues_welp = 0
+        self.increase_date = 0
+        self.counter_text = StringProperty('')
 
     def build(self):
         inspector.create_inspector(Window, self)
@@ -88,18 +97,23 @@ class TravelPlannerApp(App):
         self.geo_connection = RESTConnection('api.openweathermap.org', 443, '/geo/1.0')
 
     def get_places_to_validate(self):
-        unvalidated_airports = self.session.query(Airport).filter(Airport.validated is False)
-        unvalidated_cities = self.session.query(City).filter(City.validated is False)
-        # for airport in range(len(unvalidated_airports)):
-        #     unvalidated_airports[airport] = unvalidated_airports[airport].name
-        # for city in range(len(unvalidated_cities)):
-        #     unvalidated_airports[city] = unvalidated_airports[city].name
+        unvalidated_airports = []
+        unvalidated_cities = []
+        airports = self.session.query(Airport).all()
+        cities = self.session.query(City).all()
+        for airport in airports:
+            if not airport.validated:
+                unvalidated_airports.append(airports)
+        for city in cities:
+            if not city.validated:
+                unvalidated_cities.append(cities)
+        amount_airports_unvalidated = str(len(unvalidated_airports))
+        amount_cities_unvalidated = str(len(unvalidated_cities))
         # self.root.ids.unvalidated_airport.values = unvalidated_airports
         # self.root.ids.unvalidated_city.values = unvalidated_cities
-        amount_unvalidated_cities = StringProperty(len(unvalidated_airports))
-        amount_unvalidated_airports = StringProperty(len(unvalidated_cities))
-        self.root.ids.amount_unvalidated_airports.text = f'{amount_unvalidated_airports} airports need to be validated.'
-        self.root.ids.amount_unvalidated_cities.text = f'{amount_unvalidated_cities} cities need to be validated.'
+#        self.root.ids.amount_airports_unvalidated1.text = f'{amount_airports_unvalidated} airports need to be validated.'
+#        self.root.ids.amount_cities_unvalidated1.text = f'{amount_cities_unvalidated} cities need to be validated.'
+        print(amount_airports_unvalidated)
         return unvalidated_airports, unvalidated_cities
 
     def add_locations_spinner(self):
@@ -198,6 +212,15 @@ class TravelPlannerApp(App):
         except SQLAlchemyError:
             print('There seems to be two venues with the same name in the database,'
                   ' that or the name in the database doesn\'t exist')
+
+    def amount_of_needed_update_reviews(self):
+        welp_venues = []
+        welp = self.session.query(Venue).all()
+        for venue in welp:
+            if venue.welp_score_needs_update is True:
+                welp_venues.append(welp)
+        amount_venues_welp = str(len(welp_venues))
+        return amount_venues_welp
 
     def get_new_ratings(self):
         new_ratings = self.session.query(Review).filter(Review.validated == False)
@@ -417,6 +440,12 @@ class TravelPlannerApp(App):
         if restaurant is not None:
             venues.append(restaurant)
         return venues
+
+    def add_one_day(self, current_date):
+        self.increase_date = ''
+        self.counter_text = 0
+        self.increase_date += timedelta(days=1)
+        self.counter_text = str(self.increase_date)
 
     def search_for_indoor_events(self, event, venues_to_visit):
         for venue in venues_to_visit:
