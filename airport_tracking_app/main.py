@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import timedelta
 import json
 from kivy import Logger
 from kivy.app import App
@@ -130,7 +130,7 @@ class AirportApp(App):
                     max_date = date.today() + timedelta(days=6)
                     if date(int(date_values[2]), int(date_values[1]), int(date_values[0])) <= max_date:
                         airport = self.session.query(Airport).filter(Airport.name == airport_name).one()
-                        self.request_onecall_for_place(airport.latitude, airport.longitude, date(int(date_values[2]), int(date_values[1]), int(date_values[0])), self.api_key, airport)
+                        self.request_onecall_for_place(airport.latitude, airport.longitude, self.api_key, airport)
                         self.root.current = 'check_forecast'
                         self.root.ids.check_forecast_error.text = 'Creating new forecasts for this airport. Please wait.'
                         self.add_forecast(airport_name, date_1)
@@ -146,7 +146,7 @@ class AirportApp(App):
     def connect_to_open_weather(self, port_api=443):
         self.weather_connection = RESTConnection('api.openweathermap.org', port_api, '/data/2.5')
 
-    def request_onecall_for_place(self, latitude, longitude, itinerary_date, api_key, airport):
+    def request_onecall_for_place(self, latitude, longitude, api_key, airport):
         self.weather_connection.send_request(
             'onecall',
             {

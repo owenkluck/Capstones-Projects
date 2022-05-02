@@ -21,7 +21,6 @@ class City(Persisted):
 class Venue(Persisted):
     __tablename__ = 'venues'
     venue_id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
-    # city_id = Column(Integer, ForeignKey('cities.city_id', ondelete='cascade'))
     venue_name = Column(String(256), nullable=False)
     venue_type = Column(String(256), nullable=False)
     average_welp_score = Column(Float)
