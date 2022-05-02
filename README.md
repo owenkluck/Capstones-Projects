@@ -23,7 +23,6 @@ to service the place.
 
 ### Issues:
 1. The app will not return the user to the airport or city screen to select an airport or city if the user had selected the create city or create airport button from the success screen after creating a city or airport.
-2. 
 ### Dependencies for Running:
 - Repository exists on <git.unl.edu>.
 - The repository has been cloned on the local file system.
@@ -105,6 +104,9 @@ The app that plans future travel is the folder named travel_planner_app.
 The Travel Planner App is mostly complete in its functionality. There are some small bugs.
 ### Issues:
 1. The algorithm to determine the next place to travel, will sometimes loop back and forth between airports.
+2. The app will sometimes determine that the place you left that morning is the place you arrived at.
+3. When updating reviews, that app doesn't get rid of a review if you accept it unless you accept all the reviews, or delete them until there are only accepted reviews.
+4. The app will not create new itineraries when itineraries are deleted from the middle of a set.
 ### Dependencies for Running:
 - Repository exists on <git.unl.edu>.
 - The repository has been cloned on the local file system.
