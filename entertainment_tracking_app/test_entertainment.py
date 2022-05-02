@@ -75,12 +75,11 @@ class TestEntertainment(unittest.TestCase):
         test_app.session = database.create_session()
         test_app.commit_city_to_database('example_entity', '45', '50', 'example_city')
         test_app.commit_venue_to_database('example_city', 'example_venue', 'example_venue_type')
-        test_app.add_welp_score(5, 'example_city', 'example_venue')
-        actual = test_app.session.query(Review).filter(Review.review_id == 1)
+        test_app._add_welp_score('5', 'example_venue')
+        actual = test_app.session.query(Review).filter(Review.review_id == 1).one()
         self.assertEqual(actual.review_id, 1)
-        self.assertEqual(actual.review_score, '5')
-        self.assertEqual(actual.venue_being_reviewed, 'example_venue')
-        self.assertEqual(actual.city, 'example_city')
+        self.assertEqual(actual.score, 5)
+        self.assertEqual(actual.venue_id, 1)
 
 
 if __name__ == '__main__':

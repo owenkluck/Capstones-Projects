@@ -447,7 +447,7 @@ ScreenManager:
                         do_scroll_y: True
                         bar_width: 4
                         BoxLayout:
-                            size_hint_y: 2
+                            size_hint_min_y: 500
                             orientation: 'vertical'
                             id: past_itineraries
                     Label:
@@ -466,14 +466,20 @@ ScreenManager:
                         do_scroll_y: True
                         bar_width: 4
                         BoxLayout:
-                            size_hint_y: 2
+                            size_hint_min_y: 100
                             orientation: 'vertical'
                             id: proposed_itineraries
                     Label:
                         id: itinerary_error_message
+                        text: ''
                     BoxLayout:
                         size_hint_max_y: 60
                         orientation: 'horizontal'
+                        Button:
+                            text: 'Back'
+                            on_press:
+                                root.current = 'main_menu'
+                                root.ids.itinerary_error_message.text = ''
                         BoxLayout:
                             size_hint_min_x: 600
                         Button:
@@ -522,7 +528,11 @@ ScreenManager:
     on_press: app.add_city(self.text)
 
 <ItineraryButtons>
+    size_hint_max_y: 100
     on_press: app.add_itineraries(self.text)
+
+<ItineraryLabel>
+    size_hint_min_y: 100
 
 
 
