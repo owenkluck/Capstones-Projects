@@ -27,7 +27,6 @@ class TestEntertainment(unittest.TestCase):
         test_app.commit_venue_to_database('example_city', 'example_venue', 'example_venue_type')
         actual = test_app.session.query(Venue).filter(Venue.venue_name == 'example_venue').one()
         self.assertEqual(actual.venue_name, 'example_venue')
-        self.assertEqual(actual.city.city_name, 'example_city')
         self.assertEqual(actual.venue_type, 'example_venue_type')
 
     def test_add_condition(self):
