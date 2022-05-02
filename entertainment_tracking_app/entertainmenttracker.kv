@@ -336,6 +336,8 @@ ScreenManager:
                     root.transition.direction = 'right'
                     root.current = 'home'
     Screen:
+        on_pre_enter:
+            no_venues_message = ''
         name: 'choose_city_for_venue_edit'
         BoxLayout:
             orientation: 'vertical'
