@@ -205,7 +205,7 @@ If the program ran as outlined in the instructions the application behaved corre
 - The installer has been run.
 - No changes have been made to the database.
 
-### Test
+### Test 1
 
 1.  If you click the run button on the left on line 1 in main.py of travel_planner_app, the app should appear on your screen.
 
@@ -213,5 +213,58 @@ If the program ran as outlined in the instructions the application behaved corre
 
 3.  Click the button labelled "SUBMIT" and you should see a new screen with a label "Main Menu" at the top.
 #unfinished test
+
+### Test Validate City
+
+1. From the main menu page after completing Test 1 press the Validate Locations button and you will be navigated to another screen
+
+2. Press the button that says 'Select City or Airport' and press Denver which should be the first option.
+
+3. Press the validate button and you will be given a success message. The Test has passed.
+
+### Test Validate Airport
+
+1. From the main menu page after completing Test 1 press the Validate Locations button and you will be navigated to another screen
+
+2. Press the button that says 'Select City or Airport' and scroll until you come across Lincoln Airport. Select this value.
+
+3. Press the validate button and you will be given a success message. The Test has passed.
+
+### Test Accept Rating
+
+1. From the main menu page after completing Test 1 press the Update Ratings button and you will be navigated to another screen
+
+2. On the screen select the two boxes under the Chase Center.
+
+3. Press the Accept or Reject button and press Accept
+
+4. Click the validate button and the reviews should disappear as they have been validated.
+
+### Test Reject Ratings
+
+1. From the main menu page after completing Test 1 press the Update Ratings button and you will be navigated to another screen
+
+2. On the screen select the two boxes under the Chase Center.
+
+3. Press the Accept or Reject button and press Reject
+
+4. Click the validate button and the reviews should disappear as they have been deleted.
+
+### Test Prepare Itineraries
+
+1. From the main menu page after completing Test 1 press the Prepare Itinerary button and you will be navigated to another screen
+
+2. From here you will need to wait for the two sets of itineraries to be created.
+
+3. Once the Itineraries appear on the screen the test is done
+
+### Test Prepare Itineraries with no new Itineraries
+
+1. From the main menu page after completing Test 1 press the Prepare Itinerary button and you will be navigated to another screen
+
+2. From here you will need to wait for the two sets of itineraries to not be created.
+
+3. Once you see that no itineraries have been created the test is complete
+
 
 
