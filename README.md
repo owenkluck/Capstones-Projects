@@ -64,7 +64,7 @@ The Entertainment Tracking App is complete in its functionality.
 - The installer has been run.
 - No changes to the database have been made.
 ### Building and Running:
-Open a terminal window and run the command 'mysql -h cse.unl.edu -u kandrews -p' and press enter.
+1. Open a terminal window and run the command 'mysql -h cse.unl.edu -u kandrews -p' and press enter.
 2. You will be asked to submit a password, type 'qUc:6M' and press enter.
 3. from here run the command 'create database kandrews', if an error is given saying one then leave it.
 4. Leave the Terminal and run the python file database_installer.py.
@@ -79,7 +79,9 @@ Open a terminal window and run the command 'mysql -h cse.unl.edu -u kandrews -p'
 The installer is the folder named installer.
 
 ### Completeness:
+The installer is complete in its functionality.
 ### Issues:
+The installer has no known issues at this time.
 ### Dependencies for Running:
 - Repository exists on <git.unl.edu>.
 - The repository has been cloned on the local file system.
@@ -90,14 +92,19 @@ The installer is the folder named installer.
 - The installer has been run.
 - No changes to the database have been made.
 ### Building and Running:
-
+1. Open a terminal window and run the command 'mysql -h cse.unl.edu -u kandrews -p' and press enter.
+2. You will be asked to submit a password, type 'qUc:6M' and press enter.
+3. from here run the command 'create database kandrews', if an error is given saying one then leave it.
+4. Leave the Terminal and run the python file database_installer.py.
 
 ## Travel Planner App
 
 The app that plans future travel is the folder named travel_planner_app.
 
 ### Completeness:
+The Travel Planner App is mostly complete in its functionality. There are some small bugs.
 ### Issues:
+1. The algorithm to determine the next place to travel, will sometimes loop back and forth between airports.
 ### Dependencies for Running:
 - Repository exists on <git.unl.edu>.
 - The repository has been cloned on the local file system.
@@ -108,6 +115,13 @@ The app that plans future travel is the folder named travel_planner_app.
 - The installer has been run.
 - No changes to the database have been made.
 ### Building and Running:
+1. Open a terminal window and run the command 'mysql -h cse.unl.edu -u kandrews -p' and press enter.
+2. You will be asked to submit a password, type 'qUc:6M' and press enter.
+3. from here run the command 'create database kandrews', if an error is given saying one then leave it and skip the next step.
+4. Leave the Terminal and run the python file database_installer.py.
+5. Run the main.py file in the entertainment_tracking_app project folder.
+6. The app will start by giving you a credentials screen. Input the necessary information.
+7. Then you will be given the main menu screen where you may choose to validate locations, update reviews, or prepare itineraries.
 
 
 
