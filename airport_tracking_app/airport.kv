@@ -431,50 +431,51 @@ ScreenManager:
         BoxLayout:
             orientation: 'vertical'
             BoxLayout:
-                size_hint_max_y: 80
+                size_hint_max_y: 40
                 TestLabel:
                     text: 'Review Itinerary'
                     font_size: '25sp'
             BoxLayout:
                 orientation: 'horizontal'
                 BoxLayout:
-                    size_hint_max_x: 40
-                BoxLayout:
                     orientation: 'vertical'
-                    Label:
-                        text: 'Past Travel'
-                    ScrollView:
-                        do_scroll_x: False
-                        do_scroll_y: True
-                        bar_width: 4
+                    BoxLayout:
+                        orientation: 'horizontal'
                         BoxLayout:
-                            size_hint_min_y: 500
+                            size_hint_x: .2
+                        BoxLayout:
                             orientation: 'vertical'
-                            id: past_itineraries
-                    Label:
-                        text: 'Current Status'
-                    Label:
-                        id: current_status
-                        font_size: '20sp'
+                            Label:
+                                text: 'Status:'
+                            Label:
+                                id: current_status
+                        BoxLayout:
+                            size_hint_min_x: 15
+                            size_hint_max_x: 150
+                        BoxLayout:
+                            orientation: 'vertical'
+                            Label:
+                                text: 'Selected Itinerary:'
+                                font_size: '15sp'
+                            Label:
+                                id: selected_itinerary
+                                text: 'No itinerary selected'
+                        BoxLayout:
+                            size_hint_x: .2
                     BoxLayout:
                         size_hint_max_y: 10
                     Label:
                         text: 'Proposed Itineraries'
+                        font_size: '20sp'
                     BoxLayout:
-                        size_hint_max_y: 10
-                    ScrollView:
-                        do_scroll_x: False
-                        do_scroll_y: True
-                        bar_width: 4
-                        BoxLayout:
-                            size_hint_min_y: 100
-                            orientation: 'vertical'
-                            id: proposed_itineraries
+                        size_hint_y: 1.5
+                        orientation: 'horizontal'
+                        id: proposed_itineraries
                     Label:
                         id: itinerary_error_message
                         text: ''
                     BoxLayout:
-                        size_hint_max_y: 60
+                        size_hint_max_y: 50
                         orientation: 'horizontal'
                         Button:
                             text: 'Back'
@@ -482,14 +483,48 @@ ScreenManager:
                                 root.current = 'main_menu'
                                 root.ids.itinerary_error_message.text = ''
                         BoxLayout:
-                            size_hint_min_x: 600
+                            size_hint_max_x: 50
+                        Button:
+                            text: 'Past Travel'
+                            on_press:
+                                root.current = 'past_travel'
+                        BoxLayout:
+                            size_hint_max_x: 50
                         Button:
                             text: 'Quit'
                             on_press: app.stop()
                     BoxLayout:
                         size_hint_max_y: 20
+
+    Screen:
+        name: 'past_travel'
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                text: 'Past Travel'
+                font_size: '20sp'
+            ScrollView:
+                do_scroll_x: True
+                do_scroll_y: True
+                bar_width: 4
+                size_hint_y: 3
                 BoxLayout:
-                    size_hint_max_x: 40
+                    size_hint_y: 1.5
+                    orientation: 'vertical'
+                    id: past_itineraries
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_y: .5
+                Button:
+                    text: 'Back'
+                    on_press:
+                        root.current = 'review_itinerary'
+                        root.ids.itinerary_error_message.text = ''
+                BoxLayout:
+                    size_hint_max_x: 100
+                Button:
+                    text: 'Quit'
+                    on_press: app.stop()
 
 <Screen>:
     canvas.before:
@@ -529,11 +564,13 @@ ScreenManager:
     on_press: app.add_city(self.text)
 
 <ItineraryButtons>
-    size_hint_max_y: 100
+    size_hint_max_y: 10
     on_press: app.add_itineraries(self.text)
 
 <ItineraryLabel>
-    size_hint_min_y: 100
+    size_hint_min_y: 10
+    multiline: True
 
-
+<Box>
+    size_hint_x: .1
 

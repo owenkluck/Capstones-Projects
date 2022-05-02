@@ -187,13 +187,43 @@ If the program ran as outlined in the instructions the application behaved corre
 6.  In the "Venue Name" textbox, type "United Center". Click on the dropdown next to the label "Associated City", then scroll down and select "Chicago".    	Click on the dropdown next to the label "Venue Type" and select "Indoor Sports Arena".
 
 7.  Click on the button labeled "NEXT".
-#unfinished test  
+
+8.  Click the checkbox labeled 'OpenWeather Weather Condition Code' and click the button labeled 'NEXT'.
+
+9.  In the 'OpenWeather Condition Code' textbox, type '212' and click the buttom labeled 'CREATE VENUE'. 
+
+10. You should be taken to a new screen with a success message at the top. Click the button labeled 'OK'.
+
+11. Now, click the button labeled 'ADD/EDIT VENUE'.
+
+12. You should be taken to a screen where you can either create a new venue or edit an existing one. Click the button labeled 'Edit Existing Venue'.
+
+13. You should now be asked to select which city you are going to be editing a venue of. Select the city 'Denver' and press the button labeled 'Choose Venue'.
+
+14. You should now be asked to select whih venue will be edited. Select the venue Casa Bonita and click the button labeled 'NEXT'.
+
+15. In the 'Name' textbox, type 'Casa Blanca'. Click the button labeled 'SAVE'
+
+16. You should be taken to a new screen with a success message at the top reading 'Venue edited successfully!'. Click the button labeled 'OK'.
+
+17. Click the buttom labeled 'Add Review'.
+
+18. Select the city 'San Francisco' from the dropdown menu and click the button labeled 'NEXT'.
+
+19. Select 'Freddies' from the dropdown mednu and click the button labeled 'NEXT'.
+
+20. You should see a new screen asking, 'How many stars would you give Freddies?' In the textbox below the question, type '4' and press the button labeled 'NEXT'.
+
+21. You should be taken to a new screen that displays a success message saying 'Thank you for reviewing Freddies on Welp!' Press the 'OK' button.
+
+22. Press the 'Exit App' button. The application should close.
+
+If the program ran as outlined in the instructions the application behaved correctly.
 
 
+# Travel Planner App System Tests
 
-# Tracking App System Test Create Itinerary
-
-## System Test: Determining whether the app can successfully 
+## System Test: Determine whether the application can successfully run.
 
 ### Preconditions
 
@@ -205,13 +235,140 @@ If the program ran as outlined in the instructions the application behaved corre
 - The installer has been run.
 - No changes have been made to the database.
 
-### Test
+### Test Validate City
+#### Description: see if application changed validation value after selected and validated.
 
-1.  If you click the run button on the left on line 1 in main.py of travel_planner_app, the app should appear on your screen.
+1. From the main menu page after completing Test 1 press the Validate Locations button and you will be navigated to another screen
 
-2.  You should see several textboxes, with most already containing text. In the empty textbox labelled "Password", type "qUc:6M". In the empty textbox      	labelled "API Key", copy and paste "bc3c6684b2b24478afe3626faf49baa5".
+2. Press the button that says 'Select City or Airport' and press Denver which should be the first option.
 
-3.  Click the button labelled "SUBMIT" and you should see a new screen with a label "Main Menu" at the top.
-#unfinished test
+3. Press the validate button and you will be given a success message.
+
+4. Open up a terminal window and run the command "mysql -h cse.unl.edu -u kandrews -p". You should be prompted for a password, type "qUc:6M".
+
+5. Run the command "use database kandrews;"
+
+6. Run the command "select * from cities"
+
+7. press ctrl + f to open a search bar and type in 'Denver'
+
+8. find the row in the table with Denver and check to make sure that the validate field has been changed to True.
+
+
+### Test Validate Airport
+#### Description: see if application changed validation value after selected and validated.
+
+1. From the main menu page after completing Test 1 press the Validate Locations button and you will be navigated to another screen
+
+2. Press the button that says 'Select City or Airport' and scroll until you come across Lincoln Airport. Select this value.
+
+3. Press the validate button and you will be given a success message.
+
+4. Open up a terminal window and run the command "mysql -h cse.unl.edu -u kandrews -p". You should be prompted for a password, type "qUc:6M".
+
+5. Run the command "use database kandrews;"
+
+6. Run the command "select * from airports"
+
+7. Scroll through and find Lincoln Aiport. Check that its Value for validate has been changed to True
+
+
+### Test Accept Rating
+#### Description: see if application changed validation value after selected and validated.
+
+1. From the main menu page after completing Test 1 press the Update Ratings button and you will be navigated to another screen
+
+2. On the screen select the two boxes under the Chase Center.
+
+3. Press the Accept or Reject button and press Accept
+
+4. Click the validate button and the reviews should disappear as they have been updated.
+
+5. Open up a terminal window and run the command "mysql -h cse.unl.edu -u kandrews -p". You should be prompted for a password, type "qUc:6M".
+
+6. Run the command "use database kandrews;"
+
+7. Run the command "select * from reviews"
+
+8. You should now see that the reviews you selected have had their validated field turned True.
+
+
+### Test Reject Ratings
+#### Description: see if application deletes value after selected and updated.
+
+1. From the main menu page after completing Test 1 press the Update Ratings button and you will be navigated to another screen
+
+2. On the screen select the two boxes under the Chase Center.
+
+3. Press the Accept or Reject button and press Reject
+
+4. Click the validate button and the reviews should disappear as they have been deleted.
+
+5. Open up a terminal window and run the command "mysql -h cse.unl.edu -u kandrews -p". You should be prompted for a password, type "qUc:6M".
+
+6. Run the command "use database kandrews;"
+
+7. Run command "select * from reviews"
+
+8. You should now see that the reviews you selected have been deleted
+
+
+### Test Prepare Itineraries
+#### Description: see if application creates the proper amount of itineraries.
+
+1. From the main menu page after completing Test 1 press the Prepare Itinerary button and you will be navigated to another screen
+
+2. From here you will need to wait for the two sets of itineraries to be created.
+
+3. Once the Itineraries appear on the screen exit the program.
+
+4. Open up a terminal window and run the command "mysql -h cse.unl.edu -u kandrews -p". You should be prompted for a password, type "qUc:6M".
+
+5. Run the command "use database kandrews;"
+
+6. Run the command "select * from itineraries"
+
+7. Check that 14 new itineraries created. 7 Close and 7 Entertainment.
+
+
+### Test Prepare Itineraries with no new Itineraries
+#### Description: see if application creates no new itineraries when none are needed.
+
+1. From the main menu page after completing Test 1 press the Prepare Itinerary button and you will be navigated to another screen
+
+2. From here you will need to wait for the two sets of itineraries to not be created.
+
+3. Once you see that no itineraries have been created exit the program.
+
+4. Open up a terminal window and run the command "mysql -h cse.unl.edu -u kandrews -p". You should be prompted for a password, type "qUc:6M".
+
+5. Run the command "use database kandrews;"
+
+6. Run the command "select * from itineraries"
+
+7. From here check that the original 14 itineraries from the last system test and nothing more.
+
+### Test Prepare Only a Few Itineraries
+#### Advance the calendar day and create a few itineraries.
+
+1. From the main menu page after completing Test 1 click the 'Advance Calendar Day' button 3 times.
+
+2. Then click the Prepare Itineraries Button.
+
+3. From here you will need to wait for the two sets of itineraries to not be created.
+
+4. Once you see that no itineraries have been created exit the program.
+
+5. Open up a terminal window and run the command "mysql -h cse.unl.edu -u kandrews -p". You should be prompted for a password, type "qUc:6M".
+
+6. Run the command "use database kandrews;"
+
+7. Run the command "select * from itineraries"
+
+8. From here check that only 8 itineraries have been made.
+
+
+
+
 
 

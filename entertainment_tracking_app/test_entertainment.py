@@ -27,7 +27,6 @@ class TestEntertainment(unittest.TestCase):
         test_app.commit_venue_to_database('example_city', 'example_venue', 'example_venue_type')
         actual = test_app.session.query(Venue).filter(Venue.venue_name == 'example_venue').one()
         self.assertEqual(actual.venue_name, 'example_venue')
-        self.assertEqual(actual.city.city_name, 'example_city')
         self.assertEqual(actual.venue_type, 'example_venue_type')
 
     def test_add_condition(self):
@@ -80,6 +79,17 @@ class TestEntertainment(unittest.TestCase):
         self.assertEqual(actual.review_id, 1)
         self.assertEqual(actual.score, 5)
         self.assertEqual(actual.venue_id, 1)
+
+    def test_update_itinerary(self):
+        url = Database.construct_in_memory_url()
+        database = Database(url)
+        database.ensure_tables_exist()
+        test_app = EntertainmentTrackerApp()
+        test_app.session = database.create_session()
+        test_itinerary = Itinerary(airport='JFK', city='New York City', selected=False)
+        test_app.update_select_itinerary(True, test_itinerary)
+        actual = test_app.session.query(Itinerary).filter(Itinerary.city == 'New York City').one()
+        self.assertEqual(actual.selected, True)
 
 
 if __name__ == '__main__':

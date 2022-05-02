@@ -1,14 +1,14 @@
-from datetime import date
-
+from datetime import date, timedelta
+import json
 from kivy import Logger
 from kivy.app import App
 from kivy.modules import inspector
 from kivy.core.window import Window
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button, Label
 from sqlalchemy.exc import SQLAlchemyError, MultipleResultsFound
 from database import Airport, City, Condition, Database, Itinerary
-from travel_planner_app.api_key import API_KEY
-from travel_planner_app.rest import RESTConnection
+from rest import RESTConnection
 from datetime import date
 
 
@@ -28,16 +28,24 @@ class ItineraryLabel(Label):
     pass
 
 
+class Box(BoxLayout):
+    pass
+
+
 class AirportApp(App):
     def __init__(self, **kwargs):
         super(AirportApp, self).__init__(**kwargs)
-        url = Database.construct_mysql_url('localhost', 33060, 'airports', 'root', 'cse1208')
+        database_credentials = open('database_credentials.json')
+        data = json.load(database_credentials)
+        url = Database.construct_mysql_url(data['authority'], data['port'],
+                                           data['database'], data['username'],
+                                           data['password'])
         self.airport_database = Database(url)
         self.session = self.airport_database.create_session()
         self.airport_database.ensure_tables_exist()
         self.current_airport = None
         self.current_city = None
-        self.api_key = API_KEY
+        self.api_key = data['api_key']
         self.updated_forecast = None
         self.weather_connection = None
         self.connect_to_open_weather(port_api=443)
@@ -46,15 +54,12 @@ class AirportApp(App):
         inspector.create_inspector(Window, self)
 
     def submit_data_airport(self, name, code, latitude, longitude):
-        print(f'{len(name)}, {len(code)}, {len(latitude)}, {len(longitude)}')
-        print(len(name) > 0 and len(code) > 0 and len(latitude) > 0 and len(longitude) > 0)
         if len(name) > 0 and len(code) > 0 and len(latitude) > 0 and len(longitude) > 0:
             try:
                 self.commit_airport_to_database(code, latitude, longitude, name)
                 self.set_current_airport(name)
                 self.root.current = 'success_airport'
             except SQLAlchemyError:
-                print('Database could not be updated.')
                 self.root.ids.create_airport_error.text = 'Database could not be updated.' \
                                                           '\nThe information added may match an airport that' \
                                                           '\nis currently in the database'
@@ -75,7 +80,6 @@ class AirportApp(App):
                 self.set_current_city(name)
                 self.root.current = 'success_city'
             except SQLAlchemyError:
-                print('Database could not be updated.')
                 self.root.ids.create_city_error.text = 'Database could not be updated.' \
                                                        '\nThe information added may match a city that' \
                                                        '\nis currently in the database.'
@@ -99,16 +103,23 @@ class AirportApp(App):
             airport = self.session.query(Airport).filter(Airport.name == airport_name).one()
             airport_id = airport.airport_id
             date_values = date_1.split('/')
-            print('hi_1')
+            real_forecast = None
+            forecasts = self.session.query(Condition).filter(Condition.airport_id == airport_id)
             try:
-                forecasts = self.session.query(Condition).filter(Condition.date == date(int(date_values[2]), int(date_values[1]), int(date_values[0])) and Condition.airport_id == airport_id)
-                self.root.ids.forecast.text = f'On {forecasts[0].date}, the weather will be:\n' \
-                                              f'temperature: {forecasts[0].max_temperature}\n' \
-                                              f'wind_speed: {forecasts[0].max_wind_speed}\n' \
-                                              f'humidity: {forecasts[0].max_humidity}\n' \
-                                              f'rain: {forecasts[0].rain}\n' \
-                                              f'visibility: {forecasts[0].visibility}'
-            except (IndexError, SQLAlchemyError, ValueError):
+                for forecast in forecasts:
+                    if forecast.date == date(int(date_values[2]), int(date_values[1]), int(date_values[0])):
+                        real_forecast = forecast
+            except (IndexError, ValueError):
+                self.root.ids.check_forecast_error.text = 'The date input was incorrect,\n please type date in form DY/MN/YEAR.\n Ex: 1/7/2005'
+                return
+            if real_forecast is not None:
+                self.root.ids.forecast.text = f'On {real_forecast.date}, the weather will be:\n' \
+                                              f'temperature: {real_forecast.max_temperature}\n' \
+                                              f'wind_speed: {real_forecast.max_wind_speed}\n' \
+                                              f'humidity: {real_forecast.max_humidity}\n' \
+                                              f'rain: {real_forecast.rain}\n' \
+                                              f'visibility: {real_forecast.visibility}'
+            else:
                 for value in date_values:
                     try:
                         int(value)
@@ -116,10 +127,16 @@ class AirportApp(App):
                         self.root.ids.check_forecast_error.text = 'The date input was incorrect,\n please type date in form DY/MN/YEAR.\n Ex: 1/7/2005'
                         return
                 if int(date_values[0]) < 32 and int(date_values[1]) < 13 and 2000 < int(date_values[2]) < 3000:
-                    print('hi')
-                    self.request_onecall_for_place(airport.latitude, airport.longitude, date(int(date_values[2]), int(date_values[1]), int(date_values[0])), self.api_key)
-                    self.root.current = 'check_forecast'
-                    self.root.ids.check_forecast_error.text = 'Creating new forecasts for this airport. Please wait.'
+                    max_date = date.today() + timedelta(days=6)
+                    if date(int(date_values[2]), int(date_values[1]), int(date_values[0])) <= max_date:
+                        airport = self.session.query(Airport).filter(Airport.name == airport_name).one()
+                        self.request_onecall_for_place(airport.latitude, airport.longitude, date(int(date_values[2]), int(date_values[1]), int(date_values[0])), self.api_key, airport)
+                        self.root.current = 'check_forecast'
+                        self.root.ids.check_forecast_error.text = 'Creating new forecasts for this airport. Please wait.'
+                        self.add_forecast(airport_name, date_1)
+                    else:
+                        self.root.ids.check_forecast_error.text = 'We cannot show a forecast more than 7 days into the' \
+                                                                  ' future, please choose a different date.'
                 else:
                     self.root.ids.check_forecast_error.text = 'A value for day, month, or year is out of range or not accurate.'
         except SQLAlchemyError:
@@ -129,7 +146,7 @@ class AirportApp(App):
     def connect_to_open_weather(self, port_api=443):
         self.weather_connection = RESTConnection('api.openweathermap.org', port_api, '/data/2.5')
 
-    def request_onecall_for_place(self, latitude, longitude, itinerary_date, api_key):
+    def request_onecall_for_place(self, latitude, longitude, itinerary_date, api_key, airport):
         self.weather_connection.send_request(
             'onecall',
             {
@@ -142,16 +159,15 @@ class AirportApp(App):
             self.on_records_not_loaded,
             self.on_records_not_loaded,
         )
-        self.create_new_forecasts()
+        self.create_new_forecasts(airport)
 
     def on_records_not_loaded(self, _, error):
         Logger.error(f'{self.__class__.__name__}: {error}')
 
     def update_forecast(self, _, response):
-        # print(dumps(response, indent=4, sort_keys=True))
         self.updated_forecast = response
 
-    def create_new_forecasts(self):
+    def create_new_forecasts(self, airport):
         for day in self.updated_forecast['daily']:
             max_temperature = int(day['temp']['max'])
             min_temperature = int(day['temp']['min'])
@@ -161,7 +177,7 @@ class AirportApp(App):
             rain = int(day['pop'])
             forecast = Condition(date=date.fromtimestamp(int(day['dt'])), max_temperature=max_temperature,
                                  min_temperature=min_temperature, max_humidity=humidity, max_wind_speed=wind_speed,
-                                 visibility=visibility, rain=rain)
+                                 visibility=visibility, rain=rain, airport=airport)
             self.session.add(forecast)
             self.session.commit()
 
@@ -184,34 +200,45 @@ class AirportApp(App):
                 city_name, _, _ = city_name.partition('\n')
                 selected_itinerary = self.session.query(Itinerary).filter(Itinerary.city == city_name).one()
                 next_city = city_name
-                # Needs to be unit tested due to commit
-                selected_itinerary.itinerary_type = 'Entertainment'
-                self.session.add(selected_itinerary)
-                self.session.commit()
+                self.update_select_itinerary(True, selected_itinerary)
             itineraries = self.session.query(Itinerary).order_by(Itinerary.date)
             today_date = date.today()
             day_count = 1
             current_location = None
             for itinerary in itineraries:
-                itinerary_text = f'{itinerary.date}\nCity: {itinerary.city}\nVenues: '
+                itinerary_text = f'City: {itinerary.city}\nVenues: '
                 for venue in itinerary.venues:
-                    itinerary_text += f'{venue.venue_name}, '
+                    itinerary_text += f'{venue.venue_name}({venue.venue_type}), '
                 if selected_itinerary is not None and itinerary.date == selected_itinerary.date and itinerary != selected_itinerary:
-                    itinerary.itinerary_type = 'Close'
-                    self.session.add(itinerary)
-                    self.session.commit()
-                if itinerary.itinerary_type == 'Entertainment':
-                    self.root.ids.past_itineraries.add_widget(ItineraryLabel(text=f'Day #{day_count}: ' + itinerary_text))
-                    if itinerary != selected_itinerary and itinerary.date != today_date:
+                    self.update_select_itinerary(False, itinerary)
+                if itinerary.itinerary_type == 'Past' or itinerary.selected:
+                    if not itinerary.selected:
                         current_location = itinerary.city
-                        day_count += 1
-                    if itinerary.date == today_date:
+                    time_difference = itinerary.date - today_date
+                    day_count = str(time_difference)
+                    day_count, _, _ = day_count.partition(' day')
+                    if len(day_count) > 2:
+                        day_count = '1'
+                    else:
+                        day_count = str(int(day_count)+1)
+                    if itinerary.selected:
                         next_city = itinerary.city
-                else: # itinerary.itinerary_type == 'Close':
-                    self.root.ids.proposed_itineraries.add_widget(ItineraryButtons(text=itinerary_text))
+                        self.root.ids.selected_itinerary.text = 'Next ' + itinerary_text
+                    self.root.ids.past_itineraries.add_widget(ItineraryLabel(text=f'Day #{day_count}: {itinerary.date}\n' + itinerary_text))
+                else:
+                    if itinerary.itinerary_type == 'Close':
+                        self.root.ids.proposed_itineraries.add_widget(ItineraryLabel(text='Closest\nto Destination'))
+                    else:
+                        self.root.ids.proposed_itineraries.add_widget(ItineraryLabel(text='Most Venues'))
+                    self.root.ids.proposed_itineraries.add_widget(ItineraryButtons(text='Next ' + itinerary_text))
             self.root.ids.current_status.text = f'Day #{day_count}\nCurrent City: {current_location}\nNext City: {next_city}'
         except MultipleResultsFound:
             self.root.ids.itinerary_error_message.text = 'There seems to be multiple of the same values in the database'
+
+    def update_select_itinerary(self, selected, itinerary):
+        itinerary.selected = selected
+        self.session.add(itinerary)
+        self.session.commit()
 
     def add_city(self, city):
         try:
@@ -267,11 +294,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-# Things to clean up:
-    # Re-organize main.py functions.
-    # Add range determination to main.py.
-    # Make screen take you back after making new city from button.
-    # add view itinerary screen
-    # make one call work
-    # add method to update Condition if it doesn't exist for a day

@@ -20,23 +20,28 @@ class City(Persisted):
 
 class Venue(Persisted):
     __tablename__ = 'venues'
-    venue_id = Column(Integer, primary_key=True, autoincrement=True)
+    venue_id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
     # city_id = Column(Integer, ForeignKey('cities.city_id', ondelete='cascade'))
-    itinerary_id = Column(Integer, ForeignKey('itineraries.itinerary_id', ondelete='CASCADE'))
     venue_name = Column(String(256), nullable=False)
     venue_type = Column(String(256), nullable=False)
     average_welp_score = Column(Float)
     welp_score_needs_update = Column(Boolean, default=False)
     condition = relationship('Condition', back_populates='venue', secondary='venue_conditions')
     cities = relationship('City', uselist=True, secondary='city_venues', back_populates='venues')
+    itineraries = relationship('Itinerary', uselist=True, secondary='itinerary_venues', back_populates='venues')
     reviews = relationship('Review', back_populates='venue')
-    itinerary = relationship('Itinerary', back_populates='venues')
 
 
 class CityVenue(Persisted):
     __tablename__ = 'city_venues'
     venue_id = Column(Integer, ForeignKey('venues.venue_id', ondelete='CASCADE'), primary_key=True)
     city_id = Column(Integer, ForeignKey('cities.city_id', ondelete='CASCADE'), primary_key=True)
+
+
+class ItineraryVenue(Persisted):
+    __tablename__ = 'itinerary_venues'
+    venue_id = Column(Integer, ForeignKey('venues.venue_id', ondelete='CASCADE'), primary_key=True)
+    itinerary_id = Column(Integer, ForeignKey('itineraries.itinerary_id', ondelete='CASCADE'), primary_key=True)
 
 
 class Review(Persisted):
@@ -95,11 +100,13 @@ class Itinerary(Persisted):
     __tablename__ = 'itineraries'
     itinerary_id = Column(Integer, primary_key=True, autoincrement=True)
     airport = Column(String(256))
+    airport_left_from = Column(String(256))
     city = Column(String(256))
     date = Column(Date)
     itinerary_type = Column(String(256))
     next_itinerary = Column(String(256))
-    venues = relationship('Venue', uselist=True, back_populates='itinerary')
+    venues = relationship('Venue', uselist=True, secondary='itinerary_venues', back_populates='itineraries')
+    selected = Column(Boolean, default=False)
 
 
 class Database(object):

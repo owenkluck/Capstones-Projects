@@ -1,8 +1,22 @@
+from datetime import date
+
 from kivy.app import App
 from kivy.modules import inspector  # For inspection.
 from kivy.core.window import Window  # For inspection.
+import json
+
+from kivy.uix.button import Button, Label
+from sqlalchemy.exc import MultipleResultsFound
 
 from database import *
+
+
+class ItineraryButtons(Button):
+    pass
+
+
+class ItineraryLabel(Label):
+    pass
 
 
 def bad_condition_entry(data_list):
@@ -25,21 +39,28 @@ def bad_lat_long(lat, long):
 class EntertainmentTrackerApp(App):
     def __init__(self, **kwargs):
         super(EntertainmentTrackerApp, self).__init__(**kwargs)
-        url = Database.construct_mysql_url('localhost', 3306, 'entertainment', 'root', 'cse1208')
+        database_credentials = open('database_credentials.json')
+        data = json.load(database_credentials)
+        url = Database.construct_mysql_url(data['authority'], data['port'],
+                                           data['database'], data['username'],
+                                           data['password'])
         self.entertainment_database = Database(url)
         self.session = self.entertainment_database.create_session()
-        print('success')
 
     def build(self):
         inspector.create_inspector(Window, self)  # For inspection (press control-e to toggle).
 
     def on_start(self):
         # Update City List to match preexisting cities
+        city_names = []
         for city in self.session.query(City):
-            self.root.ids.associated_city.values.append(str(city.city_name))
+            city_names.append(str(city.city_name))
+        self.root.ids.associated_city.values = city_names
         # Update Venue List to match preexisting venues
+        venue_names = []
         for venue in self.session.query(Venue):
-            self.root.ids.venue_edit_selection.values.append(str(venue.venue_name))
+            venue_names.append(str(venue.venue_name))
+        self.root.ids.venue_edit_selection.values = venue_names
 
     def add_city(self, name, lat, long, entity):
         # Search for cities with the exact same name
@@ -72,24 +93,21 @@ class EntertainmentTrackerApp(App):
         return query.count() > 0
 
     def duplicate_name_venue(self, original_name, candidate_name, city_selection, create_or_edit):
-        message = f'A venue under the name {candidate_name} already exists in the chosen city.'
         duplicate_name = False
         city = self.session.query(City).filter(City.city_name == city_selection).one()
-        # venues_to_check = self.session.query(Venue).filter(Venue.city_id == c_id)
         venues_to_check = city.venues
         for venue in venues_to_check:
             if create_or_edit == 'CREATE' and venue.venue_name == candidate_name:
                 duplicate_name = True
-                self.root.ids.venue_name_error.text = message
+                self.root.ids.venue_name_error.text = f'A venue under the name {candidate_name} already exists in the chosen city.'
             if create_or_edit == 'EDIT' and venue.venue_name == candidate_name and original_name != candidate_name:
                 duplicate_name = True
-                self.root.ids.venue_edit_message = message
+                self.root.ids.venue_edit_message.text = f'A venue under the name {candidate_name} already exists in the chosen city.'
         return duplicate_name
 
     def check_city_for_venues(self, city, edit_or_review):
         message = 'No venues exist in this city.'
         city = self.session.query(City).filter(City.city_name == city).one()
-        # venue_query = self.session.query(Venue).filter(Venue.city_id == c_id)
         venue_query = city.venues
         if len(venue_query) > 0:
             self.update_venue_list(city)
@@ -199,7 +217,6 @@ class EntertainmentTrackerApp(App):
 
     def update_venue_list(self, city):
         self.root.ids.venue_edit_selection.values.clear()
-        # city = self.session.query(City).filter(City.city_name == city).one()
         venue_count = self.session.query(Venue).count()
         for i in range(1, venue_count + 1):
             current_venue = self.session.get(Venue, i)
@@ -234,7 +251,6 @@ class EntertainmentTrackerApp(App):
 
     def _add_welp_score(self, review_score, venue_being_reviewed):
         if valid_welp_score(review_score):
-            # city = self.session.query(City).filter(City.city_name == city).one()
             venue = self.session.query(Venue).filter(Venue.venue_name == venue_being_reviewed).one()
             if venue.average_welp_score is None:
                 venue.average_welp_score = review_score
@@ -247,6 +263,57 @@ class EntertainmentTrackerApp(App):
             self.session.commit()
             return True
         return False
+
+    def add_itineraries(self, selected_itinerary_text):
+        try:
+            self.root.ids.past_itineraries.clear_widgets()
+            self.root.ids.proposed_itineraries.clear_widgets()
+            selected_itinerary = None
+            next_city = 'Undetermined'
+            if selected_itinerary_text is not None:
+                _, _, city_name = selected_itinerary_text.partition('City: ')
+                city_name, _, _ = city_name.partition('\n')
+                selected_itinerary = self.session.query(Itinerary).filter(Itinerary.city == city_name).one()
+                next_city = city_name
+                self.update_select_itinerary(True, selected_itinerary)
+            itineraries = self.session.query(Itinerary).order_by(Itinerary.date)
+            today_date = date.today()
+            day_count = 1
+            current_location = None
+            for itinerary in itineraries:
+                itinerary_text = f'City: {itinerary.city}\nVenues: '
+                for venue in itinerary.venues:
+                    itinerary_text += f'{venue.venue_name}({venue.venue_type}), '
+                if selected_itinerary is not None and itinerary.date == selected_itinerary.date and itinerary != selected_itinerary:
+                    self.update_select_itinerary(False, itinerary)
+                if itinerary.itinerary_type == 'Past' or itinerary.selected:
+                    if not itinerary.selected:
+                        current_location = itinerary.city
+                    time_difference = itinerary.date - today_date
+                    day_count = str(time_difference)
+                    day_count, _, _ = day_count.partition(' day')
+                    if len(day_count) > 2:
+                        day_count = '1'
+                    else:
+                        day_count = str(int(day_count)+1)
+                    if itinerary.selected:
+                        next_city = itinerary.city
+                        self.root.ids.selected_itinerary.text = 'Next ' + itinerary_text
+                    self.root.ids.past_itineraries.add_widget(ItineraryLabel(text=f'Day #{day_count}: {itinerary.date}\n' + itinerary_text))
+                else:
+                    if itinerary.itinerary_type == 'Close':
+                        self.root.ids.proposed_itineraries.add_widget(ItineraryLabel(text='Closest\nto Destination'))
+                    else:
+                        self.root.ids.proposed_itineraries.add_widget(ItineraryLabel(text='Most Venues'))
+                    self.root.ids.proposed_itineraries.add_widget(ItineraryButtons(text='Next ' + itinerary_text))
+            self.root.ids.current_status.text = f'Day #{day_count}\nCurrent City: {current_location}\nNext City: {next_city}'
+        except MultipleResultsFound:
+            self.root.ids.itinerary_error_message.text = 'There seems to be multiple of the same values in the database'
+
+    def update_select_itinerary(self, selected, itinerary):
+        itinerary.selected = selected
+        self.session.add(itinerary)
+        self.session.commit()
 
 
 if __name__ == '__main__':
