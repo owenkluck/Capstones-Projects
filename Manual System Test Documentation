@@ -190,7 +190,6 @@ If the program ran as outlined in the instructions the application behaved corre
 #unfinished test  
 
 
-
 # Travel Planner App System Tests
 
 ## System Test: Determine whether the application can successfully run.
@@ -298,11 +297,11 @@ If the program ran as outlined in the instructions the application behaved corre
 
 6. Run the command "select * from itineraries"
 
-7. You will see 14 new itineraries created. 7 Close and 7 Entertainment.
+7. Check that 14 new itineraries created. 7 Close and 7 Entertainment.
 
 
 ### Test Prepare Itineraries with no new Itineraries
-#### Description: see if application creates no itineraries when none are needed.
+#### Description: see if application creates no new itineraries when none are needed.
 
 1. From the main menu page after completing Test 1 press the Prepare Itinerary button and you will be navigated to another screen
 
@@ -316,7 +315,28 @@ If the program ran as outlined in the instructions the application behaved corre
 
 6. Run the command "select * from itineraries"
 
-7. From here you will see the original 14 itineraries from the last system test and nothing more.
+7. From here check that the original 14 itineraries from the last system test and nothing more.
+
+### Test Prepare Only a Few Itineraries
+#### Advance the calendar day and create a few itineraries.
+
+1. From the main menu page after completing Test 1 click the 'Advance Calendar Day' button 3 times.
+
+2. Then click the Prepare Itineraries Button.
+
+3. From here you will need to wait for the two sets of itineraries to not be created.
+
+4. Once you see that no itineraries have been created exit the program.
+
+5. Open up a terminal window and run the command "mysql -h cse.unl.edu -u kandrews -p". You should be prompted for a password, type "qUc:6M".
+
+6. Run the command "use database kandrews;"
+
+7. Run the command "select * from itineraries"
+
+8. From here check that only 8 itineraries have been made.
+
+
 
 
 
