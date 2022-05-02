@@ -3,22 +3,18 @@ from kivy.app import App
 from kivy.modules import inspector
 from kivy.core.window import Window
 from datetime import timedelta, date
-
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
-from sqlalchemy import func
-
 from database import Database
 from rest import RESTConnection
 from api_key import API_KEY
 from database import Airport, City, Venue, Condition, Itinerary, Review
 from kivy.logger import Logger
-from json import dumps
 from kivy.clock import Clock
 import csv
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, ProgrammingError
 from kivy.properties import StringProperty, NumericProperty
 
 PRIME_MERIDIAN = [40, 0]
@@ -44,20 +40,14 @@ class BlackLineY(BoxLayout):
 class TravelPlannerApp(App):
     counter_text = NumericProperty(0)
 
-    def __init__(self, authority='localhost', port=33060, database='airports', username='root', password='cse1208',
-                 api_key=API_KEY, **kwargs):
+    def __init__(self, **kwargs):
         super(TravelPlannerApp, self).__init__(**kwargs)
-        self.authority = authority
-        self.port = port
-        self.database_name = database
-        self.username = username
-        self.password = password
         self.url = None
         self.database = None
         self.session = None
         self.weather_connection = None
         self.geo_connection = None
-        self.api_key = API_KEY
+        self.api_key = None
         self.validate_city_records = None
         self.current_location = None
         self.outdoor_sporting_events = 0
@@ -87,14 +77,18 @@ class TravelPlannerApp(App):
             self.session = session
             self.database = database
             self.url = url
-        except SQLAlchemyError:
-            print('could not connect to database')
+            self.root.current = 'mainmenu1'
+        except (SQLAlchemyError, ProgrammingError):
+            self.root.current = 'home'
+            self.root.ids.connection_error.text = 'The credentials given failed to connect to the remote database. Please re-enter your credentials'
 
-    def connect_to_open_weather(self, port_api=443):
+    def connect_to_open_weather(self, api_key, port_api=443):
         try:
             self.weather_connection = RESTConnection('api.openweathermap.org', port_api, '/data/2.5')
-            self.geo_connection = RESTConnection('api.openweathermap.org', 443, '/geo/1.0')
+            self.geo_connection = RESTConnection('api.openweathermap.org', port_api, '/geo/1.0')
+            self.api_key = api_key
         except ConnectionError:
+            self.root.current = 'home'
             self.root.ids.connection_error.text = 'OpenWeather will not connect, invalid API key.'
 
     def set_final_destination(self):
@@ -170,19 +164,13 @@ class TravelPlannerApp(App):
             self.root.ids.valid_city_message.text = 'The city location is validated.'
             return True
         else:
-            if city.city_name == self.validate_city_records['name']:
-                print('lat and lon incorrect')
-            else:
-                print('incorrect')
             self.root.ids.invalid_city_error.text = 'The city location cannot be validated.'
             return False
 
     def on_records_loaded(self, _, response):
-        print(dumps(response, indent=4, sort_keys=True))
         self.validate_city_records = response[0]
 
     def on_records_not_loaded(self, _, error):
-        print('records not loaded')
         Logger.error(f'{self.__class__.__name__}: {error}')
 
     def populate_ratings_scroll_view(self):
@@ -193,7 +181,7 @@ class TravelPlannerApp(App):
                 venues.append(rating.venue)
         for venue in venues:
             view = ReviewScrollView()
-            view.children[0].children[1].text = venue.venue_name
+            view.children[0].children[1].text = f'{venue.venue_name} = {venue.average_welp_score}'
             for rating in venue.reviews:
                 view.children[0].children[0].children[0].add_widget(CheckBox())
                 view.children[0].children[0].children[1].add_widget(
@@ -205,7 +193,8 @@ class TravelPlannerApp(App):
         root = self.root.ids.venue_and_review_scroll
         venues = root.children
         for x in range(len(venues)):
-            venue = root.children[x].children[0].children[1].text
+            venue = root.children[x].children[0].children[1].text.split()
+            venue = ' '.join(venue[:-2])
             checkboxes = root.children[x].children[0].children[0].children[0].children
             labels = root.children[x].children[0].children[0].children[1].children
             for i in range(len(checkboxes)):
@@ -218,8 +207,7 @@ class TravelPlannerApp(App):
         try:
             return self.session.query(Venue).filter(Venue.name == venue_name).one().average_welp.score
         except SQLAlchemyError:
-            print('There seems to be two venues with the same name in the database,'
-                  ' that or the name in the database doesn\'t exist')
+            return None
 
     def amount_of_needed_update_reviews(self):
         welp_venues = []
@@ -248,10 +236,13 @@ class TravelPlannerApp(App):
                 self.submit_data(venue)
                 review.validated = True
                 self.submit_data(review)
+                self.root.ids.create_city_error.text = 'The selected reviews have successfully been updated.'
             else:
                 self.delete_row(review)
+                self.root.ids.create_city_error.text = 'The selected reviews have successfully been deleted from the database.'
         except SQLAlchemyError:
-            print('it seems the database refuses your request, make a better request.')
+            self.root.ids.create_city_error.text = 'There seemed to be an issue when trying to submit your data to the database. ' \
+                                                   'Try reloading the app and trying again.'
 
     def find_airport_to_cross_meridian(self, current_airport, in_range_airports):
         cross_airports = []
@@ -303,10 +294,8 @@ class TravelPlannerApp(App):
                     best_score = score
                     best_city = city
                     best_airport = airport
-            print(f'{best_city}, from end of algorithm')
         else:
             best_city = self.determine_best_city(best_airport, current_date)
-            print('else in find best entertainment airport/city')
         return best_airport, best_city
 
     def get_positive_airports(self, current_airport, in_range_airports, destination):
@@ -327,8 +316,6 @@ class TravelPlannerApp(App):
                                       destination[1]) < min_distance:
                     min_distance = self.find_distance(airport.latitude, airport.longitude, destination[0],
                                                       destination[1])
-                    print(airport.name)
-                    print(min_distance)
                     best_option = airport
         return best_option
 
@@ -340,12 +327,8 @@ class TravelPlannerApp(App):
             if self.find_distance(current_airport.latitude, current_airport.longitude, airport.latitude,
                                   airport.longitude) <= 3500 and self.is_weather_ok_airport(airport, current_date):
                 if len(airport.cities) != 0 and airport != current_airport:
-                    # print(airport.name)
-                    # print(self.find_distance(current_airport.latitude, current_airport.longitude, airport.latitude,
-                    #       airport.longitude))
                     in_range_airports.append(airport)
         if len(in_range_airports) == 0:
-            print('No airports in range')
             for airport in airports:
                 if self.find_distance(current_airport.latitude, current_airport.longitude,
                                       airport.latitude, airport.longitude) <= 3500 and airport != current_airport:
@@ -391,7 +374,6 @@ class TravelPlannerApp(App):
                 if forecast.date == current_date:
                     forecasts_on_date.append(forecast)
             if len(forecasts_on_date) > 1:
-                print('multiple conditions found of same date and same city')
                 forecast = self.session.query(Condition).filter(Condition.city_id == city.city_id)
                 max_id = self.session.query(Condition).filter(Condition.city_id == city.city_id)[0].condition_id
                 for condition in forecast:
@@ -420,8 +402,6 @@ class TravelPlannerApp(App):
         return False
 
     def does_weather_meet_venues_conditions(self, venue, forecast):
-        print(venue.venue_name)
-        print(venue.condition)
         if venue.condition:
             condition = venue.condition[0]
             if condition.min_temperature <= forecast.max_temperature <= condition.max_temperature and \
@@ -492,11 +472,8 @@ class TravelPlannerApp(App):
         return event
 
     def create_closest_itinerary_day(self, destination, current_date, current_airport):
-        print(current_airport)
         airport = self.find_closest_airport_to_destination(self.get_airports_in_range(current_airport, current_date),
                                                            destination, current_airport)
-        if airport == current_airport:
-            print('same airport')
         city = self.determine_best_city(airport, current_date)
         city_forecast_length = self.session.query(Condition).filter(Condition.city_id == city.city_id).count()
         if city_forecast_length == 0:
@@ -525,13 +502,6 @@ class TravelPlannerApp(App):
                     itinerary = Itinerary(airport=airport.name, city=city.city_name, venues=venues, date=current_date,
                                           itinerary_type='Close', airport_left_from=airport.name)
                 self.queued_closest_itineraries.append(itinerary)
-                print('Success')
-            elif len(city_forecast) == 0:
-                print('zero forecasts on a single date, associated with one city')
-            else:
-                for x in city_forecast:
-                    print(x.city_id)
-                print('multiple forecasts on a single date, associated with one city')
             return airport
 
     def create_entertainment_itinerary(self, destination, current_date, current_airport):
@@ -547,7 +517,6 @@ class TravelPlannerApp(App):
                 self.delete_row(city_forecast[0])
                 city_forecast.pop(0)
         venues_to_visit = self.get_open_venues_list(city, city_forecast[0])
-        print(f'Venues to visit {venues_to_visit}')
         venues = self.determine_venues(venues_to_visit)
         leave_from_airport = None
         if len(city.airports) > 1:
@@ -561,7 +530,6 @@ class TravelPlannerApp(App):
             itinerary = Itinerary(airport=airport.name, city=city.city_name, venues=venues, date=current_date,
                                   itinerary_type='Entertain', airport_left_from=airport.name)
         self.queued_entertainment_itineraries.append(itinerary)
-        print('Success')
         return airport
 
     def get_previous_itinerary(self):
@@ -649,7 +617,6 @@ class TravelPlannerApp(App):
         root_1 = self.root.ids.entertainment_itinerary
         root_2 = self.root.ids.closest_itinerary
         for itinerary in self.queued_closest_itineraries:
-            print(f'Venues: {itinerary.venues}')
             itinerary_view = ItineraryView()
             if len(itinerary.venues) == 2:
                 itinerary_view.children[1].children[0].text = f'Entertainment: {itinerary.venues[0].venue_name}'
@@ -712,7 +679,7 @@ class TravelPlannerApp(App):
             new_forecast = outdated_forecast
             self.submit_data(new_forecast)
         else:
-            print('No forecast matched the date of the itinerary')
+            pass
 
     def update_forecast(self, _, response):
         self.updated_forecast = response
@@ -747,19 +714,15 @@ class TravelPlannerApp(App):
             else:
                 self.session.add(data)
             self.session.commit()
-            print(0)
         except SQLAlchemyError:
-            print('could not submit data')
-
+            pass
     def delete_row(self, item):
         try:
             item[0] = item[0]
             for data in item:
                 self.session.delete(data)
-                print(f'{item}, deleted')
         except (IndexError, ValueError, TypeError):
             self.session.delete(item)
-            print(f'{item}, deleted')
         self.session.commit()
 
     def calender_day_changed(self):
@@ -801,7 +764,6 @@ class TravelPlannerApp(App):
     def check_lift_off_acceptable(self, airport, current_date):
         self.request_onecall_for_place(airport.latitude, airport.longitude, None, None, None, None, 'Lift Off', self.api_key)
         forecast = self.updated_forecast
-        print(forecast)
         lift_off = True
         for hour in forecast['hourly']:
             if date.fromtimestamp(int(hour['dt'])) == current_date:
@@ -842,16 +804,13 @@ def construct_in_memory_url():
 
 def main():
     app = TravelPlannerApp()
-    app.connect_to_database('localhost', 33060, 'airports', 'root', 'cse1208')
-    #app.connect_to_database('cse.unl.edu', 3306, 'kandrews', 'kandrews', 'qUc:6M')
-    app.connect_to_open_weather()
-    app.destination = OPPOSITE_PRIME_MERIDIAN
-    app.final_destination = app.session.query(Airport).filter(Airport.name == 'Lincoln Airport').one()
+    #app.connect_to_database('localhost', 33060, 'airports', 'root', 'cse1208')
+    #app.connect_to_open_weather()
+    #app.destination = OPPOSITE_PRIME_MERIDIAN
+    #app.final_destination = app.session.query(Airport).filter(Airport.name == 'Lincoln Airport').one()
     app.run()
+
 
 if __name__ == '__main__':
     main()
 
-# Make sure algorithm implements all necessary requirements.
-# algorithm doesn't check weather for airport correctly
-# method to delete itinerary widgets once left the screen.
