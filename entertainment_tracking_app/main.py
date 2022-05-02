@@ -2,7 +2,7 @@ from kivy.app import App
 from kivy.modules import inspector  # For inspection.
 from kivy.core.window import Window  # For inspection.
 
-from entertainment_installer import *
+from database import *
 
 
 def bad_condition_entry(data_list):
