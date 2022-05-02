@@ -145,8 +145,7 @@ ScreenManager:
                                 multiline: False
                         BoxLayout:
                             size_hint_max_y: 40
-                    BoxLayout:
-                        size_hint_max_x: 20
+                            BoxLayout:
                     BoxLayout:
                         orientation: 'vertical'
                         size_hint_max_x: 80
@@ -159,6 +158,16 @@ ScreenManager:
                                 self.ids.database_name.text = ''
                                 self.ids.database_username.text = ''
                                 self.ids.database_password.text = ''
+                    BoxLayout:
+                        size_hint_max_x: 20
+                        Label:
+                            id: connection_error
+                            text: ''
+                    BoxLayout:
+                        size_hint_max_x: 20
+                        Label:
+                            id: empty_fields_error
+                            text: ''
                 BoxLayout:
                     orientation: 'horizontal'
                     Button:
@@ -173,8 +182,8 @@ ScreenManager:
     Screen:
         name: 'mainmenu1'
         on_enter:
-            app.amount_of_needed_update_reviews()
             app.get_places_to_validate()
+            app.amount_of_needed_update_reviews()
             app.set_final_destination()
         BoxLayout:
             orientation: 'vertical'
@@ -191,14 +200,57 @@ ScreenManager:
                     orientation: 'vertical'
                     BoxLayout:
                         orientation: 'horizontal'
-                        Label:
-                            id: amount_cities_unvalidated
-                            text: f'{app.amount_cities_unvalidated} cities need to be validated'
                     BoxLayout:
                         orientation: 'horizontal'
+                        BoxLayout:
+                            orientation: 'horizontal'
                         Label:
-                            id: welp_scores_updated
-                            text: f'{app.amount_venues_welp} venues need their welp scores updated.'
+                            halign: 'right'
+                            size: self.texture_size
+                            id: amount_airports_unvalidated
+                            text: ''
+                        Label:
+                            halign: 'left'
+                            size: self.texture_size
+                            text: 'airports that need to be validated.'
+                        BoxLayout:
+                            orientation: 'horizontal'
+                        BoxLayout:
+                            orientation: 'horizontal'
+                    BoxLayout:
+                        orientation: 'horizontal'
+                    BoxLayout:
+                        orientation: 'horizontal'
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        BoxLayout:
+                            orientation: 'horizontal'
+                            Label:
+                                id: amount_cities_unvalidated
+                                text: ''
+                            Label:
+                                size: self.texture_size
+                                text: 'cities that need to be validated.'
+                            BoxLayout:
+                                orientation: 'horizontal'
+                            BoxLayout:
+                                orientation: 'horizontal'
+                    BoxLayout:
+                        orientation: 'horizontal'
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        BoxLayout:
+                            orientation: 'horizontal'
+                            Label:
+                                id: welp_scores_updated
+                                text: ''
+                            Label:
+                                size: self.texture_size
+                                text: 'welp scores that need to be updated.'
+                            BoxLayout:
+                                orientation: 'horizontal'
+                            BoxLayout:
+                                orientation: 'horizontal'
                     BoxLayout:
                         size_hint_max_y: 10
                     Button:
@@ -229,18 +281,14 @@ ScreenManager:
                         orientation:'horizontal'
                         Button:
                             id:increase_date
+                            on_press:
+                                app.add_subtract_day()
                             text: 'Add one day'
                             font_size:20
                             markup: True
-                        Button:
-                            Label:
-                                id: counter
-                                text: f'{app.counter_text}'
-                        Button:
-                            id:decrease_date
-                            text: 'Subtract one day'
-                            font_size:20
-                            markup: True
+                        Label:
+                            id: counter_text
+                            text: f'{app.counter_text}'
                     BoxLayout:
                         size_hint_max_y: 20
                     BoxLayout:
@@ -303,11 +351,26 @@ ScreenManager:
                                 text: 'Select Airport to Validate'
                                 values:
                         BoxLayout:
+                            size_hint_max_x: 20
                             Label:
+                                id: invalid_airport_error
                                 text: ''
-                                id: create_city_error
-                            BoxLayout:
-                                size_hint_max_x: 20
+                        BoxLayout:
+                            size_hint_max_x: 20
+                            Label:
+                                id: invalid_city_error
+                                text: ''
+                                values:
+                        BoxLayout:
+                            size_hint_max_x: 20
+                            Label:
+                                id: valid_airport_message
+                                text: ''
+                        BoxLayout:
+                            size_hint_max_x: 20
+                            Label:
+                                id: valid_city_message
+                                text: ''
                         BoxLayout:
                             orientation: 'horizontal'
                             Button:
