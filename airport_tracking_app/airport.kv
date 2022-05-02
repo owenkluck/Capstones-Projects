@@ -3,55 +3,45 @@ ScreenManager:
         name: 'main_menu'
         BoxLayout:
             orientation: 'vertical'
+            Label:
+                size_hint_y: .5
+                text: 'Cornhusker Airport Tracker'
+                font_size: sp(32)
             BoxLayout:
-                size_hint_max_y: 80
-                TestLabel:
-                    text: 'Main Menu'
-                    font_size: '25sp'
-            BoxLayout:
-                orientation: 'horizontal'
-                BoxLayout:
-                    size_hint_max_x: 40
-                BoxLayout:
-                    orientation: 'vertical'
-                    BoxLayout:
-                        size_hint_max_y: 10
-                    Button:
-                        text: 'Create Airport'
-                        font_size: '20sp'
-                        on_press: root.current = 'create_airport'
-                    BoxLayout:
-                        size_hint_max_y: 10
-                    Button:
-                        text: 'Create City'
-                        font_size: '20sp'
-                        on_press: root.current = 'create_city'
-                    BoxLayout:
-                        size_hint_max_y: 10
-                    Button:
-                        text: 'Check Forecast'
-                        font_size: '20sp'
-                        on_press: root.current = 'check_forecast'
-                    BoxLayout:
-                        size_hint_max_y: 10
-                    Button:
-                        text: 'Review Itinerary'
-                        font_size: '20sp'
-                        on_press: root.current = 'review_itinerary'
-                    BoxLayout:
-                        size_hint_max_y: 20
-                    BoxLayout:
-                        size_hint_max_y: 60
-                        orientation: 'horizontal'
-                        BoxLayout:
-                            size_hint_min_x: 600
-                        Button:
-                            text: 'Quit'
-                            on_press: app.stop()
-                    BoxLayout:
-                        size_hint_max_y: 20
-                BoxLayout:
-                    size_hint_max_x: 40
+                orientation: 'vertical'
+                Button:
+                    text: 'Create Airport'
+                    size_hint_x: 0.5
+                    pos_hint: {'center_x': 0.5}
+                    on_press:
+                        root.transition.direction = 'left'
+                        root.current = 'create_airport'
+                Button:
+                    text: 'Create City'
+                    size_hint_x: 0.5
+                    pos_hint: {'center_x': 0.5}
+                    on_press:
+                        root.transition.direction = 'left'
+                        root.current = 'create_city'
+                Button:
+                    text: 'Check Forecast'
+                    size_hint_x: 0.5
+                    pos_hint: {'center_x': 0.5}
+                    on_press:
+                        root.transition.direction = 'left'
+                        root.current = 'check_forecast'
+                Button:
+                    text: 'Review Itinerary'
+                    size_hint_x: 0.5
+                    pos_hint: {'center_x': 0.5}
+                    on_press:
+                        root.transition.direction = 'left'
+                        root.current = 'review_itinerary'
+            Button:
+                text: 'Exit App'
+                size_hint: (1, 0.5)
+                on_press:
+                    app.stop()
     Screen:
         name: 'create_airport'
         on_leave: root.ids.create_airport_error.text = ''
@@ -66,6 +56,12 @@ ScreenManager:
             BoxLayout:
                 orientation: 'vertical'
                 BoxLayout:
+                    Label:
+                        text: ''
+                        id: create_airport_error
+                    BoxLayout:
+                        size_hint_max_x: 20
+                BoxLayout:
                     orientation: 'horizontal'
                     BoxLayout:
                         size_hint_max_x: 20
@@ -74,7 +70,6 @@ ScreenManager:
                         BoxLayout:
                             size_hint_max_y: 10
                         BoxLayout:
-                            size_hint_max_y: 45
                             orientation: 'horizontal'
                             Label:
                                 text: 'Name'
@@ -82,9 +77,6 @@ ScreenManager:
                                 id: airport_name
                                 multiline: False
                         BoxLayout:
-                            size_hint_max_y: 10
-                        BoxLayout:
-                            size_hint_max_y: 45
                             orientation: 'horizontal'
                             Label:
                                 text: 'ICAO Code'
@@ -93,9 +85,6 @@ ScreenManager:
                                 id: airport_code
                                 multiline: False
                         BoxLayout:
-                            size_hint_max_y: 10
-                        BoxLayout:
-                            size_hint_max_y: 45
                             orientation: 'horizontal'
                             Label:
                                 text: 'Latitude'
@@ -103,15 +92,12 @@ ScreenManager:
                                 id: airport_latitude
                                 multiline: False
                         BoxLayout:
-                            size_hint_max_y: 45
                             orientation: 'horizontal'
                             Label:
                                 text: 'Longitude'
                             TextInput:
                                 id: airport_longitude
                                 multiline: False
-                        BoxLayout:
-                            size_hint_max_y: 40
                     BoxLayout:
                         size_hint_max_x: 20
                     BoxLayout:
@@ -124,12 +110,6 @@ ScreenManager:
                                 root.ids.airport_code.text = ''
                                 root.ids.airport_latitude.text = ''
                                 root.ids.airport_longitude.text = ''
-                BoxLayout:
-                    Label:
-                        text: ''
-                        id: create_airport_error
-                    BoxLayout:
-                        size_hint_max_x: 20
                 BoxLayout:
                     orientation: 'horizontal'
                     Button:
@@ -166,15 +146,18 @@ ScreenManager:
             BoxLayout:
                 orientation: 'vertical'
                 BoxLayout:
+                    Label:
+                        text: ''
+                        id: create_city_error
+                    BoxLayout:
+                        size_hint_max_x: 20
+                BoxLayout:
                     orientation: 'horizontal'
                     BoxLayout:
                         size_hint_max_x: 20
                     BoxLayout:
                         orientation: 'vertical'
                         BoxLayout:
-                            size_hint_max_y: 10
-                        BoxLayout:
-                            size_hint_max_y: 45
                             orientation: 'horizontal'
                             Label:
                                 text: 'Name'
@@ -182,9 +165,6 @@ ScreenManager:
                                 id: city_name
                                 multiline: False
                         BoxLayout:
-                            size_hint_max_y: 10
-                        BoxLayout:
-                            size_hint_max_y: 45
                             orientation: 'horizontal'
                             Label:
                                 text: 'Geographic Entity'
@@ -192,9 +172,6 @@ ScreenManager:
                                 id: city_geo
                                 multiline: False
                         BoxLayout:
-                            size_hint_max_y: 10
-                        BoxLayout:
-                            size_hint_max_y: 45
                             orientation: 'horizontal'
                             Label:
                                 text: 'Latitude'
@@ -202,7 +179,6 @@ ScreenManager:
                                 id: city_latitude
                                 multiline: False
                         BoxLayout:
-                            size_hint_max_y: 45
                             orientation: 'horizontal'
                             Label:
                                 text: 'Longitude'
@@ -221,12 +197,6 @@ ScreenManager:
                                 root.ids.city_geo.text = ''
                                 root.ids.city_latitude.text = ''
                                 root.ids.city_longitude.text = ''
-                BoxLayout:
-                    Label:
-                        text: ''
-                        id: create_city_error
-                    BoxLayout:
-                        size_hint_max_x: 20
                 BoxLayout:
                     orientation: 'horizontal'
                     Button:

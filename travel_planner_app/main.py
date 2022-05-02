@@ -94,6 +94,7 @@ class TravelPlannerApp(App):
     def set_final_destination(self):
         airport = self.session.query(Airport).filter(Airport.name == 'Lincoln Airport').one()
         self.final_destination = airport
+        self.destination = OPPOSITE_PRIME_MERIDIAN
 
     def get_places_to_validate(self):
         unvalidated_airports = []
@@ -452,6 +453,7 @@ class TravelPlannerApp(App):
         if self.counter_text < 7:
             self.current_date += timedelta(days=1)
             self.counter_text = self.counter_text + 1
+            self.calender_day_changed()
 
     def search_for_indoor_events(self, event, venues_to_visit):
         for venue in venues_to_visit:
@@ -716,6 +718,7 @@ class TravelPlannerApp(App):
             self.session.commit()
         except SQLAlchemyError:
             pass
+
     def delete_row(self, item):
         try:
             item[0] = item[0]
@@ -733,8 +736,8 @@ class TravelPlannerApp(App):
         if next_itineraries:
             lift_off = True
             for itinerary in next_itineraries:
-                airport_arrive = self.session.query(Airport).filter(Airport.name == itinerary.airport)
-                airport_leave = self.session.query(Airport).filter(Airport.name == itinerary.airport_left_from)
+                airport_arrive = self.session.query(Airport).filter(Airport.name == itinerary.airport).one()
+                airport_leave = self.session.query(Airport).filter(Airport.name == itinerary.airport_left_from).one()
                 if airport_leave == airport_arrive:
                     lift_off = self.check_lift_off_acceptable(airport_arrive, itinerary.date)
                 else:
@@ -804,10 +807,6 @@ def construct_in_memory_url():
 
 def main():
     app = TravelPlannerApp()
-    #app.connect_to_database('localhost', 33060, 'airports', 'root', 'cse1208')
-    #app.connect_to_open_weather()
-    #app.destination = OPPOSITE_PRIME_MERIDIAN
-    #app.final_destination = app.session.query(Airport).filter(Airport.name == 'Lincoln Airport').one()
     app.run()
 
 
