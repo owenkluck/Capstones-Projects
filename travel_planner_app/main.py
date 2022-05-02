@@ -21,8 +21,8 @@ import csv
 from sqlalchemy.exc import SQLAlchemyError
 from kivy.properties import StringProperty
 
-PRIME_MERIDIAN = [0, 0]
-OPPOSITE_PRIME_MERIDIAN = [0, 180]
+PRIME_MERIDIAN = [45, 0]
+OPPOSITE_PRIME_MERIDIAN = [45, 180]
 
 
 class ReviewScrollView(ScrollView):
@@ -299,11 +299,11 @@ class TravelPlannerApp(App):
     def find_closest_airport_to_destination(self, in_range_airports, destination, current_airport):
         best_option = self.can_meridian_be_passed(current_airport, in_range_airports)
         if best_option is None:
-            max_distance = 0
+            min_distance = 1000000
             for airport in in_range_airports:
                 if self.find_distance(airport.latitude, airport.longitude, destination[0],
-                                      destination[1]) > max_distance:
-                    max_distance = self.find_distance(airport.latitude, airport.longitude, destination[0],
+                                      destination[1]) < min_distance:
+                    min_distance = self.find_distance(airport.latitude, airport.longitude, destination[0],
                                                       destination[1])
                     best_option = airport
         return best_option
@@ -633,7 +633,7 @@ class TravelPlannerApp(App):
                 itinerary_view.children[1].children[1].text = f'Eat at: {itinerary.venues[0].venue_name}'
             itinerary_view.children[1].children[2].text = f'Go to: {itinerary.city}'
             itinerary_view.children[1].children[3].text = f'Arrive At: {itinerary.airport}'
-            itinerary_view.children[1].children[4].text = f'Airport Leave:'
+            itinerary_view.children[1].children[4].text = f'Airport Leave: {itinerary.airport_left_from}'
             itinerary_view.children[1].children[5].text = f'Date {itinerary.date}'
             root_1.add_widget(itinerary_view)
         for itinerary in self.queued_closest_itineraries:
@@ -646,7 +646,7 @@ class TravelPlannerApp(App):
                 itinerary_view.children[1].children[1].text = f'Eat at: {itinerary.venues[0].venue_name}'
             itinerary_view.children[1].children[2].text = f'Go to: {itinerary.city}'
             itinerary_view.children[1].children[3].text = f'Arrive At: {itinerary.airport}'
-            itinerary_view.children[1].children[4].text = f'Airport Leave:'
+            itinerary_view.children[1].children[4].text = f'Airport Leave: {itinerary.airport_left_from}'
             itinerary_view.children[1].children[5].text = f'Date {itinerary.date}'
             root_2.add_widget(itinerary_view)
 
@@ -801,12 +801,7 @@ def main():
     app.connect_to_open_weather()
     app.destination = PRIME_MERIDIAN
     app.final_destination = app.session.query(Airport).filter(Airport.name == 'Lincoln Airport').one()
-    for city in app.session.query(City).all():
-        print(city.venues)
-    airport = app.session.query(Airport).filter(Airport.name == 'Lincoln Airport').one()
-    date_1 = date(2022, 5, 2)
-    app.check_lift_off_acceptable(airport, date_1)
-    #app.run()
+    app.run()
 
 
 if __name__ == '__main__':
