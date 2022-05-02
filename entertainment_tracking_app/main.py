@@ -225,6 +225,14 @@ class EntertainmentTrackerApp(App):
             self.root.ids.open_weather_conditions.opacity = 1
 
     def add_welp_score(self, review_score, venue_being_reviewed):
+        valid_score = self._add_welp_score(review_score, venue_being_reviewed)
+        if valid_score:
+            self.root.transition.direction = 'left'
+            self.root.current = 'review_added_success'
+        else:
+            self.root.ids.invalid_welp_score.text = 'Welp scores must be an integer 1-5.'
+
+    def _add_welp_score(self, review_score, venue_being_reviewed):
         if valid_welp_score(review_score):
             # city = self.session.query(City).filter(City.city_name == city).one()
             venue = self.session.query(Venue).filter(Venue.venue_name == venue_being_reviewed).one()
@@ -237,10 +245,8 @@ class EntertainmentTrackerApp(App):
             review = Review(venue_id=v_id, score=review_score)
             self.session.add(review)
             self.session.commit()
-            self.root.transition.direction = 'left'
-            self.root.current = 'review_added_success'
-        else:
-            self.root.ids.invalid_welp_score.text = 'Welp scores must be an integer 1-5.'
+            return True
+        return False
 
 
 if __name__ == '__main__':
