@@ -58,5 +58,17 @@ class TestAirport(unittest.TestCase):
         actual = test_app.session.query(City).filter(City.city_name == 'test_city').one()
         self.assertEqual(actual.airports, [test_airport])
 
+    def test_update_itinerary(self):
+        url = Database.construct_in_memory_url()
+        database = Database(url)
+        database.ensure_tables_exist()
+        test_app = AirportApp()
+        test_app.session = database.create_session()
+        test_itinerary = Itinerary(airport='JFK', city='New York City', selected=False)
+        test_app.update_select_itinerary(True, test_itinerary)
+        actual = test_app.session.query(Itinerary).filter(Itinerary.city == 'New York City').one()
+        self.assertEqual(actual.selected, True)
+
+
 if __name__ == '__main__':
     unittest.main()
