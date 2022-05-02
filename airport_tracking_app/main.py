@@ -8,7 +8,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button, Label
 from sqlalchemy.exc import SQLAlchemyError, MultipleResultsFound
 from database import Airport, City, Condition, Database, Itinerary
-from travel_planner_app.rest import RESTConnection
+from rest import RESTConnection
 from datetime import date
 
 
