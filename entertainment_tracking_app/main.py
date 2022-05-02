@@ -1,7 +1,7 @@
 from kivy.app import App
 from kivy.modules import inspector  # For inspection.
 from kivy.core.window import Window  # For inspection.
-
+import json
 from database import *
 
 
@@ -25,7 +25,11 @@ def bad_lat_long(lat, long):
 class EntertainmentTrackerApp(App):
     def __init__(self, **kwargs):
         super(EntertainmentTrackerApp, self).__init__(**kwargs)
-        url = Database.construct_mysql_url('localhost', 3306, 'airports', 'root', 'cse1208')
+        database_credentials = open('database_credentials.json')
+        data = json.load(database_credentials)
+        url = Database.construct_mysql_url(data['authority'], data['port'],
+                                           data['database'], data['username'],
+                                           data['password'])
         self.entertainment_database = Database(url)
         self.session = self.entertainment_database.create_session()
         print('success')

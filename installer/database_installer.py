@@ -11,8 +11,8 @@ from database import Database, City, Airport, Venue, Condition, Itinerary, Revie
 def add_starter_data(session):
     start_time = time.time()
     san_fran = City(city_name='San Francisco', latitude=37.8, longitude=-122.4,
-                    encompassing_geographic_entity='California')
-    denver = City(city_name='Denver', latitude=39.7, longitude=-105.0, encompassing_geographic_entity='Colorado')
+                    encompassing_geographic_entity='United States')
+    denver = City(city_name='Denver', latitude=39.7, longitude=-105.0, encompassing_geographic_entity='United States')
     session.add(denver)
     session.add(san_fran)
     session.commit()

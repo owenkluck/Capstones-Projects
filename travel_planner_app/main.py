@@ -754,7 +754,22 @@ class TravelPlannerApp(App):
                 if not lift_off_2 or not lift_off_1:
                     lift_off = False
         if not lift_off:
-            pass
+            # advance all proposed by One:
+            itineraries = self.session.query(Itinerary).all()
+            for itinerary in itineraries:
+                if itinerary.itinerary_type == 'Entertain' or itinerary.itinerary_type == 'Close':
+                    itinerary.date = itinerary.date + timedelta(days=1)
+        if lift_off:
+            current_itineraries = []
+            itineraries = self.session.query(Itinerary).all()
+            for itinerary in itineraries:
+                if itinerary.date == self.current_date:
+                    current_itineraries.append(itinerary)
+            for itinerary in current_itineraries:
+                if itinerary.selected:
+                    itinerary.itinerary_type = 'Past'
+                if not itinerary.selected:
+                    self.delete_row(itinerary)
 
     def check_lift_off_acceptable(self, airport, current_date):
         self.request_onecall_for_place(airport.latitude, airport.longitude, None, None, None, None, 'Lift Off', self.api_key)
