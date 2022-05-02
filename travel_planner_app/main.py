@@ -19,7 +19,7 @@ from json import dumps
 from kivy.clock import Clock
 import csv
 from sqlalchemy.exc import SQLAlchemyError
-from kivy.properties import StringProperty
+from kivy.properties import StringProperty, NumericProperty
 
 PRIME_MERIDIAN = [0, 0]
 OPPOSITE_PRIME_MERIDIAN = [0, 180]
@@ -76,6 +76,7 @@ class TravelPlannerApp(App):
         self.welp = StringProperty('')
         self.amount_venues_welp = 0
         self.increase_date = 0
+        self.subtract_date = 0
         self.counter_text = StringProperty('')
 
     def build(self):
@@ -215,6 +216,7 @@ class TravelPlannerApp(App):
 
     def amount_of_needed_update_reviews(self):
         welp_venues = []
+        print(self.session)
         welp = self.session.query(Venue).all()
         for venue in welp:
             if venue.welp_score_needs_update is True:
@@ -441,11 +443,13 @@ class TravelPlannerApp(App):
             venues.append(restaurant)
         return venues
 
-    def add_one_day(self, current_date):
-        self.increase_date = ''
-        self.counter_text = 0
-        self.increase_date += timedelta(days=1)
-        self.counter_text = str(self.increase_date)
+    def add_subtract_day(self):
+        if self.root.ids['increase_date']:
+            self.current_date += timedelta(days=1)
+            self.root.ids.counter += 1
+        if self.root.ids['subtract_date']:
+            self.current_date -= timedelta(days=1)
+            self.root.ids.counter -= 1
 
     def search_for_indoor_events(self, event, venues_to_visit):
         for venue in venues_to_visit:
@@ -770,45 +774,10 @@ def construct_in_memory_url():
 
 def main():
     app = TravelPlannerApp()
-<<<<<<< HEAD
-    # app.validate_city()
-    # a, b = app.get_places_to_validate()
-    # app.amount_of_needed_update_reviews()
-    # print(a)
-    # print(b)
-    # c = app.get_venues_to_validate()
-    # print(c)
-    # print(app.validate_airport('AYGA', -6.081689835, 145.3919983))
-    # d = app.session.query(Airport).all()
-    # e = app.session.query(City).all()[0]
-    # f = app.find_closest_airport_to_destination(d, e)
-    # print(f.name)
-    # current_date = date(2002, 9, 20)
-    # print(app.get_airports_in_range(f, current_date)[0].name)
-    # current_date += timedelta(days=1)
-    # city = app.session.query(City).filter(City.city_name == 'Omaha').one()
-    # app.update_existing_itinerary(date(2002, 1, 1))
-    # datte = date(2000, 1, 1)
-    # datte = timedelta(days=1) + datte
-    # print(datte)
     app.connect_to_database('localhost', 33060, 'airports', 'root', 'cse1208')
     #app.connect_to_database('cse.unl.edu', 3306, 'kandrews', 'kandrews', 'qUc:6M')
     app.connect_to_open_weather()
     app.destination = PRIME_MERIDIAN
-    # print(app.session.query(Itinerary).filter(Itinerary.date >= app.current_date))
-    # airport = Airport(name='Strawberry Airport', latitude=90, longitude=91, code='EEEE')
-    # app.session.add(airport)
-    # app.session.commit()
-    # airport = app.session.query(Airport).filter(Airport.name == 'Omaha Airport').one()
-    # app.create_closest_itinerary_day(PRIME_MERIDIAN, app.current_date, airport)
-    # app.create_entertainment_itinerary(PRIME_MERIDIAN, app.current_date, airport)
-    # itinerary = app.session.query(Itinerary).all()[0]
-    # app.update_existing_itinerary(itinerary)
-=======
-    app.final_destination = app.session.query(Airport).filter(Airport.name == 'Lincoln Airport').one()
-    for city in app.session.query(City).all():
-        print(city.venues)
->>>>>>> fbbbb05e04e876b7662d801bb314acef962564cc
     app.run()
 
 
