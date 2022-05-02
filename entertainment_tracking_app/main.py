@@ -53,20 +53,14 @@ class EntertainmentTrackerApp(App):
 
     def on_start(self):
         # Update City List to match preexisting cities
-        i = 0
         city_names = []
         for city in self.session.query(City):
-            print(i)
-            i += 1
             city_names.append(str(city.city_name))
-            #self.root.ids.associated_city.values.append(str(city.city_name))
         self.root.ids.associated_city.values = city_names
         # Update Venue List to match preexisting venues
         venue_names = []
         for venue in self.session.query(Venue):
-            print('ran 2')
             venue_names.append(str(venue.venue_name))
-            #self.root.ids.venue_edit_selection.values.append(str(venue.venue_name))
         self.root.ids.venue_edit_selection.values = venue_names
 
     def add_city(self, name, lat, long, entity):
@@ -298,13 +292,15 @@ class EntertainmentTrackerApp(App):
                 if selected_itinerary is not None and itinerary.date == selected_itinerary.date and itinerary != selected_itinerary:
                     self.update_select_itinerary(False, itinerary)
                 if itinerary.itinerary_type == 'Past' or itinerary.selected:
-                    if itinerary != selected_itinerary:
+                    if not itinerary.selected:
                         current_location = itinerary.city
-                        time_difference = itinerary.date - today_date
-                        day_count = str(time_difference)
-                        day_count, _, _ = day_count.partition(' day')
-                        if len(day_count) > 2:
-                            day_count = '0'
+                    time_difference = itinerary.date - today_date
+                    day_count = str(time_difference)
+                    day_count, _, _ = day_count.partition(' day')
+                    if len(day_count) > 2:
+                        day_count = '1'
+                    else:
+                        day_count = str(int(day_count)+1)
                     if itinerary.selected:
                         next_city = itinerary.city
                         self.root.ids.selected_itinerary.text = 'Next ' + itinerary_text
