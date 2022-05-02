@@ -96,7 +96,6 @@ class EntertainmentTrackerApp(App):
     def duplicate_name_venue(self, original_name, candidate_name, city_selection, create_or_edit):
         duplicate_name = False
         city = self.session.query(City).filter(City.city_name == city_selection).one()
-        # venues_to_check = self.session.query(Venue).filter(Venue.city_id == c_id)
         venues_to_check = city.venues
         for venue in venues_to_check:
             if create_or_edit == 'CREATE' and venue.venue_name == candidate_name:
@@ -255,7 +254,6 @@ class EntertainmentTrackerApp(App):
 
     def _add_welp_score(self, review_score, venue_being_reviewed):
         if valid_welp_score(review_score):
-            # city = self.session.query(City).filter(City.city_name == city).one()
             venue = self.session.query(Venue).filter(Venue.venue_name == venue_being_reviewed).one()
             if venue.average_welp_score is None:
                 venue.average_welp_score = review_score
