@@ -233,6 +233,7 @@ class TravelPlannerApp(App):
             self.on_records_not_loaded,
             self.on_records_not_loaded,
         )
+        # Gave a forgiving range to allow for small error.
         if (self.validate_city_records['lat'] - .5) <= city.latitude <= (self.validate_city_records['lat'] + .5) \
                 and (self.validate_city_records['lon'] - .5) <= city.longitude <= (
                 self.validate_city_records['lon'] + .5) \
@@ -252,6 +253,7 @@ class TravelPlannerApp(App):
         Logger.error(f'{self.__class__.__name__}: {error}')
 
     def populate_ratings_scroll_view(self):
+        # Creates set of custom widgets and populates their child widgets with rating values.
         ratings = self.get_new_ratings()
         venues = []
         for rating in ratings:
@@ -267,6 +269,7 @@ class TravelPlannerApp(App):
             self.root.ids.venue_and_review_scroll.add_widget(view)
 
     def check_state_of_checkboxes(self):
+        # Checks to see if checkboxes and child widgets are pressed, updates based on accept or reject.
         accept = self.root.ids.accept_reject_review.text
         root = self.root.ids.venue_and_review_scroll
         venues = root.children
@@ -323,6 +326,8 @@ class TravelPlannerApp(App):
                                                    'Try reloading the app and trying again.'
 
     def find_airport_to_cross_meridian(self, current_airport, in_range_airports):
+        # Decided to use meridians on the longitude of the final destination to help travel around the world.
+        # This method checks which hemosphere your in and then picks an airport on the opposite, while changing the destination.
         cross_airports = []
         if current_airport.longitude < 0:
             for airport in in_range_airports:
@@ -389,10 +394,10 @@ class TravelPlannerApp(App):
         return best_option
 
     def get_airports_in_range(self, current_airport, current_date):
+        # Checks for range and weather.
         airports = self.session.query(Airport).all()
         in_range_airports = []
         for airport in airports:
-            # make it, so it returns a list of positive going airports if there are any.
             if find_distance(current_airport.latitude, current_airport.longitude, airport.latitude,
                              airport.longitude) <= 3500 and is_weather_ok_airport(airport, current_date):
                 if len(airport.cities) != 0 and airport != current_airport:
@@ -414,6 +419,7 @@ class TravelPlannerApp(App):
         return best_city
 
     def get_city_score(self, city, current_date):
+        # Algorithm decides an integer score of city in airport.cities.
         score = 0
         venues_open = 0
         forecasts_at_city = self.session.query(Condition).filter(Condition.city_id == city.city_id).count()
@@ -478,6 +484,7 @@ class TravelPlannerApp(App):
         return venues
 
     def add_subtract_day(self):
+        # Advances current day by one.
         if self.counter_text < 7:
             self.current_date += timedelta(days=1)
             self.counter_text = self.counter_text + 1
