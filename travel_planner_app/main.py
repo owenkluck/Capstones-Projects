@@ -832,7 +832,6 @@ def main():
     #app.connect_to_database('cse.unl.edu', 3306, 'kandrews', 'kandrews', 'qUc:6M')
     app.connect_to_open_weather()
     app.destination = PRIME_MERIDIAN
-    app.run()
     app.final_destination = app.session.query(Airport).filter(Airport.name == 'Lincoln Airport').one()
     app.run()
 
