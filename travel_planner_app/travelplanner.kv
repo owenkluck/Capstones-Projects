@@ -267,6 +267,7 @@ ScreenManager:
                         text: 'Prepare Itinerary'
                         font_size: '20sp'
                         on_press:
+                            root.ids.itinerary_wait.text = 'Please Wait; Creating Itineraries...'
                             root.transition.direction = 'left'
                             root.current = 'prepare_itinerary'
                     BoxLayout:
@@ -448,6 +449,7 @@ ScreenManager:
         on_enter:
             app.prepare_itineraries()
             app.populate_itinerary_view()
+            root.ids.itinerary_wait.text = 'Prepared Itineraries'
             app.submit_data(app.queued_entertainment_itineraries)
             app.submit_data(app.queued_closest_itineraries)
             app.queued_closest_itineraries = []
@@ -458,6 +460,7 @@ ScreenManager:
                 orientation: 'horizontal'
                 size_hint_max_y: 80
                 Label:
+                    id: itinerary_wait
                     text: 'Prepare Itinerary'
                     font_size: '25sp'
                 Button:
@@ -473,10 +476,18 @@ ScreenManager:
                 id: itinerary_scroll
                 BoxLayout:
                     orientation: 'vertical'
+                    BlackLineX
+                    Label:
+                        size_hint_max_y: 30
+                        text: 'Distance Prioritized Itinerary'
                     BlackLineX:
                     BoxLayout:
                         id: entertainment_itinerary
                         orientation: 'horizontal'
+                    BlackLineX
+                    Label:
+                        size_hint_max_y: 30
+                        text: 'Entertainment Prioritized Itinerary'
                     BlackLineX:
                     BoxLayout:
                         id: closest_itinerary

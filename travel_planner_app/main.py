@@ -37,6 +37,83 @@ class BlackLineY(BoxLayout):
     pass
 
 
+def is_weather_ok_airport(airport, current_date):
+    # Figure out severe weather
+    next_day = current_date + timedelta(days=1)
+    if len(airport.conditions) == 0:
+        return True
+    for forecast in airport.conditions:
+        if next_day == forecast.date:
+            if forecast.max_temperature < 45 and forecast.visibility > 5:
+                return True
+    return False
+
+
+def find_distance(current_latitude, current_longitude, next_latitude, next_longitude):
+    # need to figure out how to calculate whether you are still going East or West.
+    distance = math.acos(math.sin(math.radians(current_latitude)) * math.sin(math.radians(next_latitude)) +
+                         math.cos(math.radians(current_latitude)) * math.cos(math.radians(next_latitude)) *
+                         math.cos(math.radians(next_longitude) - math.radians(current_longitude))) * 6371
+    return distance
+
+
+def is_weather_good_city(forecast):
+    if 32 <= forecast.max_temperature <= 90 and 0 <= forecast.max_temperature <= 40 and forecast.max_wind_speed <= 20:
+        return True
+    return False
+
+
+def does_weather_meet_venues_conditions(venue, forecast):
+    if venue.condition:
+        condition = venue.condition[0]
+        if condition.min_temperature <= forecast.max_temperature <= condition.max_temperature and \
+                condition.min_humidity <= forecast.max_humidity <= condition.max_humidity and \
+                forecast.max_wind_speed <= condition.max_wind_speed:
+            return True
+        return False
+    return True
+
+
+def get_open_venues_list(city, forecast):
+    venues_to_visit = []
+    for venue in city.venues:
+        if does_weather_meet_venues_conditions(venue, forecast):
+            venues_to_visit.append(venue)
+    return venues_to_visit
+
+
+def search_for_indoor_events(event, venues_to_visit):
+    for venue in venues_to_visit:
+        if venue.venue_type == 'Indoor Theater' or venue.venue_type == 'Indoor Sports Arena':
+            event = venue
+    return event
+
+
+def search_for_outdoor_sports(event, venues_to_visit):
+    for venue in venues_to_visit:
+        if venue.venue_type == 'Outdoor Sports Arena':
+            event = venue
+    return event
+
+
+def search_for_outdoor_theater(event, venues_to_visit):
+    for venue in venues_to_visit:
+        if venue.venue_type == 'Outdoor Theater':
+            event = venue
+    return event
+
+
+def get_positive_airports(current_airport, in_range_airports, destination):
+    positive_range_airports = []
+    for airport in in_range_airports:
+        airport_x = find_distance(airport.latitude, airport.longitude, destination[0], destination[1])
+        current_airport_x = find_distance(current_airport.latitude, current_airport.longitude, destination[0],
+                                          destination[1])
+        if airport_x < current_airport_x:
+            positive_range_airports.append(airport)
+    return positive_range_airports
+
+
 class TravelPlannerApp(App):
     counter_text = NumericProperty(0)
 
@@ -77,7 +154,7 @@ class TravelPlannerApp(App):
             self.session = session
             self.database = database
             self.url = url
-            self.root.current = 'mainmenu1'
+            self.root.current = 'loading_screen'
         except (SQLAlchemyError, ProgrammingError):
             self.root.current = 'home'
             self.root.ids.connection_error.text = 'The credentials given failed to connect to the remote database. Please re-enter your credentials'
@@ -258,8 +335,8 @@ class TravelPlannerApp(App):
         max_distance = 0
         max_airport = None
         for airport in cross_airports:
-            airport_distance = self.find_distance(current_airport.latitude, current_airport.longitude,
-                                                  airport.latitude, airport.longitude)
+            airport_distance = find_distance(current_airport.latitude, current_airport.longitude,
+                                             airport.latitude, airport.longitude)
             if airport_distance > max_distance:
                 max_airport = airport
         if max_airport is not None:
@@ -274,14 +351,14 @@ class TravelPlannerApp(App):
 
     def can_meridian_be_passed(self, current_airport, in_range_airports):
         airport = None
-        if abs(self.find_distance(current_airport.latitude, current_airport.longitude, self.destination[0],
-                                  self.destination[1])) < 3500:
+        if abs(find_distance(current_airport.latitude, current_airport.longitude, self.destination[0],
+                             self.destination[1])) < 3500:
             airport = self.find_airport_to_cross_meridian(current_airport, in_range_airports)
         return airport
 
     def find_best_entertainment_airport_and_city(self, in_range_airports, current_date, current_airport, destination):
         best_airport = self.can_meridian_be_passed(current_airport, in_range_airports)
-        positive_range_airports = self.get_positive_airports(current_airport, in_range_airports, destination)
+        positive_range_airports = get_positive_airports(current_airport, in_range_airports, destination)
         if not positive_range_airports:
             positive_range_airports = in_range_airports
         if best_airport is None:
@@ -299,24 +376,15 @@ class TravelPlannerApp(App):
             best_city = self.determine_best_city(best_airport, current_date)
         return best_airport, best_city
 
-    def get_positive_airports(self, current_airport, in_range_airports, destination):
-        positive_range_airports = []
-        for airport in in_range_airports:
-            airport_x = self.find_distance(airport.latitude, airport.longitude, destination[0], destination[1])
-            current_airport_x = self.find_distance(current_airport.latitude, current_airport.longitude, destination[0], destination[1])
-            if airport_x < current_airport_x:
-                positive_range_airports.append(airport)
-        return positive_range_airports
-
     def find_closest_airport_to_destination(self, in_range_airports, destination, current_airport):
         best_option = self.can_meridian_be_passed(current_airport, in_range_airports)
         if best_option is None:
             min_distance = 1000000
             for airport in in_range_airports:
-                if self.find_distance(airport.latitude, airport.longitude, destination[0],
-                                      destination[1]) < min_distance:
-                    min_distance = self.find_distance(airport.latitude, airport.longitude, destination[0],
-                                                      destination[1])
+                if find_distance(airport.latitude, airport.longitude, destination[0],
+                                 destination[1]) < min_distance:
+                    min_distance = find_distance(airport.latitude, airport.longitude, destination[0],
+                                                 destination[1])
                     best_option = airport
         return best_option
 
@@ -325,34 +393,16 @@ class TravelPlannerApp(App):
         in_range_airports = []
         for airport in airports:
             # make it, so it returns a list of positive going airports if there are any.
-            if self.find_distance(current_airport.latitude, current_airport.longitude, airport.latitude,
-                                  airport.longitude) <= 3500 and self.is_weather_ok_airport(airport, current_date):
+            if find_distance(current_airport.latitude, current_airport.longitude, airport.latitude,
+                             airport.longitude) <= 3500 and is_weather_ok_airport(airport, current_date):
                 if len(airport.cities) != 0 and airport != current_airport:
                     in_range_airports.append(airport)
         if len(in_range_airports) == 0:
             for airport in airports:
-                if self.find_distance(current_airport.latitude, current_airport.longitude,
-                                      airport.latitude, airport.longitude) <= 3500 and airport != current_airport:
+                if find_distance(current_airport.latitude, current_airport.longitude,
+                                 airport.latitude, airport.longitude) <= 3500 and airport != current_airport:
                     in_range_airports.append(airport)
         return in_range_airports
-
-    def is_weather_ok_airport(self, airport, current_date):
-        # Figure out severe weather
-        next_day = current_date + timedelta(days=1)
-        if len(airport.conditions) == 0:
-            return True
-        for forecast in airport.conditions:
-            if next_day == forecast.date:
-                if forecast.max_temperature < 45 and forecast.visibility > 5:
-                    return True
-        return False
-
-    def find_distance(self, current_latitude, current_longitude, next_latitude, next_longitude):
-        # need to figure out how to calculate whether you are still going East or West.
-        distance = math.acos(math.sin(math.radians(current_latitude)) * math.sin(math.radians(next_latitude)) +
-                             math.cos(math.radians(current_latitude)) * math.cos(math.radians(next_latitude)) *
-                             math.cos(math.radians(next_longitude) - math.radians(current_longitude))) * 6371
-        return distance
 
     def determine_best_city(self, airport, current_date):
         best_city = airport.cities[0]
@@ -386,9 +436,9 @@ class TravelPlannerApp(App):
                     elif condition.condition_id < max_id:
                         self.delete_row(condition)
                 return self.get_city_score(city, current_date)
-            if self.is_weather_good_city(forecasts[0]):
+            if is_weather_good_city(forecasts[0]):
                 score += 3
-                score += len(self.get_open_venues_list(city, forecasts[0]))
+                score += len(get_open_venues_list(city, forecasts[0]))
             score += venues_open
             return score
         else:
@@ -397,45 +447,23 @@ class TravelPlannerApp(App):
             score = self.get_city_score(city, current_date)
             return score
 
-    def is_weather_good_city(self, forecast):
-        if 32 <= forecast.max_temperature <= 90 and 0 <= forecast.max_temperature <= 40 and forecast.max_wind_speed <= 20:
-            return True
-        return False
-
-    def does_weather_meet_venues_conditions(self, venue, forecast):
-        if venue.condition:
-            condition = venue.condition[0]
-            if condition.min_temperature <= forecast.max_temperature <= condition.max_temperature and \
-                    condition.min_humidity <= forecast.max_humidity <= condition.max_humidity and \
-                    forecast.max_wind_speed <= condition.max_wind_speed:
-                return True
-            return False
-        return True
-
-    def get_open_venues_list(self, city, forecast):
-        venues_to_visit = []
-        for venue in city.venues:
-            if self.does_weather_meet_venues_conditions(venue, forecast):
-                venues_to_visit.append(venue)
-        return venues_to_visit
-
     def determine_venues(self, venues_to_visit):
         # 'Indoor Restaurant', 'Outdoor Restaurant', 'Indoor Theater', 'Outdoor Theater', 'Indoor Sports Arena', 'Outdoor Sports Arena'
         venues = []
         event = None
         restaurant = None
         if self.outdoor_plays < self.outdoor_sporting_events:
-            event = self.search_for_outdoor_theater(event, venues_to_visit)
+            event = search_for_outdoor_theater(event, venues_to_visit)
             if event is None:
-                event = self.search_for_outdoor_sports(event, venues_to_visit)
+                event = search_for_outdoor_sports(event, venues_to_visit)
             if event is None:
-                event = self.search_for_indoor_events(event, venues_to_visit)
+                event = search_for_indoor_events(event, venues_to_visit)
         else:
-            event = self.search_for_outdoor_sports(event, venues_to_visit)
+            event = search_for_outdoor_sports(event, venues_to_visit)
             if event is None:
-                event = self.search_for_outdoor_theater(event, venues_to_visit)
+                event = search_for_outdoor_theater(event, venues_to_visit)
             if event is None:
-                event = self.search_for_indoor_events(event, venues_to_visit)
+                event = search_for_indoor_events(event, venues_to_visit)
         for venue in venues_to_visit:
             if venue.venue_type == 'Outdoor Restaurant':
                 restaurant = venue
@@ -455,24 +483,6 @@ class TravelPlannerApp(App):
             self.counter_text = self.counter_text + 1
             self.calender_day_changed()
 
-    def search_for_indoor_events(self, event, venues_to_visit):
-        for venue in venues_to_visit:
-            if venue.venue_type == 'Indoor Theater' or venue.venue_type == 'Indoor Sports Arena':
-                event = venue
-        return event
-
-    def search_for_outdoor_sports(self, event, venues_to_visit):
-        for venue in venues_to_visit:
-            if venue.venue_type == 'Outdoor Sports Arena':
-                event = venue
-        return event
-
-    def search_for_outdoor_theater(self, event, venues_to_visit):
-        for venue in venues_to_visit:
-            if venue.venue_type == 'Outdoor Theater':
-                event = venue
-        return event
-
     def create_closest_itinerary_day(self, destination, current_date, current_airport):
         airport = self.find_closest_airport_to_destination(self.get_airports_in_range(current_airport, current_date),
                                                            destination, current_airport)
@@ -490,7 +500,7 @@ class TravelPlannerApp(App):
                     city_forecast.append(forecast)
             if len(city_forecast) == 1:
                 forecast = city_forecast[0]
-                venues_to_visit = self.get_open_venues_list(city, forecast)
+                venues_to_visit = get_open_venues_list(city, forecast)
                 venues = self.determine_venues(venues_to_visit)
                 leave_from_airport = None
                 if len(city.airports) > 1:
@@ -518,7 +528,7 @@ class TravelPlannerApp(App):
             while len(city_forecast) > 1:
                 self.delete_row(city_forecast[0])
                 city_forecast.pop(0)
-        venues_to_visit = self.get_open_venues_list(city, city_forecast[0])
+        venues_to_visit = get_open_venues_list(city, city_forecast[0])
         venues = self.determine_venues(venues_to_visit)
         leave_from_airport = None
         if len(city.airports) > 1:
@@ -765,7 +775,8 @@ class TravelPlannerApp(App):
                         self.delete_row(itinerary)
 
     def check_lift_off_acceptable(self, airport, current_date):
-        self.request_onecall_for_place(airport.latitude, airport.longitude, None, None, None, None, 'Lift Off', self.api_key)
+        self.request_onecall_for_place(airport.latitude, airport.longitude, None, None, None, None, 'Lift Off',
+                                       self.api_key)
         forecast = self.updated_forecast
         lift_off = True
         for hour in forecast['hourly']:
@@ -812,4 +823,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
