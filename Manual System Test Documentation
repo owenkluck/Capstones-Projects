@@ -191,9 +191,9 @@ If the program ran as outlined in the instructions the application behaved corre
 
 
 
-# Tracking App System Test Create Itinerary
+# Travel Planner App System Tests
 
-## System Test: Determining whether the app can successfully 
+## System Test: Determine whether the application can successfully run.
 
 ### Preconditions
 
@@ -205,32 +205,46 @@ If the program ran as outlined in the instructions the application behaved corre
 - The installer has been run.
 - No changes have been made to the database.
 
-### Test 1
-
-1.  If you click the run button on the left on line 1 in main.py of travel_planner_app, the app should appear on your screen.
-
-2.  You should see several textboxes, with most already containing text. In the empty textbox labelled "Password", type "qUc:6M". In the empty textbox      	labelled "API Key", copy and paste "bc3c6684b2b24478afe3626faf49baa5".
-
-3.  Click the button labelled "SUBMIT" and you should see a new screen with a label "Main Menu" at the top.
-#unfinished test
-
 ### Test Validate City
+#### Description: see if application changed validation value after selected and validated.
 
 1. From the main menu page after completing Test 1 press the Validate Locations button and you will be navigated to another screen
 
 2. Press the button that says 'Select City or Airport' and press Denver which should be the first option.
 
-3. Press the validate button and you will be given a success message. The Test has passed.
+3. Press the validate button and you will be given a success message.
+
+4. Open up a terminal window and run the command "mysql -h cse.unl.edu -u kandrews -p". You should be prompted for a password, type "qUc:6M".
+
+5. Run the command "use database kandrews;"
+
+6. Run the command "select * from cities"
+
+7. press ctrl + f to open a search bar and type in 'Denver'
+
+8. find the row in the table with Denver and check to make sure that the validate field has been changed to True.
+
 
 ### Test Validate Airport
+#### Description: see if application changed validation value after selected and validated.
 
 1. From the main menu page after completing Test 1 press the Validate Locations button and you will be navigated to another screen
 
 2. Press the button that says 'Select City or Airport' and scroll until you come across Lincoln Airport. Select this value.
 
-3. Press the validate button and you will be given a success message. The Test has passed.
+3. Press the validate button and you will be given a success message.
+
+4. Open up a terminal window and run the command "mysql -h cse.unl.edu -u kandrews -p". You should be prompted for a password, type "qUc:6M".
+
+5. Run the command "use database kandrews;"
+
+6. Run the command "select * from airports"
+
+7. Scroll through and find Lincoln Aiport. Check that its Value for validate has been changed to True
+
 
 ### Test Accept Rating
+#### Description: see if application changed validation value after selected and validated.
 
 1. From the main menu page after completing Test 1 press the Update Ratings button and you will be navigated to another screen
 
@@ -238,9 +252,19 @@ If the program ran as outlined in the instructions the application behaved corre
 
 3. Press the Accept or Reject button and press Accept
 
-4. Click the validate button and the reviews should disappear as they have been validated.
+4. Click the validate button and the reviews should disappear as they have been updated.
+
+5. Open up a terminal window and run the command "mysql -h cse.unl.edu -u kandrews -p". You should be prompted for a password, type "qUc:6M".
+
+6. Run the command "use database kandrews;"
+
+7. Run the command "select * from reviews"
+
+8. You should now see that the reviews you selected have had their validated field turned True.
+
 
 ### Test Reject Ratings
+#### Description: see if application deletes value after selected and updated.
 
 1. From the main menu page after completing Test 1 press the Update Ratings button and you will be navigated to another screen
 
@@ -250,21 +274,50 @@ If the program ran as outlined in the instructions the application behaved corre
 
 4. Click the validate button and the reviews should disappear as they have been deleted.
 
+5. Open up a terminal window and run the command "mysql -h cse.unl.edu -u kandrews -p". You should be prompted for a password, type "qUc:6M".
+
+6. Run the command "use database kandrews;"
+
+7. Run command "select * from reviews"
+
+8. You should now see that the reviews you selected have been deleted
+
+
 ### Test Prepare Itineraries
+#### Description: see if application creates the proper amount of itineraries.
 
 1. From the main menu page after completing Test 1 press the Prepare Itinerary button and you will be navigated to another screen
 
 2. From here you will need to wait for the two sets of itineraries to be created.
 
-3. Once the Itineraries appear on the screen the test is done
+3. Once the Itineraries appear on the screen exit the program.
+
+4. Open up a terminal window and run the command "mysql -h cse.unl.edu -u kandrews -p". You should be prompted for a password, type "qUc:6M".
+
+5. Run the command "use database kandrews;"
+
+6. Run the command "select * from itineraries"
+
+7. You will see 14 new itineraries created. 7 Close and 7 Entertainment.
+
 
 ### Test Prepare Itineraries with no new Itineraries
+#### Description: see if application creates no itineraries when none are needed.
 
 1. From the main menu page after completing Test 1 press the Prepare Itinerary button and you will be navigated to another screen
 
 2. From here you will need to wait for the two sets of itineraries to not be created.
 
-3. Once you see that no itineraries have been created the test is complete
+3. Once you see that no itineraries have been created exit the program.
+
+4. Open up a terminal window and run the command "mysql -h cse.unl.edu -u kandrews -p". You should be prompted for a password, type "qUc:6M".
+
+5. Run the command "use database kandrews;"
+
+6. Run the command "select * from itineraries"
+
+7. From here you will see the original 14 itineraries from the last system test and nothing more.
+
 
 
 
