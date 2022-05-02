@@ -136,19 +136,23 @@ class TravelPlannerApp(App):
         return unvalidated_venues
 
     def validate_airport(self, airport_name):
+        if airport_name == 'Select Airport to Validate':
+            return
         airport = self.session.query(Airport).filter(Airport.name == airport_name).one()
         with open('airports.csv') as csvfile:
             reader = csv.DictReader(csvfile)
             for item in reader:
-                if item['ICAO'] == airport.airport_code:
-                    if (int(item['Latitude']) - .009) <= airport.latitude <= (int(item['Latitude']) + .009) and \
-                            (int(item['Longitude']) - .009) <= airport.longitude <= (int(item['Longitude']) + .009):
+                if item['ICAO'] == airport.code:
+                    if (float(item['Latitude']) - .009) <= airport.latitude <= (float(item['Latitude']) + .009) and \
+                            (float(item['Longitude']) - .009) <= airport.longitude <= (float(item['Longitude']) + .009):
                         airport.validated = True
                         self.submit_data(airport)
                         return True
             return False
 
     def validate_city(self, city_name):
+        if city_name == 'Select City to Validate':
+            return
         city = self.session.query(City).filter(City.city_name == city_name).one()
         self.geo_connection.send_request(
             'direct',
