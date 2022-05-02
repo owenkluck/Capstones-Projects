@@ -46,7 +46,6 @@ class EntertainmentTrackerApp(App):
                                            data['password'])
         self.entertainment_database = Database(url)
         self.session = self.entertainment_database.create_session()
-        print('success')
 
     def build(self):
         inspector.create_inspector(Window, self)  # For inspection (press control-e to toggle).
@@ -109,7 +108,6 @@ class EntertainmentTrackerApp(App):
     def check_city_for_venues(self, city, edit_or_review):
         message = 'No venues exist in this city.'
         city = self.session.query(City).filter(City.city_name == city).one()
-        # venue_query = self.session.query(Venue).filter(Venue.city_id == c_id)
         venue_query = city.venues
         if len(venue_query) > 0:
             self.update_venue_list(city)
@@ -219,7 +217,6 @@ class EntertainmentTrackerApp(App):
 
     def update_venue_list(self, city):
         self.root.ids.venue_edit_selection.values.clear()
-        # city = self.session.query(City).filter(City.city_name == city).one()
         venue_count = self.session.query(Venue).count()
         for i in range(1, venue_count + 1):
             current_venue = self.session.get(Venue, i)

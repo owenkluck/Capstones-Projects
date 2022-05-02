@@ -54,15 +54,12 @@ class AirportApp(App):
         inspector.create_inspector(Window, self)
 
     def submit_data_airport(self, name, code, latitude, longitude):
-        print(f'{len(name)}, {len(code)}, {len(latitude)}, {len(longitude)}')
-        print(len(name) > 0 and len(code) > 0 and len(latitude) > 0 and len(longitude) > 0)
         if len(name) > 0 and len(code) > 0 and len(latitude) > 0 and len(longitude) > 0:
             try:
                 self.commit_airport_to_database(code, latitude, longitude, name)
                 self.set_current_airport(name)
                 self.root.current = 'success_airport'
             except SQLAlchemyError:
-                print('Database could not be updated.')
                 self.root.ids.create_airport_error.text = 'Database could not be updated.' \
                                                           '\nThe information added may match an airport that' \
                                                           '\nis currently in the database'
@@ -83,7 +80,6 @@ class AirportApp(App):
                 self.set_current_city(name)
                 self.root.current = 'success_city'
             except SQLAlchemyError:
-                print('Database could not be updated.')
                 self.root.ids.create_city_error.text = 'Database could not be updated.' \
                                                        '\nThe information added may match a city that' \
                                                        '\nis currently in the database.'
@@ -107,7 +103,6 @@ class AirportApp(App):
             airport = self.session.query(Airport).filter(Airport.name == airport_name).one()
             airport_id = airport.airport_id
             date_values = date_1.split('/')
-            print('hi_1')
             real_forecast = None
             forecasts = self.session.query(Condition).filter(Condition.airport_id == airport_id)
             try:
@@ -170,8 +165,6 @@ class AirportApp(App):
         Logger.error(f'{self.__class__.__name__}: {error}')
 
     def update_forecast(self, _, response):
-        # print(dumps(response, indent=4, sort_keys=True))
-        print(1)
         self.updated_forecast = response
 
     def create_new_forecasts(self, airport):
@@ -301,11 +294,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-# Things to clean up:
-    # Re-organize main.py functions.
-    # Add range determination to main.py.
-    # Make screen take you back after making new city from button.
-    # add view itinerary screen
-    # make one call work
-    # add method to update Condition if it doesn't exist for a day
