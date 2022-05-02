@@ -247,7 +247,7 @@ def add_starter_data(session):
     session.add(b1)
     session.add(b2)
     session.add(b3)
-    a1 = Airport(name='Jalingo Airport', latitude='8.90059', longitude='11.2795', code='DNJA', cities=[b1, b2, b3])
+    a1 = Airport(name='Jalingo Airport', latitude='38.90059', longitude='40.2795', code='DNJA', cities=[b1, b2, b3])
     session.add(a1)
     # b1 = City(city_name='Sumbawanga', encompassing_geographic_entity='Tanzania', latitude=-7.9667, longitude=31.6167,
     #           venues=[blondo_venue, fort_venue_1])
@@ -305,16 +305,16 @@ def add_starter_data(session):
     # a1 = Airport(name='Simon Mwansa Kapwepwe International Airport', latitude='-12.9981', longitude='28.6649',
     #              code='FLND', cities=[b1, b2, b3])
     # session.add(a1)
-    b1 = City(city_name='Luanshya', encompassing_geographic_entity='Zambia', latitude=-13.1333, longitude=28.4,
+    b1 = City(city_name='Luanshya', encompassing_geographic_entity='Zambia', latitude=-33.1333, longitude=28.4,
               venues=[blondo_venue, fort_venue_1])
-    b2 = City(city_name='Kipushi', encompassing_geographic_entity='Congo (Kinshasa)', latitude=-11.76, longitude=27.25,
+    b2 = City(city_name='Kipushi', encompassing_geographic_entity='Congo (Kinshasa)', latitude=-31.76, longitude=27.25,
               venues=[fort_venue_2, maple_venue_2])
-    b3 = City(city_name='Chililabombwe', encompassing_geographic_entity='Zambia', latitude=-12.3667, longitude=27.8333,
+    b3 = City(city_name='Chililabombwe', encompassing_geographic_entity='Zambia', latitude=-30.3667, longitude=27.8333,
               venues=[fort_venue_2, maple_venue_2])
     session.add(b1)
     session.add(b2)
     session.add(b3)
-    a1 = Airport(name='Southdowns Airport', latitude='-12.9005', longitude='28.1499', code='FLSO')
+    a1 = Airport(name='Southdowns Airport', latitude='-32.9005', longitude='28.1499', code='FLSO')
     session.add(a1)
     # a1 = Airport(name='Diego Garcia Naval Support Facility', latitude='-7.31327', longitude='72.4111', code='FJDG')
     # session.add(a1)
@@ -360,7 +360,7 @@ def add_starter_data(session):
     session.add(b1)
     session.add(b2)
     session.add(b3)
-    a1 = Airport(name='Kooddoo Airport', latitude='0.7324', longitude='73.4336', code='VRMO', cities=[b1, b2, b3])
+    a1 = Airport(name='Kooddoo Airport', latitude='30.7324', longitude='73.4336', code='VRMO', cities=[b1, b2, b3])
     session.add(a1)
     b1 = City(city_name='Ta`izz', encompassing_geographic_entity='Yemen', latitude=13.5789, longitude=44.0219,
               venues=[blondo_venue, fort_venue_1])
@@ -371,7 +371,7 @@ def add_starter_data(session):
     session.add(b1)
     session.add(b2)
     session.add(b3)
-    a1 = Airport(name='Aden International Airport', latitude='12.8295', longitude='45.0288', code='OYAA',
+    a1 = Airport(name='Aden International Airport', latitude='30.8295', longitude='45.0288', code='OYAA',
                  cities=[b1, b2, b3])
     session.add(a1)
     # b1 = City(city_name='Colombo', encompassing_geographic_entity='Sri Lanka', latitude=6.9167, longitude=79.8333,
@@ -825,15 +825,15 @@ def add_starter_data(session):
     # session.add(b2)
     # a1 = Airport(name='Clarks Point Airport', latitude='58.8337', longitude='-158.529', code='PFCL', cities=[b2])
     # session.add(a1)
-    # b1 = City(city_name='Kodiak', encompassing_geographic_entity='United States', latitude=57.7934, longitude=-152.406,
-    #           venues=[blondo_venue, fort_venue_1])
-    # b2 = City(city_name='Kalifornsky', encompassing_geographic_entity='United States', latitude=60.4417,
-    #           longitude=-151.197, venues=[fort_venue_2, maple_venue_2])
-    # b3 = City(city_name='Homer', encompassing_geographic_entity='United States', latitude=59.653, longitude=-151.525,
-    #           venues=[blondo_venue, fort_venue_1])
-    # session.add(b1)
-    # session.add(b2)
-    # session.add(b3)
+    b1 = City(city_name='Kodiak', encompassing_geographic_entity='United States', latitude=57.7934, longitude=-152.406,
+              venues=[blondo_venue, fort_venue_1])
+    b2 = City(city_name='Kalifornsky', encompassing_geographic_entity='United States', latitude=60.4417,
+              longitude=-151.197, venues=[fort_venue_2, maple_venue_2])
+    b3 = City(city_name='Homer', encompassing_geographic_entity='United States', latitude=59.653, longitude=-151.525,
+              venues=[blondo_venue, fort_venue_1])
+    session.add(b1)
+    session.add(b2)
+    session.add(b3)
     a1 = Airport(name='Seldovia Airport', latitude='59.4424', longitude='-151.704', code='PASO', cities=[b1, b2, b3])
     session.add(a1)
     a1 = Airport(name='King Cove Airport', latitude='55.1163', longitude='-162.266', code='PAVC', cities=[b1, b3])
@@ -843,49 +843,112 @@ def add_starter_data(session):
     a1 = Airport(name='Dillingham Airport', latitude='59.0447', longitude='-158.505', code='PADL', cities=[b2, b3])
     session.add(a1)
     session.commit()
-    a1 = Airport(name='New Airport', latitude=45.0, longitude=-35.0, code='ZZUY')
+    b1 = City(city_name='Coquitlam', encompassing_geographic_entity='Canada', latitude=49.2839, longitude=-122.792,
+              venues=[blondo_venue, fort_venue_1])
+    b2 = City(city_name='Langley', encompassing_geographic_entity='Canada', latitude=49.1044, longitude=-122.583,
+              venues=[fort_venue_2, maple_venue_2])
+    b3 = City(city_name='Delta', encompassing_geographic_entity='Canada', latitude=49.0847, longitude=-123.059,
+              venues=[fort_venue_2, maple_venue_2])
+    session.add(b1)
+    session.add(b2)
+    session.add(b3)
+    a1 = Airport(name='New Airport', latitude=45.0, longitude=-35.0, code='ZZUY', cities=[b1])
     session.add(a1)
-    a1 = Airport(name='Old Airport', latitude=45.0, longitude=-25.0, code='ZZOY')
+    a1 = Airport(name='Old Airport', latitude=45.0, longitude=-25.0, code='ZZOY', cities=[b2])
     session.add(a1)
-    a1 = Airport(name='Some Airport', latitude=45.0, longitude=15.0, code='ZZOO')
+    a1 = Airport(name='Some Airport', latitude=45.0, longitude=15.0, code='ZZOO', cities=[b3])
     session.add(a1)
-    a1 = Airport(name='Same Old Airport', latitude=45.0, longitude=35.0, code='ZZOL')
+    b1 = City(city_name='San Francisco', encompassing_geographic_entity='California', latitude=37.8, longitude=-122.4,
+              venues=[fort_venue_2, maple_venue_2])
+    b2 = City(city_name='Concord', encompassing_geographic_entity='United States', latitude=37.9722, longitude=-122.002,
+              venues=[blondo_venue, fort_venue_1])
+    b3 = City(city_name='Santa Rosa', encompassing_geographic_entity='United States', latitude=38.4458,
+              longitude=-122.707, venues=[fort_venue_2, maple_venue_2])
+    session.add(b1)
+    session.add(b2)
+    session.add(b3)
+    a1 = Airport(name='Same Old Airport', latitude=45.0, longitude=35.0, code='ZZOL', cities=[b1])
     session.add(a1)
-    a1 = Airport(name='Dog Airport', latitude=45.0, longitude=55.0, code='ZFOY')
+    a1 = Airport(name='Dog Airport', latitude=45.0, longitude=55.0, code='ZFOY', cities=[b2])
     session.add(a1)
-    a1 = Airport(name='Cat Airport', latitude=45.0, longitude=85.0, code='ZIOY')
+    a1 = Airport(name='Cat Airport', latitude=45.0, longitude=85.0, code='ZIOY', cities=[b3])
     session.add(a1)
-    a1 = Airport(name='Mouse Airport', latitude=45.0, longitude=115.0, code='ZIRY')
+    b1 = City(city_name='Wichita', encompassing_geographic_entity='United States', latitude=37.6896, longitude=-97.3442,
+              venues=[blondo_venue, fort_venue_1])
+    b2 = City(city_name='Topeka', encompassing_geographic_entity='United States', latitude=39.0346, longitude=-95.6955,
+              venues=[fort_venue_2, maple_venue_2])
+    b3 = City(city_name='Manhattan', encompassing_geographic_entity='United States', latitude=39.1886,
+              longitude=-96.6046, venues=[fort_venue_2, maple_venue_2])
+    session.add(b1)
+    session.add(b2)
+    session.add(b3)
+    a1 = Airport(name='Mouse Airport', latitude=45.0, longitude=115.0, code='ZIRY', cities=[b1])
     session.add(a1)
-    a1 = Airport(name='Mountain Airport', latitude=45.0, longitude=125.0, code='ZIRP')
+    a1 = Airport(name='Mountain Airport', latitude=45.0, longitude=125.0, code='ZIRP', cities=[b2])
     session.add(a1)
-    a1 = Airport(name='Gorilla Airport', latitude=45.0, longitude=135.0, code='ZIRY')
+    a1 = Airport(name='Gorilla Airport', latitude=45.0, longitude=135.0, code='ZIRY', cities=[b3])
     session.add(a1)
-    a1 = Airport(name='Monkey Airport', latitude=45.0, longitude=145.0, code='ZIRY')
+    b1 = City(city_name='Clarksville', encompassing_geographic_entity='United States', latitude=36.5695,
+              longitude=-87.342, venues=[blondo_venue, fort_venue_1])
+    b2 = City(city_name='Murfreesboro', encompassing_geographic_entity='United States', latitude=35.8492,
+              longitude=-86.4119, venues=[fort_venue_2, maple_venue_2])
+    b3 = City(city_name='Bowling Green', encompassing_geographic_entity='United States', latitude=36.9719,
+              longitude=-86.4373, venues=[fort_venue_2, maple_venue_2])
+    session.add(b1)
+    session.add(b2)
+    session.add(b3)
+    a1 = Airport(name='Monkey Airport', latitude=45.0, longitude=145.0, code='ZIRY', cities=[b1])
     session.add(a1)
-    a1 = Airport(name='Luffy Airport', latitude=45.0, longitude=155.0, code='ZIRY')
+    a1 = Airport(name='Luffy Airport', latitude=45.0, longitude=155.0, code='ZIRY', cities=[b2])
     session.add(a1)
-    a1 = Airport(name='Man Airport', latitude=45.0, longitude=165.0, code='ZIRY')
+    a1 = Airport(name='Man Airport', latitude=45.0, longitude=165.0, code='ZIRY', cities=[b3])
     session.add(a1)
-    a1 = Airport(name='Mildren Airport', latitude=45.0, longitude=175.0, code='ZIRY')
+    b1 = City(city_name='Douglas', encompassing_geographic_entity='Isle Of Man', latitude=54.15, longitude=-4.4819,
+              venues=[fort_venue_2, maple_venue_2])
+    b2 = City(city_name='Liverpool', encompassing_geographic_entity='United Kingdom', latitude=53.4075,
+              longitude=-2.9919, venues=[blondo_venue, fort_venue_1])
+    b3 = City(city_name='Abertawe', encompassing_geographic_entity='United Kingdom', latitude=51.6167, longitude=-3.95,
+              venues=[fort_venue_2, maple_venue_2])
+    session.add(b1)
+    session.add(b2)
+    session.add(b3)
+    a1 = Airport(name='Mildren Airport', latitude=45.0, longitude=175.0, code='ZIRY', cities=[b1])
     session.add(a1)
-    a1 = Airport(name='Cucumber Airport', latitude=45.0, longitude=-175.0, code='ZIRY')
+    a1 = Airport(name='Cucumber Airport', latitude=45.0, longitude=-175.0, code='ZIRY', cities=[b2])
     session.add(a1)
-    a1 = Airport(name='Tomahat Airport', latitude=45.0, longitude=-165.0, code='ZIRY')
+    a1 = Airport(name='Tomahat Airport', latitude=45.0, longitude=-165.0, code='ZIRY', cities=[b3])
     session.add(a1)
-    a1 = Airport(name='Quill Airport', latitude=45.0, longitude=-155.0, code='ZIRY')
+    b1 = City(city_name='Kushiro', encompassing_geographic_entity='Japan', latitude=42.9833, longitude=144.383,
+              venues=[blondo_venue, fort_venue_1])
+    b2 = City(city_name='Koencho', encompassing_geographic_entity='Japan', latitude=43.8081, longitude=143.894,
+              venues=[fort_venue_2, maple_venue_2])
+    b3 = City(city_name='Abashiri', encompassing_geographic_entity='Japan', latitude=44.0206, longitude=144.274,
+              venues=[fort_venue_2, maple_venue_2])
+    session.add(b1)
+    session.add(b2)
+    session.add(b3)
+    a1 = Airport(name='Quill Airport', latitude=45.0, longitude=-155.0, code='ZIRY', cities=[b1])
     session.add(a1)
-    a1 = Airport(name='Mr. Airport', latitude=45.0, longitude=-145.0, code='ZIRY')
+    a1 = Airport(name='Mr. Airport', latitude=45.0, longitude=-145.0, code='ZIRY', cities=[b2])
     session.add(a1)
-    a1 = Airport(name='Dude Airport', latitude=45.0, longitude=-135.0, code='ZIRY')
+    a1 = Airport(name='Dude Airport', latitude=45.0, longitude=-135.0, code='ZIRY', cities=[b3])
     session.add(a1)
-    a1 = Airport(name='Duke Airport', latitude=45.0, longitude=-125.0, code='ZIRY')
+    a1 = Airport(name='Duke Airport', latitude=45.0, longitude=-125.0, code='ZIRY', cities=[b2])
     session.add(a1)
-    a1 = Airport(name='Green Airport', latitude=45.0, longitude=-115.0, code='ZIRY')
+    b1 = City(city_name='Memphis', encompassing_geographic_entity='United States', latitude=35.1046, longitude=-89.9773,
+              venues=[fort_venue_2, maple_venue_2])
+    b2 = City(city_name='Bartlett', encompassing_geographic_entity='United States', latitude=35.2337,
+              longitude=-89.8195, venues=[fort_venue_2, maple_venue_2])
+    b3 = City(city_name='Southaven', encompassing_geographic_entity='United States', latitude=34.9514,
+              longitude=-89.9787, venues=[blondo_venue, fort_venue_1])
+    session.add(b1)
+    session.add(b2)
+    session.add(b3)
+    a1 = Airport(name='Green Airport', latitude=45.0, longitude=-115.0, code='ZIRY', cities=[b3])
     session.add(a1)
-    a1 = Airport(name='Red Airport', latitude=45.0, longitude=-105.0, code='ZIRY')
+    a1 = Airport(name='Red Airport', latitude=45.0, longitude=-105.0, code='ZIRY', cities=[b2])
     session.add(a1)
-    a1 = Airport(name='Orange Airport', latitude=45.0, longitude=-95.0, code='ZIRY')
+    a1 = Airport(name='Orange Airport', latitude=45.0, longitude=-95.0, code='ZIRY', cities=[b1])
     session.add(a1)
 
     airports = session.query(Airport).all()

@@ -21,8 +21,8 @@ import csv
 from sqlalchemy.exc import SQLAlchemyError
 from kivy.properties import StringProperty, NumericProperty
 
-PRIME_MERIDIAN = [45, 0]
-OPPOSITE_PRIME_MERIDIAN = [45, 180]
+PRIME_MERIDIAN = [40, 0]
+OPPOSITE_PRIME_MERIDIAN = [40, 180]
 
 
 class ReviewScrollView(ScrollView):
@@ -287,13 +287,16 @@ class TravelPlannerApp(App):
             airport = self.find_airport_to_cross_meridian(current_airport, in_range_airports)
         return airport
 
-    def find_best_entertainment_airport_and_city(self, in_range_airports, current_date, current_airport):
+    def find_best_entertainment_airport_and_city(self, in_range_airports, current_date, current_airport, destination):
         best_airport = self.can_meridian_be_passed(current_airport, in_range_airports)
+        positive_range_airports = self.get_positive_airports(current_airport, in_range_airports, destination)
+        if not positive_range_airports:
+            positive_range_airports = in_range_airports
         if best_airport is None:
             best_score = 0
-            best_airport = in_range_airports[0]
-            best_city = in_range_airports[0].cities[0]
-            for airport in in_range_airports:
+            best_airport = positive_range_airports[0]
+            best_city = positive_range_airports[0].cities[0]
+            for airport in positive_range_airports:
                 city = self.determine_best_city(airport, current_date)
                 score = self.get_city_score(city, current_date)
                 if score > best_score:
@@ -306,6 +309,15 @@ class TravelPlannerApp(App):
             print('else in find best entertainment airport/city')
         return best_airport, best_city
 
+    def get_positive_airports(self, current_airport, in_range_airports, destination):
+        positive_range_airports = []
+        for airport in in_range_airports:
+            airport_x = self.find_distance(airport.latitude, airport.longitude, destination[0], destination[1])
+            current_airport_x = self.find_distance(current_airport.latitude, current_airport.longitude, destination[0], destination[1])
+            if airport_x < current_airport_x:
+                positive_range_airports.append(airport)
+        return positive_range_airports
+
     def find_closest_airport_to_destination(self, in_range_airports, destination, current_airport):
         best_option = self.can_meridian_be_passed(current_airport, in_range_airports)
         if best_option is None:
@@ -315,6 +327,8 @@ class TravelPlannerApp(App):
                                       destination[1]) < min_distance:
                     min_distance = self.find_distance(airport.latitude, airport.longitude, destination[0],
                                                       destination[1])
+                    print(airport.name)
+                    print(min_distance)
                     best_option = airport
         return best_option
 
@@ -326,6 +340,9 @@ class TravelPlannerApp(App):
             if self.find_distance(current_airport.latitude, current_airport.longitude, airport.latitude,
                                   airport.longitude) <= 3500 and self.is_weather_ok_airport(airport, current_date):
                 if len(airport.cities) != 0 and airport != current_airport:
+                    # print(airport.name)
+                    # print(self.find_distance(current_airport.latitude, current_airport.longitude, airport.latitude,
+                    #       airport.longitude))
                     in_range_airports.append(airport)
         if len(in_range_airports) == 0:
             print('No airports in range')
@@ -519,7 +536,7 @@ class TravelPlannerApp(App):
 
     def create_entertainment_itinerary(self, destination, current_date, current_airport):
         airport, city = self.find_best_entertainment_airport_and_city(
-            self.get_airports_in_range(current_airport, current_date), current_date, current_airport)
+            self.get_airports_in_range(current_airport, current_date), current_date, current_airport, destination)
         city_forecasts = self.session.query(Condition).filter(Condition.city_id == city.city_id)
         city_forecast = []
         for forecast in city_forecasts:
@@ -631,11 +648,11 @@ class TravelPlannerApp(App):
                 (len(self.queued_closest_itineraries) + len(self.queued_entertainment_itineraries)) / 2)
         root_1 = self.root.ids.entertainment_itinerary
         root_2 = self.root.ids.closest_itinerary
-        for itinerary in self.queued_entertainment_itineraries:
+        for itinerary in self.queued_closest_itineraries:
             print(f'Venues: {itinerary.venues}')
             itinerary_view = ItineraryView()
             if len(itinerary.venues) == 2:
-                itinerary_view.children[1].children[0].text = f'Entertainment: {itinerary.venues[1].venue_name}'
+                itinerary_view.children[1].children[0].text = f'Entertainment: {itinerary.venues[0].venue_name}'
                 itinerary_view.children[1].children[1].text = f'Eat at: {itinerary.venues[1].venue_name}'
             elif len(itinerary.venues) == 1:
                 itinerary_view.children[1].children[0].text = 'Entertainment: None'
@@ -645,10 +662,10 @@ class TravelPlannerApp(App):
             itinerary_view.children[1].children[4].text = f'Airport Leave: {itinerary.airport_left_from}'
             itinerary_view.children[1].children[5].text = f'Date {itinerary.date}'
             root_1.add_widget(itinerary_view)
-        for itinerary in self.queued_closest_itineraries:
+        for itinerary in self.queued_entertainment_itineraries:
             itinerary_view = ItineraryView()
             if len(itinerary.venues) == 2:
-                itinerary_view.children[1].children[0].text = f'Entertainment: {itinerary.venues[1].venue_name}'
+                itinerary_view.children[1].children[0].text = f'Entertainment: {itinerary.venues[0].venue_name}'
                 itinerary_view.children[1].children[1].text = f'Eat at: {itinerary.venues[1].venue_name}'
             elif len(itinerary.venues) == 1:
                 itinerary_view.children[1].children[0].text = 'Entertainment: None'
@@ -828,7 +845,7 @@ def main():
     app.connect_to_database('localhost', 33060, 'airports', 'root', 'cse1208')
     #app.connect_to_database('cse.unl.edu', 3306, 'kandrews', 'kandrews', 'qUc:6M')
     app.connect_to_open_weather()
-    app.destination = PRIME_MERIDIAN
+    app.destination = OPPOSITE_PRIME_MERIDIAN
     app.final_destination = app.session.query(Airport).filter(Airport.name == 'Lincoln Airport').one()
     app.run()
 
