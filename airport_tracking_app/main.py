@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 
 from kivy import Logger
 from kivy.app import App
@@ -105,15 +105,23 @@ class AirportApp(App):
             airport_id = airport.airport_id
             date_values = date_1.split('/')
             print('hi_1')
+            real_forecast = None
+            forecasts = self.session.query(Condition).filter(Condition.airport_id == airport_id)
             try:
-                forecasts = self.session.query(Condition).filter(Condition.date == date(int(date_values[2]), int(date_values[1]), int(date_values[0])) and Condition.airport_id == airport_id)
-                self.root.ids.forecast.text = f'On {forecasts[0].date}, the weather will be:\n' \
-                                              f'temperature: {forecasts[0].max_temperature}\n' \
-                                              f'wind_speed: {forecasts[0].max_wind_speed}\n' \
-                                              f'humidity: {forecasts[0].max_humidity}\n' \
-                                              f'rain: {forecasts[0].rain}\n' \
-                                              f'visibility: {forecasts[0].visibility}'
-            except (IndexError, SQLAlchemyError, ValueError):
+                for forecast in forecasts:
+                    if forecast.date == date(int(date_values[2]), int(date_values[1]), int(date_values[0])):
+                        real_forecast = forecast
+            except (IndexError, ValueError):
+                self.root.ids.check_forecast_error.text = 'The date input was incorrect,\n please type date in form DY/MN/YEAR.\n Ex: 1/7/2005'
+                return
+            if real_forecast is not None:
+                self.root.ids.forecast.text = f'On {real_forecast.date}, the weather will be:\n' \
+                                              f'temperature: {real_forecast.max_temperature}\n' \
+                                              f'wind_speed: {real_forecast.max_wind_speed}\n' \
+                                              f'humidity: {real_forecast.max_humidity}\n' \
+                                              f'rain: {real_forecast.rain}\n' \
+                                              f'visibility: {real_forecast.visibility}'
+            else:
                 for value in date_values:
                     try:
                         int(value)
@@ -121,10 +129,16 @@ class AirportApp(App):
                         self.root.ids.check_forecast_error.text = 'The date input was incorrect,\n please type date in form DY/MN/YEAR.\n Ex: 1/7/2005'
                         return
                 if int(date_values[0]) < 32 and int(date_values[1]) < 13 and 2000 < int(date_values[2]) < 3000:
-                    print('hi')
-                    self.request_onecall_for_place(airport.latitude, airport.longitude, date(int(date_values[2]), int(date_values[1]), int(date_values[0])), self.api_key)
-                    self.root.current = 'check_forecast'
-                    self.root.ids.check_forecast_error.text = 'Creating new forecasts for this airport. Please wait.'
+                    max_date = date.today() + timedelta(days=6)
+                    if date(int(date_values[2]), int(date_values[1]), int(date_values[0])) <= max_date:
+                        airport = self.session.query(Airport).filter(Airport.name == airport_name).one()
+                        self.request_onecall_for_place(airport.latitude, airport.longitude, date(int(date_values[2]), int(date_values[1]), int(date_values[0])), self.api_key, airport)
+                        self.root.current = 'check_forecast'
+                        self.root.ids.check_forecast_error.text = 'Creating new forecasts for this airport. Please wait.'
+                        self.add_forecast(airport_name, date_1)
+                    else:
+                        self.root.ids.check_forecast_error.text = 'We cannot show a forecast more than 7 days into the' \
+                                                                  ' future, please choose a different date.'
                 else:
                     self.root.ids.check_forecast_error.text = 'A value for day, month, or year is out of range or not accurate.'
         except SQLAlchemyError:
@@ -134,7 +148,7 @@ class AirportApp(App):
     def connect_to_open_weather(self, port_api=443):
         self.weather_connection = RESTConnection('api.openweathermap.org', port_api, '/data/2.5')
 
-    def request_onecall_for_place(self, latitude, longitude, itinerary_date, api_key):
+    def request_onecall_for_place(self, latitude, longitude, itinerary_date, api_key, airport):
         self.weather_connection.send_request(
             'onecall',
             {
@@ -147,16 +161,17 @@ class AirportApp(App):
             self.on_records_not_loaded,
             self.on_records_not_loaded,
         )
-        self.create_new_forecasts()
+        self.create_new_forecasts(airport)
 
     def on_records_not_loaded(self, _, error):
         Logger.error(f'{self.__class__.__name__}: {error}')
 
     def update_forecast(self, _, response):
         # print(dumps(response, indent=4, sort_keys=True))
+        print(1)
         self.updated_forecast = response
 
-    def create_new_forecasts(self):
+    def create_new_forecasts(self, airport):
         for day in self.updated_forecast['daily']:
             max_temperature = int(day['temp']['max'])
             min_temperature = int(day['temp']['min'])
@@ -166,7 +181,7 @@ class AirportApp(App):
             rain = int(day['pop'])
             forecast = Condition(date=date.fromtimestamp(int(day['dt'])), max_temperature=max_temperature,
                                  min_temperature=min_temperature, max_humidity=humidity, max_wind_speed=wind_speed,
-                                 visibility=visibility, rain=rain)
+                                 visibility=visibility, rain=rain, airport=airport)
             self.session.add(forecast)
             self.session.commit()
 

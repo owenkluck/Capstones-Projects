@@ -192,19 +192,12 @@ ScreenManager:
                         orientation: 'horizontal'
                         Label:
                             id: amount_cities_unvalidated
-                            values: app.amount_cities_unvalidated
+                            text: f'{app.amount_cities_unvalidated} cities need to be validated'
                     BoxLayout:
                         orientation: 'horizontal'
                         Label:
-                            text: 'Airports need to be validated.'
-                    BoxLayout:
-                        orientation: 'horizontal'
-                        Label:
-                            text: 'Operators need their RateMyPilot scores updated.'
-                    BoxLayout:
-                        orientation: 'horizontal'
-                        Label:
-                            text: 'Venues need their welp scores updated.'
+                            id: welp_scores_updated
+                            text: f'{app.amount_venues_welp} venues need their welp scores updated.'
                     BoxLayout:
                         size_hint_max_y: 10
                     Button:
@@ -236,16 +229,16 @@ ScreenManager:
                         Button:
                             id:increase_date
                             text: 'Add one day'
-                            font_size:30
-                            on_press: app.add_one_day()
+                            font_size:20
                             markup: True
                         Button:
                             Label:
-                                text: root.counter_text
+                                id: counter
+                                text: f'{app.counter_text}'
                         Button:
                             id:decrease_date
                             text: 'Subtract one day'
-                            font_size:30
+                            font_size:20
                             markup: True
                     BoxLayout:
                         size_hint_max_y: 20
@@ -490,8 +483,6 @@ ScreenManager:
 <ValidateLocationsLabel>
     on_press: app.get_places_to_validate(self.text)
 
-<TravelPlannerApp>
-    text:
 
 <ReviewScrollView>:
     id: view
@@ -511,7 +502,7 @@ ScreenManager:
 
 <ItineraryView>
     orientation: 'horizontal'
-    size_hint_min_x: 300
+    size_hint_min_x: 200
     BlackLineY:
     BoxLayout:
         orientation: 'vertical'

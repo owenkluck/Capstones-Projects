@@ -2,7 +2,7 @@ from kivy.app import App
 from kivy.modules import inspector  # For inspection.
 from kivy.core.window import Window  # For inspection.
 
-from entertainment_installer import *
+from database import *
 
 
 def bad_condition_entry(data_list):
@@ -25,7 +25,7 @@ def bad_lat_long(lat, long):
 class EntertainmentTrackerApp(App):
     def __init__(self, **kwargs):
         super(EntertainmentTrackerApp, self).__init__(**kwargs)
-        url = Database.construct_mysql_url('localhost', 3306, 'entertainment', 'root', 'cse1208')
+        url = Database.construct_mysql_url('localhost', 3306, 'airports', 'root', 'cse1208')
         self.entertainment_database = Database(url)
         self.session = self.entertainment_database.create_session()
         print('success')
@@ -72,7 +72,6 @@ class EntertainmentTrackerApp(App):
         return query.count() > 0
 
     def duplicate_name_venue(self, original_name, candidate_name, city_selection, create_or_edit):
-        message = f'A venue under the name {candidate_name} already exists in the chosen city.'
         duplicate_name = False
         city = self.session.query(City).filter(City.city_name == city_selection).one()
         # venues_to_check = self.session.query(Venue).filter(Venue.city_id == c_id)
@@ -80,10 +79,10 @@ class EntertainmentTrackerApp(App):
         for venue in venues_to_check:
             if create_or_edit == 'CREATE' and venue.venue_name == candidate_name:
                 duplicate_name = True
-                self.root.ids.venue_name_error.text = message
+                self.root.ids.venue_name_error.text = f'A venue under the name {candidate_name} already exists in the chosen city.'
             if create_or_edit == 'EDIT' and venue.venue_name == candidate_name and original_name != candidate_name:
                 duplicate_name = True
-                self.root.ids.venue_edit_message = message
+                self.root.ids.venue_edit_message.text = f'A venue under the name {candidate_name} already exists in the chosen city.'
         return duplicate_name
 
     def check_city_for_venues(self, city, edit_or_review):
@@ -225,6 +224,14 @@ class EntertainmentTrackerApp(App):
             self.root.ids.open_weather_conditions.opacity = 1
 
     def add_welp_score(self, review_score, venue_being_reviewed):
+        valid_score = self._add_welp_score(review_score, venue_being_reviewed)
+        if valid_score:
+            self.root.transition.direction = 'left'
+            self.root.current = 'review_added_success'
+        else:
+            self.root.ids.invalid_welp_score.text = 'Welp scores must be an integer 1-5.'
+
+    def _add_welp_score(self, review_score, venue_being_reviewed):
         if valid_welp_score(review_score):
             # city = self.session.query(City).filter(City.city_name == city).one()
             venue = self.session.query(Venue).filter(Venue.venue_name == venue_being_reviewed).one()
@@ -237,10 +244,8 @@ class EntertainmentTrackerApp(App):
             review = Review(venue_id=v_id, score=review_score)
             self.session.add(review)
             self.session.commit()
-            self.root.transition.direction = 'left'
-            self.root.current = 'review_added_success'
-        else:
-            self.root.ids.invalid_welp_score.text = 'Welp scores must be an integer 1-5.'
+            return True
+        return False
 
 
 if __name__ == '__main__':
