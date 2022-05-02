@@ -106,6 +106,7 @@ class Itinerary(Persisted):
     itinerary_type = Column(String(256))
     next_itinerary = Column(String(256))
     venues = relationship('Venue', uselist=True, secondary='itinerary_venues', back_populates='itineraries')
+    selected = Column(Boolean, default=False)
 
 
 class Database(object):
