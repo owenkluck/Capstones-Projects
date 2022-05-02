@@ -207,10 +207,7 @@ class AirportApp(App):
                 city_name, _, _ = city_name.partition('\n')
                 selected_itinerary = self.session.query(Itinerary).filter(Itinerary.city == city_name).one()
                 next_city = city_name
-                # Needs to be unit tested due to commit
-                selected_itinerary.selected = True
-                self.session.add(selected_itinerary)
-                self.session.commit()
+                self.update_select_itinerary(True, selected_itinerary)
             itineraries = self.session.query(Itinerary).order_by(Itinerary.date)
             today_date = date.today()
             day_count = 1
@@ -220,17 +217,19 @@ class AirportApp(App):
                 for venue in itinerary.venues:
                     itinerary_text += f'{venue.venue_name}({venue.venue_type}), '
                 if selected_itinerary is not None and itinerary.date == selected_itinerary.date and itinerary != selected_itinerary:
-                    itinerary.selected = False
-                    self.session.add(itinerary)
-                    self.session.commit()
+                    self.update_select_itinerary(False, itinerary)
                 if itinerary.itinerary_type == 'Past' or itinerary.selected:
-                    self.root.ids.past_itineraries.add_widget(ItineraryLabel(text=f'Day #{day_count}: {itinerary.date}\n' + itinerary_text))
-                    if itinerary != selected_itinerary and itinerary.date != today_date:
+                    if itinerary != selected_itinerary:
                         current_location = itinerary.city
-                        day_count += 1
+                        time_difference = itinerary.date - today_date
+                        day_count = str(time_difference)
+                        day_count, _, _ = day_count.partition(' day')
+                        if len(day_count) > 2:
+                            day_count = '0'
                     if itinerary.selected:
                         next_city = itinerary.city
                         self.root.ids.selected_itinerary.text = 'Next ' + itinerary_text
+                    self.root.ids.past_itineraries.add_widget(ItineraryLabel(text=f'Day #{day_count}: {itinerary.date}\n' + itinerary_text))
                 else:
                     if itinerary.itinerary_type == 'Close':
                         self.root.ids.proposed_itineraries.add_widget(ItineraryLabel(text='Closest\nto Destination'))
@@ -240,6 +239,11 @@ class AirportApp(App):
             self.root.ids.current_status.text = f'Day #{day_count}\nCurrent City: {current_location}\nNext City: {next_city}'
         except MultipleResultsFound:
             self.root.ids.itinerary_error_message.text = 'There seems to be multiple of the same values in the database'
+
+    def update_select_itinerary(self, selected, itinerary):
+        itinerary.selected = selected
+        self.session.add(itinerary)
+        self.session.commit()
 
     def add_city(self, city):
         try:
