@@ -187,7 +187,38 @@ If the program ran as outlined in the instructions the application behaved corre
 6.  In the "Venue Name" textbox, type "United Center". Click on the dropdown next to the label "Associated City", then scroll down and select "Chicago".    	Click on the dropdown next to the label "Venue Type" and select "Indoor Sports Arena".
 
 7.  Click on the button labeled "NEXT".
-#unfinished test  
+
+8.  Click the checkbox labeled 'OpenWeather Weather Condition Code' and click the button labeled 'NEXT'.
+
+9.  In the 'OpenWeather Condition Code' textbox, type '212' and click the buttom labeled 'CREATE VENUE'. 
+
+10. You should be taken to a new screen with a success message at the top. Click the button labeled 'OK'.
+
+11. Now, click the button labeled 'ADD/EDIT VENUE'.
+
+12. You should be taken to a screen where you can either create a new venue or edit an existing one. Click the button labeled 'Edit Existing Venue'.
+
+13. You should now be asked to select which city you are going to be editing a venue of. Select the city 'Denver' and press the button labeled 'Choose Venue'.
+
+14. You should now be asked to select whih venue will be edited. Select the venue Casa Bonita and click the button labeled 'NEXT'.
+
+15. In the 'Name' textbox, type 'Casa Blanca'. Click the button labeled 'SAVE'
+
+16. You should be taken to a new screen with a success message at the top reading 'Venue edited successfully!'. Click the button labeled 'OK'.
+
+17. Click the buttom labeled 'Add Review'.
+
+18. Select the city 'San Francisco' from the dropdown menu and click the button labeled 'NEXT'.
+
+19. Select 'Freddies' from the dropdown mednu and click the button labeled 'NEXT'.
+
+20. You should see a new screen asking, 'How many stars would you give Freddies?' In the textbox below the question, type '4' and press the button labeled 'NEXT'.
+
+21. You should be taken to a new screen that displays a success message saying 'Thank you for reviewing Freddies on Welp!' Press the 'OK' button.
+
+22. Press the 'Exit App' button. The application should close.
+
+If the program ran as outlined in the instructions the application behaved correctly.
 
 
 
