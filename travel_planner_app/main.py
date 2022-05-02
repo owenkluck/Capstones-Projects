@@ -42,6 +42,8 @@ class BlackLineY(BoxLayout):
 
 
 class TravelPlannerApp(App):
+    counter_text = NumericProperty(0)
+
     def __init__(self, authority='localhost', port=33060, database='airports', username='root', password='cse1208',
                  api_key=API_KEY, **kwargs):
         super(TravelPlannerApp, self).__init__(**kwargs)
@@ -71,13 +73,8 @@ class TravelPlannerApp(App):
         self.queued_closest_itineraries = []
         self.airports = StringProperty('')
         self.cities = StringProperty('')
-        self.amount_airports_unvalidated = 0
-        self.amount_cities_unvalidated = 0
         self.welp = StringProperty('')
         self.amount_venues_welp = 0
-        self.increase_date = 0
-        self.subtract_date = 0
-        self.counter_text = StringProperty('')
 
     def build(self):
         inspector.create_inspector(Window, self)
@@ -94,8 +91,11 @@ class TravelPlannerApp(App):
             print('could not connect to database')
 
     def connect_to_open_weather(self, port_api=443):
-        self.weather_connection = RESTConnection('api.openweathermap.org', port_api, '/data/2.5')
-        self.geo_connection = RESTConnection('api.openweathermap.org', 443, '/geo/1.0')
+        try:
+            self.weather_connection = RESTConnection('api.openweathermap.org', port_api, '/data/2.5')
+            self.geo_connection = RESTConnection('api.openweathermap.org', 443, '/geo/1.0')
+        except ConnectionError:
+            self.root.ids.connection_error.text = 'OpenWeather will not connect, invalid API key.'
 
     def get_places_to_validate(self):
         unvalidated_airports = []
@@ -108,14 +108,8 @@ class TravelPlannerApp(App):
         for city in cities:
             if not city.validated:
                 unvalidated_cities.append(cities)
-        amount_airports_unvalidated = str(len(unvalidated_airports))
-        amount_cities_unvalidated = str(len(unvalidated_cities))
-        # self.root.ids.unvalidated_airport.values = unvalidated_airports
-        # self.root.ids.unvalidated_city.values = unvalidated_cities
-#        self.root.ids.amount_airports_unvalidated1.text = f'{amount_airports_unvalidated} airports need to be validated.'
-#        self.root.ids.amount_cities_unvalidated1.text = f'{amount_cities_unvalidated} cities need to be validated.'
-        print(amount_airports_unvalidated)
-        return unvalidated_airports, unvalidated_cities
+        self.root.ids.amount_airports_unvalidated.text = str(len(unvalidated_airports))
+        self.root.ids.amount_cities_unvalidated.text = str(len(unvalidated_cities))
 
     def add_locations_spinner(self):
         spinner_airports = [airport.name for airport in self.session.query(Airport).all(Airport.validated is False)]
@@ -141,7 +135,9 @@ class TravelPlannerApp(App):
                             (int(item['Longitude']) - .009) <= airport.longitude <= (int(item['Longitude']) + .009):
                         airport.validated = True
                         self.submit_data(airport)
+                        self.root.ids.valid_airport_message.text = 'The airport location is validated.'
                         return True
+            self.root.ids.invalid_airport_error.text = 'The airport location cannot be validated.'
             return False
 
     def validate_city(self, city_name):
@@ -163,12 +159,14 @@ class TravelPlannerApp(App):
                 and city.city_name == self.validate_city_records['name']:
             city.validated = True
             self.submit_data(city)
+            self.root.ids.valid_city_message.text = 'The city location is validated.'
             return True
         else:
             if city.city_name == self.validate_city_records['name']:
                 print('lat and lon incorrect')
             else:
                 print('incorrect')
+            self.root.ids.invalid_city_error.text = 'The city location cannot be validated.'
             return False
 
     def on_records_loaded(self, _, response):
@@ -216,13 +214,11 @@ class TravelPlannerApp(App):
 
     def amount_of_needed_update_reviews(self):
         welp_venues = []
-        print(self.session)
         welp = self.session.query(Venue).all()
         for venue in welp:
             if venue.welp_score_needs_update is True:
                 welp_venues.append(welp)
-        amount_venues_welp = str(len(welp_venues))
-        return amount_venues_welp
+        self.root.ids.welp_scores_updated.text = str(len(welp_venues))
 
     def get_new_ratings(self):
         new_ratings = self.session.query(Review).filter(Review.validated == False)
@@ -444,12 +440,9 @@ class TravelPlannerApp(App):
         return venues
 
     def add_subtract_day(self):
-        if self.root.ids['increase_date']:
+        if self.counter_text < 7:
             self.current_date += timedelta(days=1)
-            self.root.ids.counter += 1
-        if self.root.ids['subtract_date']:
-            self.current_date -= timedelta(days=1)
-            self.root.ids.counter -= 1
+            self.counter_text = self.counter_text + 1
 
     def search_for_indoor_events(self, event, venues_to_visit):
         for venue in venues_to_visit:
@@ -712,6 +705,10 @@ class TravelPlannerApp(App):
                                      min_temperature=min_temperature, max_humidity=humidity, max_wind_speed=wind_speed,
                                      visibility=visibility, rain=rain, city=city)
             self.submit_data(forecast)
+
+    def empty_credentials_screen(self):
+        if self.root.ids.database_authority.text or self.root.ids.database_portnumber.text or self.root.ids.database_name.text or self.root.ids.database_username.text or self.root.ids.database_password.text or self.root.ids.api_authority.text or self.root.ids.api_portnumber.text or self.root.ids.api_key.text != '':
+            self.root.ids.empty_fields_error.text = 'Text boxes were left blank, please fill in proper information.'
 
     def submit_data(self, data):
         try:
