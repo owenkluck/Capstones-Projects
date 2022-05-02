@@ -97,6 +97,10 @@ class TravelPlannerApp(App):
         self.weather_connection = RESTConnection('api.openweathermap.org', port_api, '/data/2.5')
         self.geo_connection = RESTConnection('api.openweathermap.org', 443, '/geo/1.0')
 
+    def set_final_destination(self):
+        airport = self.session.query(Airport).filter(Airport.name == 'Lincoln Airport').one()
+        self.final_destination = airport
+
     def get_places_to_validate(self):
         unvalidated_airports = []
         unvalidated_cities = []
@@ -157,9 +161,9 @@ class TravelPlannerApp(App):
             self.on_records_not_loaded,
             self.on_records_not_loaded,
         )
-        if (self.validate_city_records['lat'] - .009) <= city.latitude <= (self.validate_city_records['lat'] + .009) \
-                and (self.validate_city_records['lon'] - .009) <= city.longitude <= (
-                self.validate_city_records['lon'] + .009) \
+        if (self.validate_city_records['lat'] - .5) <= city.latitude <= (self.validate_city_records['lat'] + .5) \
+                and (self.validate_city_records['lon'] - .5) <= city.longitude <= (
+                self.validate_city_records['lon'] + .5) \
                 and city.city_name == self.validate_city_records['name']:
             city.validated = True
             self.submit_data(city)

@@ -3,6 +3,7 @@ import math
 from datetime import date
 from sys import stderr
 import time
+import json
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import timedelta
 from database import Database, City, Airport, Venue, Condition, Itinerary, Review
@@ -12,7 +13,7 @@ def add_starter_data(session):
     start_time = time.time()
     san_fran = City(city_name='San Francisco', latitude=37.8, longitude=-122.4,
                     encompassing_geographic_entity='California')
-    denver = City(city_name='Denver', latitude=39.7, longitude=-105.0, encompassing_geographic_entity='Colorado')
+    denver = City(city_name='Denver', latitude=39.7392364, longitude=-104.9848623, encompassing_geographic_entity='Colorado')
     session.add(denver)
     session.add(san_fran)
     session.commit()
@@ -641,8 +642,12 @@ def add_starter_data(session):
 def main():
     try:
         # url = Database.construct_mysql_url('cse.unl.edu', 3306, 'kandrews', 'kandrews', 'qUc:6M')
-        # url = Database.construct_mysql_url('localhost', 33060, 'airports', 'root', 'cse1208')
-        url = Database.construct_mysql_url('localhost', 3306, 'airports', 'root', 'cse1208')
+        database_credentials = open('database_credentials.json')
+        data = json.load(database_credentials)
+        url = Database.construct_mysql_url(data['authority'], data['port'],
+                                           data['database'], data['username'],
+                                           data['password'])
+        #url = Database.construct_mysql_url('localhost', 3306, 'airports', 'root', 'cse1208')
         database = Database(url)
         database.ensure_tables_exist()
         session = database.create_session()

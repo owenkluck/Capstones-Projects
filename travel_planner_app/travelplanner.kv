@@ -175,6 +175,7 @@ ScreenManager:
         on_enter:
             app.amount_of_needed_update_reviews()
             app.get_places_to_validate()
+            app.set_final_destination()
         BoxLayout:
             orientation: 'vertical'
             BoxLayout:
@@ -370,12 +371,14 @@ ScreenManager:
                                 size_hint: (0.5, 0.5)
                                 on_press:
                                     root.current = 'mainmenu1'
+                                    root.ids.venue_and_review_scroll.clear_widgets()
                             Button:
                                 text: 'UPDATE REVIEWS'
                                 size_hint: (0.5, 0.5)
                                 on_press:
                                     app.check_state_of_checkboxes()
                                     root.ids.venue_and_review_scroll.clear_widgets()
+                                    app.populate_ratings_scroll_view()
     Screen:
         name: 'prepare_itinerary'
         on_enter:
