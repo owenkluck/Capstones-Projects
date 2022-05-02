@@ -221,13 +221,17 @@ class AirportApp(App):
                     self.session.add(itinerary)
                     self.session.commit()
                 if itinerary.itinerary_type == 'Past' or itinerary.selected:
-                    self.root.ids.past_itineraries.add_widget(ItineraryLabel(text=f'Day #{day_count}: {itinerary.date}\n' + itinerary_text))
-                    if itinerary != selected_itinerary and itinerary.date != today_date:
+                    if itinerary != selected_itinerary:
                         current_location = itinerary.city
-                        day_count += 1
+                        time_difference = itinerary.date - today_date
+                        day_count = str(time_difference)
+                        day_count, _, _ = day_count.partition(' day')
+                        if len(day_count) > 2:
+                            day_count = '0'
                     if itinerary.selected:
                         next_city = itinerary.city
                         self.root.ids.selected_itinerary.text = 'Next ' + itinerary_text
+                    self.root.ids.past_itineraries.add_widget(ItineraryLabel(text=f'Day #{day_count}: {itinerary.date}\n' + itinerary_text))
                 else:
                     if itinerary.itinerary_type == 'Close':
                         self.root.ids.proposed_itineraries.add_widget(ItineraryLabel(text='Closest\nto Destination'))
