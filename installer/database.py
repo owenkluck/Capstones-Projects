@@ -99,6 +99,7 @@ class Itinerary(Persisted):
     date = Column(Date)
     itinerary_type = Column(String(256))
     next_itinerary = Column(String(256))
+    selected = Column(Boolean, default=False)
     venues = relationship('Venue', uselist=True, back_populates='itinerary')
 
 

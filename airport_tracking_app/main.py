@@ -4,6 +4,7 @@ from kivy import Logger
 from kivy.app import App
 from kivy.modules import inspector
 from kivy.core.window import Window
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button, Label
 from sqlalchemy.exc import SQLAlchemyError, MultipleResultsFound
 from database import Airport, City, Condition, Database, Itinerary
@@ -25,6 +26,10 @@ class ItineraryButtons(Button):
 
 
 class ItineraryLabel(Label):
+    pass
+
+
+class Box(BoxLayout):
     pass
 
 
@@ -185,7 +190,7 @@ class AirportApp(App):
                 selected_itinerary = self.session.query(Itinerary).filter(Itinerary.city == city_name).one()
                 next_city = city_name
                 # Needs to be unit tested due to commit
-                selected_itinerary.itinerary_type = 'Entertainment'
+                selected_itinerary.selected = True
                 self.session.add(selected_itinerary)
                 self.session.commit()
             itineraries = self.session.query(Itinerary).order_by(Itinerary.date)
@@ -193,22 +198,27 @@ class AirportApp(App):
             day_count = 1
             current_location = None
             for itinerary in itineraries:
-                itinerary_text = f'{itinerary.date}\nCity: {itinerary.city}\nVenues: '
+                itinerary_text = f'City: {itinerary.city}\nVenues: '
                 for venue in itinerary.venues:
-                    itinerary_text += f'{venue.venue_name}, '
+                    itinerary_text += f'{venue.venue_name}({venue.venue_type}), '
                 if selected_itinerary is not None and itinerary.date == selected_itinerary.date and itinerary != selected_itinerary:
-                    itinerary.itinerary_type = 'Close'
+                    itinerary.selected = False
                     self.session.add(itinerary)
                     self.session.commit()
-                if itinerary.itinerary_type == 'Entertainment':
-                    self.root.ids.past_itineraries.add_widget(ItineraryLabel(text=f'Day #{day_count}: ' + itinerary_text))
+                if itinerary.itinerary_type == 'Past' or itinerary.selected:
+                    self.root.ids.past_itineraries.add_widget(ItineraryLabel(text=f'Day #{day_count}: {itinerary.date}\n' + itinerary_text))
                     if itinerary != selected_itinerary and itinerary.date != today_date:
                         current_location = itinerary.city
                         day_count += 1
-                    if itinerary.date == today_date:
+                    if itinerary.selected:
                         next_city = itinerary.city
-                else: # itinerary.itinerary_type == 'Close':
-                    self.root.ids.proposed_itineraries.add_widget(ItineraryButtons(text=itinerary_text))
+                        self.root.ids.selected_itinerary.text = 'Next ' + itinerary_text
+                else:
+                    if itinerary.itinerary_type == 'Close':
+                        self.root.ids.proposed_itineraries.add_widget(ItineraryLabel(text='Closest\nto Destination'))
+                    else:
+                        self.root.ids.proposed_itineraries.add_widget(ItineraryLabel(text='Most Venues'))
+                    self.root.ids.proposed_itineraries.add_widget(ItineraryButtons(text='Next ' + itinerary_text))
             self.root.ids.current_status.text = f'Day #{day_count}\nCurrent City: {current_location}\nNext City: {next_city}'
         except MultipleResultsFound:
             self.root.ids.itinerary_error_message.text = 'There seems to be multiple of the same values in the database'
