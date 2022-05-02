@@ -257,7 +257,9 @@ ScreenManager:
                     size_hint_max_x: 40
     Screen:
         name: 'validate_locations'
-        on_enter: app.add_airports_city_spinner()
+        on_enter:
+            app.add_airports_city_spinner()
+            app.add_airports_spinner()
         BoxLayout:
             orientation: 'vertical'
             BoxLayout:
@@ -294,7 +296,11 @@ ScreenManager:
                         BoxLayout:
                             Spinner:
                                 id: airports_city_spinner1
-                                text: 'Select Airport or City to Validate'
+                                text: 'Select City to Validate'
+                                values:
+                            Spinner:
+                                id: airport_spinner
+                                text: 'Select Airport to Validate'
                                 values:
                         BoxLayout:
                             Label:
@@ -314,6 +320,7 @@ ScreenManager:
                                 size_hint: (0.5, 0.5)
                                 on_press:
                                     app.validate_city(root.ids.airports_city_spinner1.text)
+                                    app.validate_airport(root.ids.airport_spinner.text)
     Screen:
         name: 'update_ratings'
         on_enter:
@@ -398,6 +405,7 @@ ScreenManager:
                     font_size: '25sp'
                 Button:
                     text: 'Back'
+                    size_hint_max_x: 100
                     on_press:
                         root.current = 'mainmenu1'
                         root.ids.entertainment_itinerary.clear_widgets()

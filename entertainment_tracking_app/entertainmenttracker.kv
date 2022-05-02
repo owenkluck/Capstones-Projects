@@ -626,6 +626,7 @@ ScreenManager:
                             text: 'Back'
                             on_press:
                                 root.current = 'home'
+                                root.transition.direction = 'right'
                                 root.ids.itinerary_error_message.text = ''
                         BoxLayout:
                             size_hint_max_x: 50
@@ -664,6 +665,7 @@ ScreenManager:
                     text: 'Back'
                     on_press:
                         root.current = 'review_itinerary'
+                        root.transition.direction = 'right'
                         root.ids.itinerary_error_message.text = ''
                 BoxLayout:
                     size_hint_max_x: 100
