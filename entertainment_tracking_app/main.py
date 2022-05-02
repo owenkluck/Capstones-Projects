@@ -1,8 +1,22 @@
+from datetime import date
+
 from kivy.app import App
 from kivy.modules import inspector  # For inspection.
 from kivy.core.window import Window  # For inspection.
 import json
+
+from kivy.uix.button import Button, Label
+from sqlalchemy.exc import MultipleResultsFound
+
 from database import *
+
+
+class ItineraryButtons(Button):
+    pass
+
+
+class ItineraryLabel(Label):
+    pass
 
 
 def bad_condition_entry(data_list):
@@ -39,11 +53,21 @@ class EntertainmentTrackerApp(App):
 
     def on_start(self):
         # Update City List to match preexisting cities
+        i = 0
+        city_names = []
         for city in self.session.query(City):
-            self.root.ids.associated_city.values.append(str(city.city_name))
+            print(i)
+            i += 1
+            city_names.append(str(city.city_name))
+            #self.root.ids.associated_city.values.append(str(city.city_name))
+        self.root.ids.associated_city.values = city_names
         # Update Venue List to match preexisting venues
+        venue_names = []
         for venue in self.session.query(Venue):
-            self.root.ids.venue_edit_selection.values.append(str(venue.venue_name))
+            print('ran 2')
+            venue_names.append(str(venue.venue_name))
+            #self.root.ids.venue_edit_selection.values.append(str(venue.venue_name))
+        self.root.ids.venue_edit_selection.values = venue_names
 
     def add_city(self, name, lat, long, entity):
         # Search for cities with the exact same name
@@ -250,6 +274,55 @@ class EntertainmentTrackerApp(App):
             self.session.commit()
             return True
         return False
+
+    def add_itineraries(self, selected_itinerary_text):
+        try:
+            self.root.ids.past_itineraries.clear_widgets()
+            self.root.ids.proposed_itineraries.clear_widgets()
+            selected_itinerary = None
+            next_city = 'Undetermined'
+            if selected_itinerary_text is not None:
+                _, _, city_name = selected_itinerary_text.partition('City: ')
+                city_name, _, _ = city_name.partition('\n')
+                selected_itinerary = self.session.query(Itinerary).filter(Itinerary.city == city_name).one()
+                next_city = city_name
+                self.update_select_itinerary(True, selected_itinerary)
+            itineraries = self.session.query(Itinerary).order_by(Itinerary.date)
+            today_date = date.today()
+            day_count = 1
+            current_location = None
+            for itinerary in itineraries:
+                itinerary_text = f'City: {itinerary.city}\nVenues: '
+                for venue in itinerary.venues:
+                    itinerary_text += f'{venue.venue_name}({venue.venue_type}), '
+                if selected_itinerary is not None and itinerary.date == selected_itinerary.date and itinerary != selected_itinerary:
+                    self.update_select_itinerary(False, itinerary)
+                if itinerary.itinerary_type == 'Past' or itinerary.selected:
+                    if itinerary != selected_itinerary:
+                        current_location = itinerary.city
+                        time_difference = itinerary.date - today_date
+                        day_count = str(time_difference)
+                        day_count, _, _ = day_count.partition(' day')
+                        if len(day_count) > 2:
+                            day_count = '0'
+                    if itinerary.selected:
+                        next_city = itinerary.city
+                        self.root.ids.selected_itinerary.text = 'Next ' + itinerary_text
+                    self.root.ids.past_itineraries.add_widget(ItineraryLabel(text=f'Day #{day_count}: {itinerary.date}\n' + itinerary_text))
+                else:
+                    if itinerary.itinerary_type == 'Close':
+                        self.root.ids.proposed_itineraries.add_widget(ItineraryLabel(text='Closest\nto Destination'))
+                    else:
+                        self.root.ids.proposed_itineraries.add_widget(ItineraryLabel(text='Most Venues'))
+                    self.root.ids.proposed_itineraries.add_widget(ItineraryButtons(text='Next ' + itinerary_text))
+            self.root.ids.current_status.text = f'Day #{day_count}\nCurrent City: {current_location}\nNext City: {next_city}'
+        except MultipleResultsFound:
+            self.root.ids.itinerary_error_message.text = 'There seems to be multiple of the same values in the database'
+
+    def update_select_itinerary(self, selected, itinerary):
+        itinerary.selected = selected
+        self.session.add(itinerary)
+        self.session.commit()
 
 
 if __name__ == '__main__':

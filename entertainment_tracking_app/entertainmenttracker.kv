@@ -4,31 +4,39 @@ ScreenManager:
         BoxLayout:
             orientation: 'vertical'
             Label:
+                size_hint_y: .5
                 text: 'Cornhusker Entertainment Tracker'
                 font_size: sp(32)
             BoxLayout:
                 orientation: 'vertical'
                 Button:
                     text: 'Create City'
-                    size_hint: (0.5, None)
+                    size_hint_x: 0.5
                     pos_hint: {'center_x': 0.5}
                     on_press:
                         root.transition.direction = 'left'
                         root.current = 'create_city'
                 Button:
                     text: 'Add/Edit Venue'
-                    size_hint: (0.5, None)
+                    size_hint_x: 0.5
                     pos_hint: {'center_x': 0.5}
                     on_press:
                         root.transition.direction = 'left'
                         root.current = 'venues'
                 Button:
                     text: 'Add Review'
-                    size_hint: (0.5, None)
+                    size_hint_x: 0.5
                     pos_hint: {'center_x': 0.5}
                     on_press:
                         root.transition.direction = 'left'
                         root.current = 'add_review_page'
+                Button:
+                    text: 'Review Itinerary'
+                    size_hint_x: 0.5
+                    pos_hint: {'center_x': 0.5}
+                    on_press:
+                        root.transition.direction = 'left'
+                        root.current = 'review_itinerary'
             Button:
                 text: 'Exit App'
                 size_hint: (1, 0.5)
@@ -562,6 +570,106 @@ ScreenManager:
                 on_press:
                     root.transition.direction = 'right'
                     root.current = 'home'
+    Screen:
+        name: 'review_itinerary'
+        on_enter: app.add_itineraries(None)
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout:
+                size_hint_max_y: 40
+                TestLabel:
+                    text: 'Review Itinerary'
+                    font_size: '25sp'
+            BoxLayout:
+                orientation: 'horizontal'
+                BoxLayout:
+                    orientation: 'vertical'
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        BoxLayout:
+                            size_hint_x: .2
+                        BoxLayout:
+                            orientation: 'vertical'
+                            Label:
+                                text: 'Status:'
+                            Label:
+                                id: current_status
+                        BoxLayout:
+                            size_hint_min_x: 15
+                            size_hint_max_x: 150
+                        BoxLayout:
+                            orientation: 'vertical'
+                            Label:
+                                text: 'Selected Itinerary:'
+                                font_size: '15sp'
+                            Label:
+                                id: selected_itinerary
+                                text: 'No itinerary selected'
+                        BoxLayout:
+                            size_hint_x: .2
+                    BoxLayout:
+                        size_hint_max_y: 10
+                    Label:
+                        text: 'Proposed Itineraries'
+                        font_size: '20sp'
+                    BoxLayout:
+                        size_hint_y: 1.5
+                        orientation: 'horizontal'
+                        id: proposed_itineraries
+                    Label:
+                        id: itinerary_error_message
+                        text: ''
+                    BoxLayout:
+                        size_hint_max_y: 50
+                        orientation: 'horizontal'
+                        Button:
+                            text: 'Back'
+                            on_press:
+                                root.current = 'main_menu'
+                                root.ids.itinerary_error_message.text = ''
+                        BoxLayout:
+                            size_hint_max_x: 50
+                        Button:
+                            text: 'Past Travel'
+                            on_press:
+                                root.current = 'past_travel'
+                        BoxLayout:
+                            size_hint_max_x: 50
+                        Button:
+                            text: 'Quit'
+                            on_press: app.stop()
+                    BoxLayout:
+                        size_hint_max_y: 20
+
+    Screen:
+        name: 'past_travel'
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                text: 'Past Travel'
+                font_size: '20sp'
+            ScrollView:
+                do_scroll_x: True
+                do_scroll_y: True
+                bar_width: 4
+                size_hint_y: 3
+                BoxLayout:
+                    size_hint_y: 1.5
+                    orientation: 'vertical'
+                    id: past_itineraries
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_y: .5
+                Button:
+                    text: 'Back'
+                    on_press:
+                        root.current = 'review_itinerary'
+                        root.ids.itinerary_error_message.text = ''
+                BoxLayout:
+                    size_hint_max_x: 100
+                Button:
+                    text: 'Quit'
+                    on_press: app.stop()
 
 <Screen>:
     canvas.before:
@@ -595,4 +703,23 @@ ScreenManager:
             source: f'atlas://data/images/defaulttheme/checkbox{"_radio" if self.group else ""}{"_disabled" if self.disabled else ""}{"_on" if self.active else "_off"}'
             size: sp(32), sp(32)
             pos: int(self.center_x - sp(16)), int(self.center_y - sp(16))
+
+<ItineraryButtons>
+    size_hint_max_y: 10
+    on_press: app.add_itineraries(self.text)
+
+<ItineraryLabel>
+    size_hint_min_y: 10
+    multiline: True
+
+<TestLabel@Label>:
+    font_size: 20
+    background_color: 1, 1, 1, 1
+    background_normal: ""
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Line:
+            width: 2
+            rectangle: self.x, self.y, self.width, self.height
 
