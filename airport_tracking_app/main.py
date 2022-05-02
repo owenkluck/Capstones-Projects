@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-
+import json
 from kivy import Logger
 from kivy.app import App
 from kivy.modules import inspector
@@ -7,7 +7,6 @@ from kivy.core.window import Window
 from kivy.uix.button import Button, Label
 from sqlalchemy.exc import SQLAlchemyError, MultipleResultsFound
 from database import Airport, City, Condition, Database, Itinerary
-from travel_planner_app.api_key import API_KEY
 from travel_planner_app.rest import RESTConnection
 from datetime import date
 
@@ -31,13 +30,17 @@ class ItineraryLabel(Label):
 class AirportApp(App):
     def __init__(self, **kwargs):
         super(AirportApp, self).__init__(**kwargs)
-        url = Database.construct_mysql_url('localhost', 33060, 'airports', 'root', 'cse1208')
+        database_credentials = open('database_credentials.json')
+        data = json.load(database_credentials)
+        url = Database.construct_mysql_url(data['authority'], data['port'],
+                                           data['database'], data['username'],
+                                           data['password'])
         self.airport_database = Database(url)
         self.session = self.airport_database.create_session()
         self.airport_database.ensure_tables_exist()
         self.current_airport = None
         self.current_city = None
-        self.api_key = API_KEY
+        self.api_key = data['api_key']
         self.updated_forecast = None
         self.weather_connection = None
         self.connect_to_open_weather(port_api=443)
