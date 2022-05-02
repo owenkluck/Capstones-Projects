@@ -199,6 +199,7 @@ class TravelPlannerApp(App):
             self.root.ids.venue_and_review_scroll.add_widget(view)
 
     def check_state_of_checkboxes(self):
+        accept = self.root.ids.accept_reject_review.text
         root = self.root.ids.venue_and_review_scroll
         venues = root.children
         for x in range(len(venues)):
@@ -209,7 +210,7 @@ class TravelPlannerApp(App):
                 if checkboxes[i].active:
                     text = labels[i].text.split()
                     review_id = text[3]
-                    self.update_rating(venue, review_id)
+                    self.update_rating(venue, review_id, accept)
 
     def get_average_rating(self, venue_name):
         try:
@@ -232,20 +233,23 @@ class TravelPlannerApp(App):
         new_ratings = self.session.query(Review).filter(Review.validated == False)
         return new_ratings
 
-    def update_rating(self, venue_name, review_id):
+    def update_rating(self, venue_name, review_id, accept):
         try:
             venue = self.session.query(Venue).filter(Venue.venue_name == venue_name).one()
             review = self.session.query(Review).filter(Review.review_id == review_id).one()
-            if venue.average_welp_score is None:
-                new_average_score = review.score
+            if accept == 'Accept':
+                if venue.average_welp_score is None:
+                    new_average_score = review.score
+                else:
+                    new_average_score = (len(venue.reviews) * venue.average_welp_score + review.score) / (
+                            len(venue.reviews) + 1)
+                venue.average_welp_score = new_average_score
+                venue.welp_score_needs_update = False
+                self.submit_data(venue)
+                review.validated = True
+                self.submit_data(review)
             else:
-                new_average_score = (len(venue.reviews) * venue.average_welp_score + review.score) / (
-                        len(venue.reviews) + 1)
-            venue.average_welp_score = new_average_score
-            venue.welp_score_needs_update = False
-            self.submit_data(venue)
-            review.validated = True
-            self.submit_data(review)
+                self.delete_row(review)
         except SQLAlchemyError:
             print('it seems the database refuses your request, make a better request.')
 
@@ -745,35 +749,36 @@ class TravelPlannerApp(App):
         for itinerary in self.session.query(Itinerary).all():
             if itinerary.date == self.current_date:
                 next_itineraries.append(itinerary)
-        lift_off = True
-        for itinerary in next_itineraries:
-            airport_arrive = self.session.query(Airport).filter(Airport.name == itinerary.airport)
-            airport_leave = self.session.query(Airport).filter(Airport.name == itinerary.airport_left_from)
-            if airport_leave == airport_arrive:
-                lift_off = self.check_lift_off_acceptable(airport_arrive, itinerary.date)
-            else:
-                lift_off_1 = self.check_lift_off_acceptable(airport_arrive, itinerary.date)
-                lift_off_2 = self.check_lift_off_acceptable(airport_leave, itinerary.date)
-                lift_off = True
-                if not lift_off_2 or not lift_off_1:
-                    lift_off = False
-        if not lift_off:
-            # advance all proposed by One:
-            itineraries = self.session.query(Itinerary).all()
-            for itinerary in itineraries:
-                if itinerary.itinerary_type == 'Entertain' or itinerary.itinerary_type == 'Close':
-                    itinerary.date = itinerary.date + timedelta(days=1)
-        if lift_off:
-            current_itineraries = []
-            itineraries = self.session.query(Itinerary).all()
-            for itinerary in itineraries:
-                if itinerary.date == self.current_date:
-                    current_itineraries.append(itinerary)
-            for itinerary in current_itineraries:
-                if itinerary.selected:
-                    itinerary.itinerary_type = 'Past'
-                if not itinerary.selected:
-                    self.delete_row(itinerary)
+        if next_itineraries:
+            lift_off = True
+            for itinerary in next_itineraries:
+                airport_arrive = self.session.query(Airport).filter(Airport.name == itinerary.airport)
+                airport_leave = self.session.query(Airport).filter(Airport.name == itinerary.airport_left_from)
+                if airport_leave == airport_arrive:
+                    lift_off = self.check_lift_off_acceptable(airport_arrive, itinerary.date)
+                else:
+                    lift_off_1 = self.check_lift_off_acceptable(airport_arrive, itinerary.date)
+                    lift_off_2 = self.check_lift_off_acceptable(airport_leave, itinerary.date)
+                    lift_off = True
+                    if not lift_off_2 or not lift_off_1:
+                        lift_off = False
+            if not lift_off:
+                # advance all proposed by One:
+                itineraries = self.session.query(Itinerary).all()
+                for itinerary in itineraries:
+                    if itinerary.itinerary_type == 'Entertain' or itinerary.itinerary_type == 'Close':
+                        itinerary.date = itinerary.date + timedelta(days=1)
+            if lift_off:
+                current_itineraries = []
+                itineraries = self.session.query(Itinerary).all()
+                for itinerary in itineraries:
+                    if itinerary.date == self.current_date:
+                        current_itineraries.append(itinerary)
+                for itinerary in current_itineraries:
+                    if itinerary.selected:
+                        itinerary.itinerary_type = 'Past'
+                    if not itinerary.selected:
+                        self.delete_row(itinerary)
 
     def check_lift_off_acceptable(self, airport, current_date):
         self.request_onecall_for_place(airport.latitude, airport.longitude, None, None, None, None, 'Lift Off', self.api_key)
